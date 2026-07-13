@@ -1,0 +1,51 @@
+<svg width="920" height="360" viewBox="0 0 920 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Pocket Republic treasury map</title>
+  <desc id="desc">A map-like interface showing constitution hall, treasury, parliament, archive, studio, sanctuary, academy, and embassy.</desc>
+  <rect width="920" height="360" rx="8" fill="#F4F7FB"/>
+  <path d="M68 281C168 214 244 246 328 205C421 159 437 83 553 91C669 99 679 187 770 204C822 214 856 196 892 178" stroke="#A8B5C6" stroke-width="22" stroke-linecap="round" opacity=".35"/>
+  <path d="M70 281C170 214 246 246 330 205C423 159 439 83 555 91C671 99 681 187 772 204C824 214 858 196 894 178" stroke="#7E9CB8" stroke-width="3" stroke-dasharray="8 10" opacity=".85"/>
+  <g transform="translate(380 72)">
+    <rect width="170" height="112" rx="8" fill="#FFFFFF" stroke="#111827" stroke-width="3"/>
+    <path d="M22 44H148L85 12L22 44Z" fill="#007C73"/>
+    <rect x="36" y="56" width="20" height="38" rx="3" fill="#DFF7F2"/>
+    <rect x="75" y="56" width="20" height="38" rx="3" fill="#DFF7F2"/>
+    <rect x="114" y="56" width="20" height="38" rx="3" fill="#DFF7F2"/>
+    <text x="85" y="132" text-anchor="middle" fill="#111827" font-family="Inter, Arial" font-size="18" font-weight="800">Constitution Hall</text>
+  </g>
+  <g transform="translate(130 155)">
+    <rect width="150" height="92" rx="8" fill="#FFFFFF" stroke="#2458D3" stroke-width="3"/>
+    <rect x="24" y="24" width="102" height="44" rx="6" fill="#E7EEFF"/>
+    <path d="M44 46H106" stroke="#2458D3" stroke-width="6" stroke-linecap="round"/>
+    <text x="75" y="113" text-anchor="middle" fill="#111827" font-family="Inter, Arial" font-size="17" font-weight="800">Parliament</text>
+  </g>
+  <g transform="translate(642 151)">
+    <rect width="150" height="96" rx="8" fill="#FFFFFF" stroke="#007C73" stroke-width="3"/>
+    <rect x="34" y="24" width="82" height="50" rx="8" fill="#DFF7F2"/>
+    <circle cx="75" cy="49" r="16" fill="#007C73"/>
+    <text x="75" y="54" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="15" font-weight="900">$</text>
+    <text x="75" y="117" text-anchor="middle" fill="#111827" font-family="Inter, Arial" font-size="17" font-weight="800">Kite Treasury</text>
+  </g>
+  <g transform="translate(376 235)">
+    <rect width="176" height="72" rx="8" fill="#FFFFFF" stroke="#C2412E" stroke-width="3"/>
+    <path d="M40 43L66 25L92 43L118 25L144 43" stroke="#C2412E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="88" y="94" text-anchor="middle" fill="#111827" font-family="Inter, Arial" font-size="17" font-weight="800">Public Gazette</text>
+  </g>
+  <g fill="#FFFFFF" stroke="#A8B5C6" stroke-width="2">
+    <rect x="46" y="46" width="112" height="62" rx="8"/>
+    <rect x="206" y="42" width="112" height="62" rx="8"/>
+    <rect x="602" y="45" width="112" height="62" rx="8"/>
+    <rect x="762" y="48" width="112" height="62" rx="8"/>
+  </g>
+  <g fill="#5F6878" font-family="Inter, Arial" font-size="16" font-weight="800" text-anchor="middle">
+    <text x="102" y="83">Studio</text>
+    <text x="262" y="79">Sanctuary</text>
+    <text x="658" y="82">Academy</text>
+    <text x="818" y="85">Embassy</text>
+  </g>
+  <g fill="#007C73">
+    <circle cx="330" cy="205" r="8"/>
+    <circle cx="555" cy="91" r="8"/>
+    <circle cx="772" cy="204" r="8"/>
+    <circle cx="170" cy="214" r="8"/>
+  </g>
+</svg>

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Pocket Republic 是一个由 AI Agent 国民共同治理目标、规则与钱包支出的个人国度。"
+    />
+    <title>Pocket Republic | 口袋共和国</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23151522'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23ff5a52'/%3E%3Cpath d='M20 34c7-13 17-15 25-6-8-2-14 3-17 13z' fill='%23f6f2e9'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="pre-entry">
+    <a class="skip-link" href="#mainWorkspace">跳到主要内容</a>
+
+    <section class="entry-screen" id="entryScreen" aria-label="Pocket Republic 开屏页">
+      <canvas id="entryFluidCanvas" class="entry-fluid-canvas" aria-hidden="true"></canvas>
+      <div class="entry-image art-slot art-slot-cover" data-art-slot="ART-00" aria-label="开屏主视觉占位">
+        <div class="art-slot-note">
+          <code>ART-00</code>
+          <strong>口袋共和国全景主视觉</strong>
+          <span>1920 x 1200，横版。超现实乌托邦、奇幻马戏团能量、漂浮国度与镜面湖泊，无文字、无现成动画角色。</span>
+        </div>
+      </div>
+      <div class="entry-vignette" aria-hidden="true"></div>
+      <div class="entry-orbit entry-orbit-one" aria-hidden="true"></div>
+      <div class="entry-orbit entry-orbit-two" aria-hidden="true"></div>
+
+      <div class="entry-content">
+        <p class="kicker">个人 AI 国度</p>
+        <h1>Pocket<br />Republic</h1>
+        <p class="entry-title-cn">你写下宪法，Agent 国民与你一起治理生活。</p>
+        <p class="entry-copy">
+          建立一个属于自己的小国家。Kite 钱包是国库，每一次 Agent 支出都先经过宪法、议会和审计。
+        </p>
+        <div class="entry-actions">
+          <button class="button primary magnetic" type="button" data-entry-action="enter">
+            开始建国
+          </button>
+          <button class="button ghost magnetic" type="button" data-entry-action="review">
+            查看国库如何运作
+          </button>
+        </div>
+      </div>
+      <div class="entry-chapter" aria-hidden="true">
+        <span>宪法</span><span>国民</span><span>国库</span><span>公报</span>
+      </div>
+      <div class="entry-iris" aria-hidden="true"></div>
+    </section>
+
+    <header class="topbar">
+      <button class="brand-button" type="button" data-entry-action="home" aria-label="返回开屏页">
+        <span class="brand-mark" aria-hidden="true">PR</span>
+        <span class="brand-wording">
+          <strong>Pocket Republic</strong>
+          <small>口袋共和国</small>
+        </span>
+      </button>
+      <nav class="nation-nav" aria-label="国家主导航">
+        <button class="active" type="button" data-view-tab="setup">
+          <span aria-hidden="true">建</span><strong>建国</strong>
+        </button>
+        <button type="button" data-view-tab="constitution">
+          <span aria-hidden="true">法</span><strong>个人宪法</strong>
+        </button>
+        <button type="button" data-view-tab="review">
+          <span aria-hidden="true">议</span><strong>财政议案</strong>
+        </button>
+        <button type="button" data-view-tab="map">
+          <span aria-hidden="true">境</span><strong>国家地图</strong>
+        </button>
+        <button type="button" data-view-tab="trace">
+          <span aria-hidden="true">报</span><strong>国家公报</strong>
+        </button>
+        <i class="nav-liquid" aria-hidden="true"></i>
+      </nav>
+    </header>
+
+    <main class="nation-workspace" id="mainWorkspace">
+      <section class="nation-status-ribbon" id="nationStatusRibbon" aria-label="国家状态">
+        <div class="nation-identity">
+          <span>我的国家</span>
+          <strong id="nationName">星芽建设者共和国</strong>
+          <p id="nationMission">本阶段目标：把重要目标拆成可执行计划。</p>
+        </div>
+        <dl class="nation-metrics">
+          <div>
+            <dt>国库余额</dt>
+            <dd id="balanceMetric">500 USDC</dd>
+          </div>
+          <div>
+            <dt>月度授权</dt>
+            <dd id="treasuryHeroMetric">500 USDC</dd>
+          </div>
+          <div>
+            <dt>本案未放行</dt>
+            <dd id="frozenMetric">0 USDC</dd>
+          </div>
+          <div class="kite-status">
+            <dt>Kite 国库</dt>
+            <dd id="providerName">连接中</dd>
+          </div>
+        </dl>
+        <div class="status-passport">
+          <span>财政大臣护照</span>
+          <code id="passportId">加载中</code>
+          <small id="allowanceText">加载中</small>
+        </div>
+      </section>
+
+      <section class="view-panel active" data-view-panel="setup">
+        <div class="view-intro setup-intro">
+          <div>
+            <p class="kicker">建立你的个人国度</p>
+            <h2>先选择这片国土要保护什么。</h2>
+            <p>国家模板定义初始价值观。你的目标和预算会继续写进宪法，并决定 Agent 国民以后如何行动。</p>
+          </div>
+          <div class="nation-tags" id="nationTags" aria-label="国家标签"></div>
+        </div>
+
+        <section class="territory-stage">
+          <div class="art-slot territory-art" data-art-slot="ART-01">
+            <div class="art-slot-note">
+              <code>ART-01</code>
+              <strong>国家种子与初始领土</strong>
+              <span>1200 x 900，4:3。漂浮生态建筑、入口拱门、奇异植物与镜面水面，保留右下方给模板标签。</span>
+            </div>
+          </div>
+          <div class="territory-picker">
+            <h3>选择国家性格</h3>
+            <p>这是宪法的起点，后续仍可逐条修改。</p>
+            <div class="template-options" id="templateOptions"></div>
+          </div>
+        </section>
+
+        <section class="founding-form-section">
+          <div class="section-copy">
+            <h3>写下国家使命</h3>
+            <p>告诉国民你当前最想完成的事，再设置他们可以动用的国库边界。</p>
+          </div>
+          <div class="founding-form">
+            <label>
+              国家名称
+              <input id="nationNameInput" type="text" maxlength="40" placeholder="例如：星芽共和国" />
+            </label>
+            <label class="mission-field">
+              当前最重要的目标
+              <textarea id="missionInput" rows="4"></textarea>
+            </label>
+            <div class="budget-inputs">
+              <label>
+                月度授权
+                <span><input id="monthlyBudgetInput" type="number" min="0" step="1" /><em>USDC</em></span>
+              </label>
+              <label>
+                单笔限额
+                <span><input id="singleLimitInput" type="number" min="0" step="1" /><em>USDC</em></span>
+              </label>
+              <label>
+                高风险限额
+                <span><input id="highRiskLimitInput" type="number" min="0" step="1" /><em>USDC</em></span>
+              </label>
+            </div>
+            <div class="founding-actions">
+              <button class="button primary magnetic" id="updateNationButton" type="button">
+                生成我的个人宪法
+              </button>
+              <p class="setup-status" id="setupStatus" aria-live="polite">建设者共和国已准备就绪。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="citizen-section">
+          <div class="citizen-heading">
+            <div>
+              <p class="kicker">首批 Agent 国民</p>
+              <h3>他们忠于宪法，不迎合你一时的冲动。</h3>
+            </div>
+            <div class="art-slot citizen-group-art" data-art-slot="ART-02">
+              <div class="art-slot-note">
+                <code>ART-02</code>
+                <strong>七位 Agent 国民群像</strong>
+                <span>1600 x 900，16:9。原创奇幻公民，玩具质感、鲜艳但不幼儿化，每人轮廓和职业道具不同。</span>
+              </div>
+            </div>
+          </div>
+          <div class="citizen-list" id="citizenList" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view-panel="constitution" hidden>
+        <div class="view-intro constitution-intro">
+          <div>
+            <p class="kicker">个人宪法</p>
+            <h2>你不是给 Agent 一句提示词，而是给它一套制度。</h2>
+            <p>每一条都可以编辑。财政大臣和审计官会在下一次议案中读取最新版本。</p>
+          </div>
+        </div>
+        <section class="constitution-stage">
+          <div class="art-slot constitution-art" data-art-slot="ART-03">
+            <div class="art-slot-note">
+              <code>ART-03</code>
+              <strong>宪法大厅</strong>
+              <span>1400 x 1000，7:5。红白超现实峡谷、悬浮宪法碑、细长仪式建筑，中心留出光源。</span>
+            </div>
+          </div>
+          <div class="constitution-sheet">
+            <div class="constitution-seal" aria-hidden="true">PR</div>
+            <div>
+              <span>口袋共和国基本法</span>
+              <h3>我的国家规则</h3>
+              <p>编辑后自动保存到本地国家档案。</p>
+            </div>
+            <div class="policy-grid" id="constitutionGrid"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view-panel="review" hidden>
+        <div class="view-intro review-intro">
+          <div>
+            <p class="kicker">财政议案</p>
+            <h2>钱包不只问“确认吗”，它先问“符合我们的国家吗”。</h2>
+            <p>用户或 Agent 提出支出请求，国民议会按宪法审查，再由 Kite 国库执行批准金额。</p>
+          </div>
+        </div>
+
+        <section class="proposal-stage">
+          <form class="proposal-form" id="proposalForm">
+            <h3>提交一项国事议案</h3>
+            <label>
+              议案标题
+              <input id="proposalTitleInput" type="text" placeholder="例如：购买新的项目数据包" />
+            </label>
+            <label>
+              申请金额
+              <span class="currency-field"><input id="proposalAmountInput" type="number" min="0" step="1" /><em>USDC</em></span>
+            </label>
+            <label>
+              背景说明
+              <textarea id="proposalContextInput" rows="5" placeholder="说明这笔支出要解决什么问题，以及为什么现在需要。"></textarea>
+            </label>
+            <button class="button secondary magnetic" type="submit">提交给国民议会</button>
+          </form>
+          <div class="proposal-examples">
+            <div class="section-copy small">
+              <h3>试运行议案</h3>
+              <p>选择一个场景，先看宪法会如何改变钱包行为。</p>
+            </div>
+            <div class="request-list" id="requestList" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="current-proposal">
+          <div>
+            <span>当前议案</span>
+            <h3 id="requestTitle">正在加载议案</h3>
+            <p id="requestSummary"></p>
+            <div class="request-tags" id="riskTags"></div>
+          </div>
+          <div class="proposal-amount">
+            <code id="requestedAmount">0 USDC</code>
+            <em id="requestMerchant">商家</em>
+          </div>
+        </section>
+
+        <section class="treasury-theatre">
+          <div class="art-slot treasury-art" data-art-slot="ART-04">
+            <div class="art-slot-note">
+              <code>ART-04</code>
+              <strong>Kite 国库与议会大厅</strong>
+              <span>1400 x 1000，7:5。流体金库门、漂浮议席、彩色管线与发光账本，画面中央可放审批状态。</span>
+            </div>
+          </div>
+          <div class="decision-card">
+            <div class="decision-heading">
+              <span>宪法预审</span>
+              <h3 id="decisionTitle">等待审查</h3>
+              <p id="decisionPolicy"></p>
+            </div>
+            <dl class="decision-metrics">
+              <div>
+                <dt>批准金额</dt>
+                <dd id="approvedAmount">0 USDC</dd>
+              </div>
+              <div>
+                <dt>投票</dt>
+                <dd id="voteMetric">0:0</dd>
+              </div>
+              <div>
+                <dt>状态</dt>
+                <dd id="statusMetric">待审查</dd>
+              </div>
+            </dl>
+            <div class="triggered-block">
+              <span>触发条款</span>
+              <div class="triggered-laws" id="triggeredLaws" aria-live="polite"></div>
+            </div>
+            <div class="decision-actions">
+              <button class="button primary magnetic" id="runReviewButton" type="button">运行国库审查</button>
+              <button class="button ghost magnetic" id="overrideButton" type="button">行使 A6 立宪者权利</button>
+            </div>
+            <div class="review-progress" id="reviewProgress" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="council-section">
+          <div class="section-copy">
+            <h3>国民议会发言</h3>
+            <p>书记官登记，审计官检查风险，财政大臣核对额度，反对党必须提出反方意见。</p>
+          </div>
+          <div class="debate-timeline" id="debateTimeline" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view-panel="map" hidden>
+        <div class="view-intro map-intro">
+          <div>
+            <p class="kicker">国家地图</p>
+            <h2>今天先让国库运转，明天让整座国家长出来。</h2>
+            <p>每个部门都是一个可发展的 Agent 产品入口。涉及支付时，它们都回到同一套个人宪法和 Kite 国库。</p>
+          </div>
+        </div>
+
+        <section class="nation-map-stage">
+          <div class="art-slot nation-map-art" data-art-slot="ART-05">
+            <div class="art-slot-note map-note">
+              <code>ART-05</code>
+              <strong>完整个人国度地图</strong>
+              <span>2000 x 1250，16:10。中央宪法厅、Kite 国库、心灵花园、创作工坊、学院、外交邮局、道具铺和档案馆，保留热点区域。</span>
+            </div>
+          </div>
+          <button class="map-hotspot hotspot-treasury active" type="button" data-map-target="treasury"><span>Kite 国库</span><small>当前可用</small></button>
+          <button class="map-hotspot hotspot-garden" type="button" data-map-target="garden"><span>心灵花园</span><small>情绪与冷静期</small></button>
+          <button class="map-hotspot hotspot-studio" type="button" data-map-target="studio"><span>创作工坊</span><small>项目共创</small></button>
+          <button class="map-hotspot hotspot-academy" type="button" data-map-target="academy"><span>学院</span><small>学习与训练</small></button>
+          <button class="map-hotspot hotspot-embassy" type="button" data-map-target="embassy"><span>外交邮局</span><small>外部 Agent</small></button>
+          <button class="map-hotspot hotspot-shop" type="button" data-map-target="shop"><span>道具铺</span><small>Agent 与工具市场</small></button>
+        </section>
+
+        <section class="department-story">
+          <div class="department-current" id="departmentCurrent" data-department="treasury">
+            <span id="departmentStatus">正在运转</span>
+            <h3 id="departmentTitle">Kite 国库</h3>
+            <p id="departmentDescription">Agent Passport 是国民身份，Allowance 是财政权限，Payment Trace 是写进国家公报的执行记录。</p>
+            <button class="button primary magnetic" id="departmentAction" type="button" data-map-view="review">前往财政议案</button>
+          </div>
+          <div class="future-departments">
+            <article><strong>心灵花园</strong><p>在强情绪时触发冷静期。后续可发展为陪伴订阅。</p></article>
+            <article><strong>创作工坊</strong><p>共创项目并采购 API、素材和数据。后续可按项目或团队收费。</p></article>
+            <article><strong>学院</strong><p>课程规划、练习和考官 Agent。后续可连接课程与教练市场。</p></article>
+            <article><strong>外交邮局</strong><p>代表用户与外部 Agent、商家和服务谈判并支付。</p></article>
+            <article><strong>道具铺</strong><p>售卖专业国民、工作流和国家模板，平台收取交易费。</p></article>
+            <article><strong>国家档案馆</strong><p>沉淀长期决策与支出记录，形成可导出的个人治理档案。</p></article>
+          </div>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view-panel="trace" hidden>
+        <div class="view-intro trace-intro">
+          <div>
+            <p class="kicker">国家公报</p>
+            <h2>每一次批准、缩减和推翻，都留下可追溯的国家记录。</h2>
+            <p>公报把议会决定、Kite 支付和用户主权放在同一张凭证里。</p>
+          </div>
+        </div>
+
+        <section class="gazette-stage">
+          <div class="gazette-paper">
+            <div class="gazette-masthead">
+              <span>POCKET REPUBLIC</span>
+              <strong>国家公报</strong>
+              <small>个人国度官方记录</small>
+            </div>
+            <div class="gazette-card" id="gazetteCard"></div>
+            <button class="button ink magnetic" id="downloadTraceButton" type="button">下载 Kite 凭证 JSON</button>
+          </div>
+          <div class="gazette-side">
+            <div class="art-slot gazette-art" data-art-slot="ART-06">
+              <div class="art-slot-note">
+                <code>ART-06</code>
+                <strong>国家印章与档案装饰</strong>
+                <span>1000 x 1000，透明背景。原创奇幻印章、缎带和生物形态花纹，可用于公报角落与加载状态。</span>
+              </div>
+            </div>
+            <div class="trace-box">
+              <div class="trace-header">
+                <span>Kite 支付凭证包</span>
+                <strong id="traceId">待生成</strong>
+              </div>
+              <pre id="tracePayload" aria-label="支付凭证 JSON"></pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="history-section">
+          <div class="section-copy">
+            <h3>最近的国库记录</h3>
+            <p>保存在本地国家档案馆，记录每次审议、执行和用户推翻轨迹。</p>
+          </div>
+          <div class="history-list" id="gazetteHistory" aria-live="polite"></div>
+        </section>
+      </section>
+
+    </main>
+
+    <div class="interaction-ripple-layer" aria-hidden="true"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

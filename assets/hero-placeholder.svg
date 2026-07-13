@@ -1,0 +1,11 @@
+<svg width="760" height="620" viewBox="0 0 760 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="760" height="620" rx="8" fill="#F6F9FC"/>
+  <rect x="70" y="70" width="620" height="480" rx="8" fill="#FFFFFF" stroke="#D8E0EA" stroke-width="2"/>
+  <circle cx="380" cy="220" r="92" fill="#DFF7F2" stroke="#007C73" stroke-width="4"/>
+  <path d="M316 230L380 156L444 230H418V294H342V230H316Z" fill="#007C73"/>
+  <rect x="160" y="372" width="134" height="74" rx="8" fill="#EEF2F7" stroke="#9AA9BA" stroke-width="2"/>
+  <rect x="313" y="372" width="134" height="74" rx="8" fill="#EEF2F7" stroke="#9AA9BA" stroke-width="2"/>
+  <rect x="466" y="372" width="134" height="74" rx="8" fill="#EEF2F7" stroke="#9AA9BA" stroke-width="2"/>
+  <text x="380" y="498" text-anchor="middle" fill="#111827" font-family="Inter, Arial" font-size="30" font-weight="800">Opening Hero Slot</text>
+  <text x="380" y="530" text-anchor="middle" fill="#5F6878" font-family="Inter, Arial" font-size="18">个人国度 + Kite 国库主视觉</text>
+</svg>
