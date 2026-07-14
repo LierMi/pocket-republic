@@ -4,6 +4,8 @@ Pocket Republic is a personal nation governed by AI agents. Users create a small
 
 中文一句话：口袋共和国：由 AI Agent 治理的个人国度。
 
+**Live Demo:** https://pocket-republic.vercel.app
+
 ## Why This Fits Kite
 
 This MVP focuses on the wallet side of Pocket Republic:
@@ -27,7 +29,7 @@ The important distinction: Pocket Republic is not a generic multi-agent chatroom
 7. Open **国家公报** to see the Kite-style payment trace and gazette history.
 8. Optionally use **推翻议会决策 (A6)** to show user sovereignty with an audited override receipt.
 
-The default demo shows a 300 USDC high-risk meme coin proposal being reduced to 10 USDC with a cooling period. The override path executes the full amount while preserving the previous decision hash in the trace.
+The default demo shows a 300 USDC high-risk meme coin proposal being reduced to 10 USDC with a cooling period. If the user invokes A6, the treasury pays only the outstanding remainder while preserving the previous decision hash and both ledger records.
 
 ## Run Locally
 
