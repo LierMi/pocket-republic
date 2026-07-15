@@ -221,6 +221,8 @@ const elements = {
   viewPanels: [...document.querySelectorAll("[data-view-panel]")],
   citizenList: document.querySelector("#citizenList"),
   templateOptions: document.querySelector("#templateOptions"),
+  policyPreview: document.querySelector("#policyPreview"),
+  policyPreviewContent: document.querySelector("#policyPreviewContent"),
   nationName: document.querySelector("#nationName"),
   nationMission: document.querySelector("#nationMission"),
   nationTags: document.querySelector("#nationTags"),
@@ -294,6 +296,7 @@ async function init() {
   initVisualEffects();
   syncProviderPolicy();
   renderTemplateOptions();
+  renderPolicyPreview(nationState);
   renderSetupForm();
   renderNationHeader();
   renderCitizens();
@@ -426,15 +429,85 @@ function renderTemplateOptions() {
     nationTemplates
       .map((template) => {
         const active = template.id === nationState.id;
+        const featured = template.featured
+          ? `<em class="template-featured">${escapeHtml(template.featured)}</em>`
+          : "";
         return `
-          <button class="template-chip${active ? " active" : ""}" type="button" data-template-id="${template.id}">
-            <strong>${escapeHtml(template.cn)}</strong>
-            <small>${escapeHtml(template.description)}</small>
+          <button class="template-chip${active ? " active" : ""}" type="button" data-template-id="${template.id}" aria-pressed="${active}">
+            <span class="template-policy-label">Kite Wallet Policy</span>
+            ${featured}
+            <span class="template-title">
+              <strong>${escapeHtml(template.cn)}</strong>
+              <small>${escapeHtml(template.en)}</small>
+            </span>
+            <span class="template-subtitle">${escapeHtml(template.subtitle)}</span>
+            <span class="template-wallet-metrics">
+              ${template.walletMetrics
+                .map(
+                  (metric) => `
+                    <span>
+                      <small>${escapeHtml(metric.label)}</small>
+                      <strong>${escapeHtml(metric.value)}</strong>
+                    </span>
+                  `,
+                )
+                .join("")}
+            </span>
+            <span class="template-rule">${escapeHtml(template.treasuryRule)}</span>
+            <span class="template-route">审批路线：${escapeHtml(template.approvalRoute)}</span>
+            <span class="template-demo">${escapeHtml(template.demoHint)}</span>
           </button>
         `;
       })
       .join(""),
   );
+}
+
+function renderPolicyPreview(template = nationState) {
+  if (!elements.policyPreviewContent || !template) return;
+  const isSandbox = provider.providerMode === "sandbox";
+  const providerLabel = isSandbox ? "Sandbox / 本地政策推演" : "Kite Passport / Scoped Spending Session";
+  const coolingLabel = template.coolingPeriodHours > 0 ? `${template.coolingPeriodHours} 小时` : "按议案触发";
+  const rows = [
+    ["当前国度", `${template.cn} / ${template.en}`],
+    ["支付资产", "USDC"],
+    ["月度授权", `${template.monthlyBudget} USDC`],
+    ["单笔审查线", `${template.singleSpendLimit} USDC`],
+    ["高风险上限", `${template.highRiskLimit} USDC`],
+    ["冷静期", coolingLabel],
+    ["审批路线", template.approvalRoute],
+    ["运行环境", providerLabel],
+  ];
+
+  setHtml(
+    elements.policyPreviewContent,
+    `
+      <dl class="policy-preview-list">
+        ${rows
+          .map(
+            ([label, value]) => `
+              <div>
+                <dt>${escapeHtml(label)}</dt>
+                <dd>${escapeHtml(value)}</dd>
+              </div>
+            `,
+          )
+          .join("")}
+      </dl>
+      <div class="policy-preview-rule">
+        <span>国库放行原则</span>
+        <p>${escapeHtml(template.treasuryRule)}</p>
+      </div>
+      <p class="policy-preview-truth">
+        ${
+          isSandbox
+            ? "当前仅推演宪法、额度与审议结果，不执行或伪造链上交易。"
+            : "实际支付还必须同时通过立宪者批准的 Kite Spending Session。"
+        }
+      </p>
+    `,
+  );
+  pulseElement(elements.policyPreview);
 }
 
 function renderSetupForm() {
@@ -603,6 +676,7 @@ async function renderProviderStatus() {
       allowance.totalLimit > 0 ? `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency}` : "尚未授权",
     );
     renderProtocolStatus(passport, allowance);
+    renderPolicyPreview(nationState);
     renderCitizens();
     return true;
   } catch (error) {
@@ -614,6 +688,7 @@ async function renderProviderStatus() {
     setText(elements.balanceMetric, "不可用");
     setText(elements.treasuryHeroMetric, "不可用");
     renderProtocolError(error);
+    renderPolicyPreview(nationState);
     renderCitizens();
     return false;
   }
@@ -679,6 +754,7 @@ function selectTemplate(templateId) {
   saveConstitutionArticles();
   syncProviderPolicy();
   renderTemplateOptions();
+  renderPolicyPreview(nationState);
   renderSetupForm();
   renderNationHeader();
   renderConstitution();
@@ -699,6 +775,7 @@ function updateNationFromForm() {
   saveConstitutionArticles();
   syncProviderPolicy();
   renderTemplateOptions();
+  renderPolicyPreview(nationState);
   renderNationHeader();
   renderConstitution();
   renderProviderStatus();
