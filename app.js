@@ -1,4 +1,5 @@
 import { createKiteProvider } from "./adapters/kite-provider.js";
+import { buildConstitution, nationTemplates } from "./nation-policies.js";
 import {
   buildPaymentDecision,
   calculateOverrideAmount,
@@ -20,57 +21,6 @@ const storageKeys = {
   constitution: "pocket-republic:constitution",
   gazette: "pocket-republic:gazette-history",
 };
-
-const nationTemplates = [
-  {
-    id: "builder",
-    label: "建设型国家",
-    cn: "建设者共和国",
-    nationName: "星芽建设者共和国",
-    mission: "把重要目标拆成可执行计划，在预算边界内稳步推进。",
-    monthlyBudget: 500,
-    singleSpendLimit: 30,
-    highRiskLimit: 10,
-    protectedAssets: ["时间", "预算", "创造力"],
-    description: "适合创业者和独立创作者，强调推进项目、控制预算、反方评估。",
-  },
-  {
-    id: "web3",
-    label: "探索型国家",
-    cn: "Web3 冒险国",
-    nationName: "星潮 Web3 冒险国",
-    mission: "在 Web3 机会里保护本金、识别 FOMO，并给高风险交易设置冷静期。",
-    monthlyBudget: 500,
-    singleSpendLimit: 40,
-    highRiskLimit: 8,
-    protectedAssets: ["本金", "钱包安全", "长期判断"],
-    description: "适合 Web3 用户，把 meme coin、空投任务和工具订阅纳入宪法治理。",
-  },
-  {
-    id: "healing",
-    label: "守护型国家",
-    cn: "心灵花园国",
-    nationName: "微光心灵花园国",
-    mission: "在强情绪状态下先稳定、复盘，再做行动和支出决定。",
-    monthlyBudget: 300,
-    singleSpendLimit: 25,
-    highRiskLimit: 5,
-    protectedAssets: ["情绪", "关系", "睡眠"],
-    description: "适合情感陪伴与自我反思，提供非医疗化的情绪稳定与行动复盘。",
-  },
-  {
-    id: "learning",
-    label: "成长型国家",
-    cn: "学院共和国",
-    nationName: "长青学院共和国",
-    mission: "把学习目标拆成课程、训练、考试和复盘，不让临时兴趣吞掉预算。",
-    monthlyBudget: 350,
-    singleSpendLimit: 35,
-    highRiskLimit: 6,
-    protectedAssets: ["注意力", "学习节奏", "长期积累"],
-    description: "适合学生和自我提升用户，把课程购买、练习计划和复盘档案制度化。",
-  },
-];
 
 const defaultNationState = { ...nationTemplates[0] };
 
@@ -1382,41 +1332,6 @@ function defaultReviewSteps() {
     "核验 Agent Passport",
     "请求 x402 支付",
     "写入 Receipt 与公报",
-  ];
-}
-
-function buildConstitution(state) {
-  return [
-    {
-      id: "A1",
-      title: "国家目标",
-      text: `本阶段最重要的目标是：${state.mission}`,
-    },
-    {
-      id: "A2",
-      title: "国库审查",
-      text: `任何单笔超过 ${state.singleSpendLimit} USDC 的支出，必须进入财政部和国民议会审查。`,
-    },
-    {
-      id: "A3",
-      title: "高风险上限",
-      text: `高风险 Web3 购买、meme coin、未知 DEX 池或强投机行为，默认最多批准 ${state.highRiskLimit} USDC。`,
-    },
-    {
-      id: "A4",
-      title: "冷静期",
-      text: "包含 FOMO、今晚、立刻、100x、错过等冲动信号时，未批准金额自动冻结 24 小时。",
-    },
-    {
-      id: "A5",
-      title: "情绪保护",
-      text: "当用户处于焦虑、兴奋、失眠或关系冲突状态时，心灵部长必须先给出稳定建议，再允许重大决策继续。",
-    },
-    {
-      id: "A6",
-      title: "用户主权",
-      text: "用户可以强制推翻议会，但必须生成用户主权国家公报，记录原始建议、决策哈希和最终执行金额。",
-    },
   ];
 }
 
