@@ -1,0 +1,10 @@
+{
+  "name": "pocket-republic",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node scripts/verify-product-structure.mjs && node scripts/verify-effects-module.mjs && node scripts/verify-governance-logic.mjs && node scripts/verify-kite-envelope.mjs && node scripts/verify-kite-bridge.mjs"
+  }
+}

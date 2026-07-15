@@ -1,131 +1,81 @@
-# 3 分钟 Demo 脚本
+# Pocket Republic 3 分钟 Demo 脚本
 
-项目：Pocket Republic  
-中文名：口袋共和国  
-目标：让观众相信这是一个“个人 AI 国度”产品，黑客松第一版把 Kite 国库 / Agent 钱包治理跑通。
+主线：浪漫建国 45 秒，个人宪法 35 秒，Kite 真实支付 80 秒，商业闭环 20 秒。
 
-世界观参考：[WORLD_BIBLE.md](./WORLD_BIBLE.md)
+## 0:00 - 0:20 一块尚未升空的土地
 
----
-
-## 0:00 - 0:20 问题
-
-画面：开屏页。
+画面：云海开屏，点击“让我的国度升空”。
 
 旁白：
 
-> 未来 AI Agent 会替我们买 API、订阅工具、支付服务，甚至参与投资。问题是，钱包只会问“确认吗”，但 Agent 花钱前更应该先问：这符合我的长期目标、预算和个人边界吗？
-
----
+> 每个人心里，都有一块尚未升空的土地。它装着愿望，也保管我们即将交给 AI 的权力。未来 Agent 会替我们买 API、数据和算力，但一只只会问“确认吗”的钱包，还不足以承载这种信任。
 
 ## 0:20 - 0:45 建国
 
-画面：点击“开始建国”，进入建国 tab。
+画面：选择建设者共和国，写下“完成 Kite 黑客松 MVP”，设置 500 / 30 / 10 USDC。
 
 旁白：
 
-> Pocket Republic 让每个人建立一个由 AI Agent 国民组成的个人国度。你不是在使用一个 AI 助手，而是在创建一个小国家。你选择国家模板，写下当前目标，设置月度授权、单笔限额和高风险上限。
+> Pocket Republic 让用户建立一个由 AI Agent 国民组成的个人国度。你写下国家使命、月度预算、单笔限额和高风险边界。这不是给 AI 一句提示词，而是在定义它被允许怎样行动。
 
-操作：
+## 0:45 - 1:05 个人宪法
 
-- 选择 Builder Republic。
-- 修改目标：完成 Kite 赛道黑客松 MVP。
-- 点击“更新个人宪法”。
-
----
-
-## 0:45 - 1:10 个人宪法
-
-画面：个人宪法 tab。
+画面：进入个人宪法，修改 A2 或 A3 数值。
 
 旁白：
 
-> 系统根据用户建模生成个人宪法，而且这些条款可以直接编辑。A2 是单笔限额，A3 是高风险上限，A4 是冷静期，A6 保留用户主权：用户可以推翻议会，但必须留下国家公报。
+> 宪法可以逐条编辑，而且会真实改变下一次支付审查。Agent 国民忠于这部宪法，而不是迎合用户一时的冲动。
 
-关键句：
+## 1:05 - 1:25 国库风门
 
-> 这不是 AI 给建议，而是 Agent 行动前必须遵守的制度。
-
----
-
-## 1:10 - 1:35 Agent 国民和国家地图
-
-画面：左侧国民护照 + 国家地图 tab。
+画面：进入财政议案，展示四道门。
 
 旁白：
 
-> 这些 Agent 不只是多个聊天角色。它们是国民和官员：首相协调目标，财政大臣管理 Kite 国库，审计官查风险，反对党防止 AI 迎合，心灵部长处理 FOMO 和焦虑，书记官生成国家公报。
+> 当 Agent 要把一阵风带出国境，它要经过四道门：Agent Passport 证明身份；Scoped Session 写入金额、时限和 endpoint；x402 完成服务采购；Receipt 把轨迹留在国家公报。
 
-补充：
+## 1:25 - 1:55 宪法治理
 
-> 现在 demo 只跑通财政部，但创作工坊、心灵花园、学院、外交邮局和道具铺都保留为后续产品入口。
-
----
-
-## 1:35 - 2:15 财政议案
-
-画面：财政议案 tab，选择 AI meme coin 冲动买入。
+画面：先选 300 USDC meme coin，运行沙盒审查。
 
 旁白：
 
-> 用户想花 300 USDC 买一个刚上线的 AI meme coin。普通钱包只会弹出确认按钮，但在 Pocket Republic 里，这会先变成国事议案。
+> 这笔 300 USDC 的冲动投资触发了 FOMO、高风险限额和冷静期。议会只批准 10 USDC，其余 290 USDC 留在云层中。Kite 让 Agent 能支付，Pocket Republic 决定它应不应该支付、能支付多少。
 
-操作：点击“运行国库审查”。
+## 1:55 - 2:35 Kite 真实模式
 
-旁白：
-
-> 审计官发现高风险资产和 FOMO，财政大臣检查 Kite 授权额度，反对党要求冷静期，心灵部长识别强情绪信号。最终议会不会全额放款，而是根据宪法只批准 10 USDC，剩余 290 USDC 冻结。
-
-关键句：
-
-> Kite 让 Agent 能支付。Pocket Republic 决定 Agent 应不应该支付、能支付多少。
-
----
-
-## 2:15 - 2:35 用户主权 Override
-
-画面：回到财政议案，点击“推翻议会决策 (A6)”。
+画面：切到本地 `?provider=kite`，终端短暂展示 `kpass status`，选择“购买一封云外市场晨报”。
 
 旁白：
 
-> Pocket Republic 不是让 AI 替用户当主人。用户仍然可以推翻议会，但 A6 会强制生成 Override 公报：全额执行可以发生，原始建议、反对意见、previousDecisionHash 和 override 标记都必须留痕。
+> 这不是虚构的 MCP 方法。项目通过官方 kpass 和 ksearch 连接 Kite Passport。建设部长从 Kite 目录雇佣 StableCrypto 购买一份市场数据。系统先预检 x402 真实报价与合约资产，再把宪法批准上限、`USDC` Session 资产、host 与 path 写进 Delegation。
 
----
-
-## 2:35 - 3:00 国家公报和 Kite 国库
-
-画面：国家公报 tab。
+画面：Session Pending 时展示“国玺待盖”；在 Passport Dashboard 用 Passkey 批准；回到页面再次执行。
 
 旁白：
 
-> 最终每次国库动作都会生成国家公报和 Kite-style trace。这里可以看到 Agent Passport、Allowance、Payment Intent、Payment Trace、ledgerId、decisionHash 和 override 信息。真实 Kite 接入时，只需要替换 provider adapter，个人宪法、议会和国家公报逻辑不用改。
+> 用户只签一次 Session。此后财政大臣可以在批准的额度、时限和服务范围内自主行动。成功后，页面读取服务结果与 settlement reference，不用假 tx hash 充数。
 
-操作：
+## 2:35 - 2:50 国家公报
 
-- 展示凭证 JSON。
-- 展示国家公报历史。
-- 点击“下载凭证 JSON”。
+画面：国家公报，显示 decision hash、Session、实际支付、Receipt。
 
-结尾：
+旁白：
 
-> AI Agent 时代，每个人需要的不是一个更会聊天的助手，而是一个能被信任、被约束、能协作、能花钱的个人国度。
+> 最终每一笔支付都能从 payment 回溯到 session、agent 和 owner。风会离开云层，但它走过的轨迹不会消失。
 
----
+## 2:50 - 3:00 商业闭环
 
-## 录屏重点
+画面：国家地图，点亮外交邮局、道具铺、创作工坊。
 
-- Pocket Republic 开屏和“开始建国”。
-- 建国流程：模板、目标、预算。
-- 可编辑个人宪法。
-- 7 个 Agent 国民护照。
-- 国家地图和未来部门入口。
-- 300 USDC -> 10 USDC 的财政议案。
-- A6 Override。
-- 国家公报里的 Kite-style trace。
-- `node scripts/verify-kite-envelope.mjs` 命令输出。
+旁白：
 
----
+> 下一步，Agent 国民可以互相雇佣、购买 API 与工作流。Pocket Republic 对高级宪法和团队审计订阅收费，并从 Agent 服务市场抽成。它最终会成为所有 Agent 支出之前的个人主权层。
 
-## 备用中文结尾
+## 录屏前置
 
-> Kite 解决 Agent 钱包和支付能力。Pocket Republic 解决下一步问题：用户凭什么敢把钱包授权给 Agent？答案是个人宪法、Agent 国民议会、授权额度和可追踪的国家公报。
+- 稳定产品段使用线上沙盒。
+- 真实支付段使用 `npm start` 和 `?provider=kite`。
+- 先准备 Passport 登录、Passkey、余额和已知 x402 服务。
+- 若真实结算临时失败，保留失败状态并解释，不切换成假链上凭证。
+- 终端展示 `npm test` 与 `kpass status --output json --no-interactive`。

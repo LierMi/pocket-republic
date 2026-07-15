@@ -1,79 +1,190 @@
-import { DemoKiteProvider, kiteTreasurySchema } from "../adapters/kite-provider.js";
+import assert from "node:assert/strict";
+import {
+  DemoKiteProvider,
+  KitePassportBridgeProvider,
+  kiteTreasurySchema,
+} from "../adapters/kite-provider.js";
 
 const provider = new DemoKiteProvider();
-
 const proposal = {
-  id: "meme",
-  title: "AI meme coin impulse buy",
-  amount: 300,
+  id: "api",
+  title: "购买一封云外市场晨报",
+  amount: 18,
   currency: "USDC",
-  merchant: "Unknown DEX pool",
+  merchant: "StableCrypto / Kite 服务目录",
+  serviceUrl: "https://stablecrypto.dev/api/coingecko/global",
+  serviceMethod: "POST",
+  serviceBody: {},
+  paymentAsset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  estimatedCost: 0.01,
 };
-
-const reviewedDecision = {
-  action: "reduce_payment",
-  approvedAmount: 10,
-  frozenAmount: 290,
-  triggeredArticles: ["A1", "A2", "A3", "A4"],
-  vote: { approve: 0, oppose: 2, reduce: 1, delay: 1 },
-  decisionHash: "0xreviewed_decision_hash",
-  policy: "A3 High-Risk Cap reduced the payment to 10 USDC.",
-};
-
-const overrideDecision = {
-  action: "override_execute",
-  approvedAmount: 290,
+const decision = {
+  action: "approve",
+  approvedAmount: 18,
   frozenAmount: 0,
-  triggeredArticles: ["A1", "A2", "A3", "A4", "A5"],
-  vote: { approve: 1, oppose: 3, reduce: 0, delay: 0 },
-  decisionHash: "0xoverride_decision_hash",
-  previousDecisionHash: reviewedDecision.decisionHash,
-  policy: "User invoked A5 Override Gazette.",
+  triggeredArticles: ["A1"],
+  vote: { approve: 4, oppose: 0, reduce: 0, delay: 0 },
+  decisionHash: "0xdecision",
+  policy: "宪法检查通过。",
+  policyLimits: { singleSpendLimit: 30, highRiskLimit: 10 },
 };
 
-const checks = [];
+const intent = await provider.createPaymentIntent({ proposal, decision, decisionHash: decision.decisionHash });
+const execution = await provider.executePayment(intent);
+const trace = await provider.tracePayment({ proposal, decision, intent, execution });
 
-function assertCheck(name, condition, detail = "") {
-  checks.push({ name, pass: Boolean(condition), detail });
-}
+assert.deepEqual(kiteTreasurySchema.requiredConcepts, [
+  "agentPassport",
+  "spendingSession",
+  "delegation",
+  "paymentIntent",
+  "paymentReceipt",
+  "activity",
+]);
+assert.equal(provider.providerMode, "sandbox");
+assert.equal(execution.txMode, "sandbox-ledger");
+assert.equal(execution.status, "executed_sandbox");
+assert.equal(execution.isOnchain, false);
+assert.equal(execution.executedAmount, 0.01);
+assert.match(execution.ledgerId, /^sandbox-ledger:/);
+assert.equal(trace.paymentReceipt.proofType, "sandbox_receipt");
+assert.equal(trace.paymentReceipt.isOnchain, false);
+assert.equal(trace.spendingSession.status, "sandbox_active");
+assert.equal(trace.delegation.payment_policy.assets[0], "USDC");
+assert.equal("mcpToolCall" in trace, false);
 
-async function createTrace(decision) {
-  const intent = await provider.createPaymentIntent({
-    proposal,
-    decision,
-    decisionHash: decision.decisionHash,
-  });
-  const execution = await provider.executePayment(intent);
-  return provider.tracePayment({ proposal, decision, intent, execution });
-}
+const calls = [];
+const bridge = new KitePassportBridgeProvider({
+  fetchImpl: async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.endsWith("/status")) {
+      return jsonResponse({
+        mode: "kite-passport-cli",
+        status: {
+          status: "success",
+          user: { logged_in: false },
+          agent: { registered: false },
+          session: { active: false },
+        },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  },
+});
 
-const passport = await provider.getAgentPassport();
-const allowance = await provider.getAllowance();
-const reviewTrace = await createTrace(reviewedDecision);
-const overrideTrace = await createTrace(overrideDecision);
+const passport = await bridge.getAgentPassport();
+assert.equal(passport.status, "unauthenticated");
+assert.equal(bridge.providerMode, "kite-passport");
+assert.equal(calls.length, 1);
 
-assertCheck("schema exposes Kite-facing concepts", kiteTreasurySchema.requiredConcepts.length === 5);
-assertCheck("agent passport exists", passport.agentPassportId?.startsWith("kite-passport:"));
-assertCheck("allowance can cover override demo", allowance.totalLimit >= proposal.amount);
-assertCheck("review trace reduces high-risk spend", reviewTrace.paymentTrace.approvedAmount === 10);
-assertCheck("review trace keeps MCP tool call", reviewTrace.mcpToolCall.tool === "treasury.executeGovernedPayment");
-assertCheck("override trace executes only the unpaid remainder", overrideTrace.paymentTrace.approvedAmount === 290);
-assertCheck("override trace has override flag", overrideTrace.paymentTrace.override === true);
-assertCheck(
-  "override trace preserves previous decision hash",
-  overrideTrace.paymentTrace.previousDecisionHash === reviewedDecision.decisionHash,
+const realCalls = [];
+const realBridge = new KitePassportBridgeProvider({
+  fetchImpl: async (url, options = {}) => {
+    const body = options.body ? JSON.parse(options.body) : null;
+    realCalls.push({ url, options, body });
+    if (url.endsWith("/status")) {
+      return jsonResponse({
+        status: {
+          user: { logged_in: true, user_id: "user_demo" },
+          agent: { registered: true, agent_id: "agent_demo" },
+          session: { active: false },
+        },
+      });
+    }
+    if (url.endsWith("/preflight")) {
+      return jsonResponse({
+        status: "payment_required",
+        requirement: {
+          network: "eip155:8453",
+          asset: proposal.paymentAsset,
+          assetSymbol: "USDC",
+          amountRaw: "10000",
+          amount: "0.01",
+          decimals: 6,
+        },
+      });
+    }
+    if (url.endsWith("/session/create")) {
+      return jsonResponse({ status: "success", session_id: "session_demo" });
+    }
+    if (url.endsWith("/session/use")) return jsonResponse({ status: "success" });
+    if (url.endsWith("/session/execute")) {
+      return jsonResponse({
+        session_id: "session_demo",
+        x402: { status_code: 200, parsed_response_body: { market: "delivered" } },
+        payment: { transaction_hash: "0xsettled" },
+        payment_requirement: { amount: "10000", asset: proposal.paymentAsset },
+        usage: { spent_total: "0.01" },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  },
+});
+const realIntent = await realBridge.createPaymentIntent({
+  proposal,
+  decision,
+  decisionHash: decision.decisionHash,
+});
+const realExecution = await realBridge.executePayment(realIntent);
+assert.equal(realExecution.status, "settled_onchain");
+assert.equal(realExecution.executedAmount, 0.01);
+assert.equal(realExecution.currency, "USDC");
+assert.equal(realExecution.paymentAsset, proposal.paymentAsset);
+assert.equal(realExecution.settlementReference, "0xsettled");
+assert.equal(realIntent.delegation.payment_policy.assets[0], "USDC");
+assert.deepEqual(
+  realCalls.find((call) => call.url.endsWith("/session/execute")).body.body,
+  {},
 );
-assertCheck("override MCP arguments carry override flag", overrideTrace.mcpToolCall.arguments.override === true);
-assertCheck("review deducts from the live allowance", reviewTrace.allowance.remainingAfterExecution === 490);
-assertCheck("override continues deducting from the live allowance", overrideTrace.allowance.remainingAfterExecution === 200);
-assertCheck("provider retains the cumulative remaining allowance", provider.allowance.remaining === 200);
 
-const failed = checks.filter((check) => !check.pass);
+const overLimitCalls = [];
+const overLimitBridge = new KitePassportBridgeProvider({
+  fetchImpl: async (url) => {
+    overLimitCalls.push(url);
+    if (url.endsWith("/status")) {
+      return jsonResponse({
+        status: {
+          user: { logged_in: true },
+          agent: { registered: true },
+          session: { active: false },
+        },
+      });
+    }
+    if (url.endsWith("/preflight")) {
+      return jsonResponse({
+        status: "payment_required",
+        requirement: {
+          network: "eip155:8453",
+          asset: proposal.paymentAsset,
+          assetSymbol: "USDC",
+          amountRaw: "50000000",
+          amount: "50",
+          decimals: 6,
+        },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  },
+});
+const overLimitIntent = await overLimitBridge.createPaymentIntent({
+  proposal,
+  decision: { ...decision, approvedAmount: 3 },
+  decisionHash: decision.decisionHash,
+});
+await assert.rejects(
+  () => overLimitBridge.executePayment(overLimitIntent),
+  (error) => error.code === "KITE_QUOTE_EXCEEDS_CONSTITUTION",
+);
+assert.equal(overLimitCalls.some((url) => url.endsWith("/session/create")), false);
 
-console.log("Pocket Republic Kite envelope verification");
-console.log(JSON.stringify({ provider: provider.providerName, checks }, null, 2));
+console.log("Pocket Republic Kite provider verification passed");
 
-if (failed.length > 0) {
-  console.error(`Failed checks: ${failed.map((check) => check.name).join(", ")}`);
-  process.exit(1);
+function jsonResponse(payload, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    async json() {
+      return payload;
+    },
+  };
 }

@@ -1,240 +1,177 @@
-# Pocket Republic
+# Pocket Republic / 口袋共和国
 
-Pocket Republic is a personal nation governed by AI agents. Users create a small AI nation, write a personal constitution, activate agent citizens, and let the Kite treasury execute only the spending proposals that pass governance.
+> 当 AI 开始替你花钱，它需要的不只是一只钱包，而是一部宪法。
 
-中文一句话：口袋共和国：由 AI Agent 治理的个人国度。
+Pocket Republic 是一座由用户立宪、由 AI Agent 国民协作治理的个人云上国度。用户保留主权，Agent 拥有不同职责；当 Agent 要购买 API、数据、算力或服务时，请求先通过个人宪法，再在用户批准的 Kite Agent Passport Spending Session 内执行，最后写入可验证的国家公报。
 
-**Live Demo:** https://pocket-republic.vercel.app
+线上沙盒：[pocket-republic.vercel.app](https://pocket-republic.vercel.app)
 
-## Why This Fits Kite
+## 为什么贴合 Kite
 
-This MVP focuses on the wallet side of Pocket Republic:
+| Pocket Republic | Kite 官方机制 |
+| --- | --- |
+| 立宪者 | Passport account owner |
+| 财政大臣护照 | Agent Passport / Agent DID |
+| 国库 | Passport Wallet |
+| 国库风门 | Scoped Spending Session |
+| 宪法财政条款 | Delegation payment policy |
+| 外交采购 | x402 HTTP payment |
+| 国家公报 | Session history + x402 receipt |
+| 星轨凭证 | Settlement reference / transaction hash |
 
-- **Kite Agent Passport** becomes an agent citizen identity.
-- **Kite Wallet / Allowance** becomes the national treasury.
-- **Kite Payment** becomes a governed fiscal action.
-- **Kite Payment Trace** becomes a public gazette receipt.
-- **Kite MCP server** is represented through an adapter envelope that can be replaced with the real server call.
+Kite 让 Agent 获得可验证身份、受控钱包和支付能力。Pocket Republic 解决用户侧的下一层问题：这笔支付是否符合我的目标、预算和价值边界。
 
-The important distinction: Pocket Republic is not a generic multi-agent chatroom. It is a personal governance layer before AI agents act or spend money.
+## 已实现
 
-## Demo Flow
+- 完整建国流程：国家模板、国家名称、使命和预算。
+- 可编辑个人宪法，A2/A3 条款会真实改变审查结果。
+- 七位不同职责的 Agent 国民与强制反方意见。
+- 财政议案：批准、限额、冷静期和有留痕的用户主权操作。
+- 沙盒 Provider：完整可演示，所有凭证明确标记“非链上”。
+- 真实 Provider：通过本地安全桥接调用 Kite 官方 `kpass` / `ksearch` CLI。
+- Kite 状态机：未登录、Agent 待注册、Session 待批准、Session 生效、x402 执行、Receipt 结算。
+- Scoped Delegation：金额、总额、TTL、资产、HTTP method、host 和 path 都进入 Session policy。
+- x402 无签名预检：先读取 `payment-required` 中的网络、资产合约与真实报价，再创建授权。
+- x402 示例：建设部长通过 Kite 目录中的 StableCrypto 购买一份全球市场数据。
+- Session 历史、x402 Receipt 接入口与国家公报 JSON 导出。
+- SSRF 防护、参数白名单、CLI 超时、输出上限和安全响应头。
+- 原创 WebGL 云海显色、章节切换、按钮涟漪和 reduced-motion 回退。
 
-1. Open the Pocket Republic entry screen.
-2. Click **开始建国** and choose a nation template.
-3. Edit the user model: mission, monthly allowance, single-spend limit, and high-risk limit.
-4. Open **个人宪法** to inspect or edit the generated constitution.
-5. Open **财政议案**, submit a spending proposal, or choose a preset case.
-6. Run treasury review: agent citizens debate, vote, and apply the constitution.
-7. Open **国家公报** to see the Kite-style payment trace and gazette history.
-8. Optionally use **推翻议会决策 (A6)** to show user sovereignty with an audited override receipt.
+## 两种运行模式
 
-The default demo shows a 300 USDC high-risk meme coin proposal being reduced to 10 USDC with a cooling period. If the user invokes A6, the treasury pays only the outstanding remainder while preserving the previous decision hash and both ledger records.
+### 1. 线上沙盒
 
-## Run Locally
+直接访问 Vercel。沙盒会运行完整产品逻辑，但不会宣称发生了 Kite 链上交易。
 
-This is a static app with no package install.
+### 2. Kite Passport 真实模式
+
+真实模式需要官方 CLI、用户登录、Passkey 和可用余额。凭证留在本机，不放进静态网页或 Vercel 环境变量。
+
+安装官方工具：
 
 ```bash
-cd pocket-republic
-python3 -m http.server 5180
+curl -fsSL https://agentpassport.ai/install.sh | bash
 ```
 
-Open:
+先检查：
+
+```bash
+kpass health --output json
+ksearch health --output json
+kpass status --output json --no-interactive
+```
+
+再启动本地桥接：
+
+```bash
+npm start
+```
+
+打开：
 
 ```text
-http://localhost:5180
+http://127.0.0.1:5180/?provider=kite
 ```
 
-## Project Structure
+首次使用需要本人完成：
+
+1. 使用 `kpass signup init` / `signup exchange` 或 `kpass login init` / `login verify` 完成邮箱验证。
+2. 在 Agent Passport Dashboard 创建 Passkey。
+3. 为 Passport Wallet 准备可用资产。
+4. 页面发起 Session 后，用 Passkey 批准范围、单笔额度、总额度和时限。
+5. 再次运行议案，财政大臣会在已批准 Session 内执行 x402 请求。
+
+完整步骤见 [KITE_INTEGRATION.md](./docs/KITE_INTEGRATION.md)。
+
+## 真实支付路径
+
+```text
+用户使命与宪法
+      ↓
+Agent 提交财政议案
+      ↓
+Pocket Republic 规则引擎审查
+      ↓
+预检 x402 payment-required 与真实报价
+      ↓
+生成 Kite Delegation
+      ↓
+Passkey 批准 Spending Session
+      ↓
+kpass agent:session execute
+      ↓
+x402 服务返回结果与 Receipt
+      ↓
+国家公报保存 decision hash + settlement reference
+```
+
+## 安全边界
+
+- 浏览器永远不读取 Kite JWT、OTP 或 Passkey。
+- 本地桥接使用 `spawn` 参数数组，不执行 shell 拼接。
+- x402 目标必须是 HTTPS 且位于服务允许名单。
+- localhost、私网、link-local 和 metadata 地址会被拒绝。
+- CLI 调用有超时与输出大小限制。
+- `.vercelignore` 会在构建时排除 `.kite-passport/`、`.kpass/`、本地 CLI 和桥接服务，线上只发布无凭证的前端沙盒。
+- 只有官方返回 settlement reference 时，页面才显示“链上已结算”。
+- 钱包余额不作为支付成功的唯一证据；Receipt 与服务响应才是结算判断依据。
+- 宪法批准额是上限，真实成交额取自 x402 报价和 Receipt，两者分开记录。
+
+## 测试
+
+```bash
+npm test
+```
+
+测试覆盖：
+
+- 产品结构与五个主流程入口
+- WebGL/motion 辅助函数
+- 宪法限额、FOMO 风险和 override 差额
+- 沙盒与真实 Provider 合约
+- Delegation schema
+- x402 `payment-required` 解析、USDC 精度和真实成交额
+- URL、method、金额、TTL 与 SSRF 防护
+
+## 项目结构
 
 ```text
 pocket-republic/
   index.html
   styles.css
   app.js
+  effects.js
   governance.js
+  server.mjs                 # Kite CLI 本地安全桥接
   adapters/
-    kite-provider.js
+    kite-provider.js         # Sandbox + Kite Passport Provider
+  scripts/
+    verify-*.mjs
   assets/
-    nation-map.svg
     UI_ASSET_BRIEF.md
+  docs/
+    KITE_INTEGRATION.md
+    DEMO_SCRIPT.md
+    WORLD_BIBLE.md
+    UI_HANDOFF.md
 ```
 
-## UI Asset Slots
+## 商业闭环
 
-The page now uses a full-stage personal nation workspace instead of the former permanent three-column shell. Every visual entry point has a visible `ART-XX` placeholder and a precise handoff brief:
+1. 免费层：一个国家、基础宪法、沙盒治理。
+2. 个人订阅：高级条款、长期公报、多 Agent 国民和跨设备同步。
+3. Agent / 服务市场：国民购买 API、数据、算力和工作流，平台收取交易服务费。
+4. 团队版：家庭、工作室和创业团队共享国库、角色权限与审计。
+5. 基础设施：向其他 Agent 产品提供 Constitution-as-Policy SDK，让所有 Agent 支出先经过规则层。
 
-```text
-assets/UI_ASSET_BRIEF.md
-```
-
-Current slots:
-
-- `ART-00` opening fantasy nation panorama
-- `ART-01` founding territory
-- `ART-02` seven Agent citizens group portrait
-- `ART-03` constitution hall
-- `ART-04` Kite treasury and parliament chamber
-- `ART-05` complete personal nation map
-- `ART-06` gazette seal and archive ornament
-
-The visual system is intentionally original. It uses surreal-utopia, dreamland, fantasy-nation, and theatrical digital-circus qualities without reproducing protected characters or scene designs.
-
-## Interaction Layer
-
-`effects.js` adds a zero-dependency visual layer:
-
-- Procedural WebGL color reveal on the opening screen
-- Organic iris transition into the nation
-- View transitions tied to the five product destinations
-- Pointer-position button ripples
-- Magnetic desktop buttons and subtle Agent passport tilt
-- Interactive nation-map hotspots
-- Reduced-motion and no-WebGL fallbacks
-
-## Execution Docs
-
-Use these files for the two-person workflow:
-
-```text
-docs/UI_HANDOFF.md
-docs/DEMO_SCRIPT.md
-docs/SUBMISSION_CHECKLIST.md
-docs/WORLD_BIBLE.md
-docs/KITE_INTEGRATION.md
-docs/SUBMISSION_PACKET.md
-```
-
-- `UI_HANDOFF.md` explains the page logic and image slots for the UI pass.
-- `DEMO_SCRIPT.md` is the 3-minute recording script.
-- `SUBMISSION_CHECKLIST.md` is the final anti-PPT-project checklist.
-- `WORLD_BIBLE.md` defines the pocket-nation worldbuilding, future departments, and monetization gates.
-- `KITE_INTEGRATION.md` documents the real Kite MCP provider boundary.
-- `SUBMISSION_PACKET.md` is a copy-ready project description for hackathon submission.
-
-## Technical Verification
-
-Run the static provider-envelope check:
-
-```bash
-node scripts/verify-kite-envelope.mjs
-```
-
-Run the product structure and effects checks:
-
-```bash
-node scripts/verify-product-structure.mjs
-node scripts/verify-effects-module.mjs
-node scripts/verify-governance-logic.mjs
-```
-
-This verifies that the demo provider preserves the Kite-facing contract: Agent Passport, Allowance, Payment Intent, Payment Trace, MCP Tool Call, and audited override fields.
-
-## Kite Adapter Boundary
-
-The app uses `DemoKiteProvider` by default. The provider exposes the same product concepts that the real Kite integration should supply:
-
-```js
-getAgentPassport()
-getAllowance()
-createPaymentIntent()
-executePayment()
-tracePayment()
-```
-
-The current envelope intentionally keeps the Kite-facing data isolated in `adapters/kite-provider.js`:
-
-```js
-{
-  agentPassport: {
-    agentPassportId,
-    agentName,
-    agentRole,
-    ownerNationId,
-    walletAddress,
-    status
-  },
-  allowance: {
-    allowanceId,
-    totalLimit,
-    singleSpendLimit,
-    highRiskLimit,
-    remainingAfterExecution,
-    currency,
-    policySource
-  },
-  paymentIntent,
-  paymentTrace,
-  mcpToolCall
-}
-```
-
-When Kite official SDK or MCP credentials are available, replace only the provider implementation:
-
-```js
-// app.js
-// import { KiteMcpProvider } from "./adapters/kite-provider.js";
-// const provider = new KiteMcpProvider({ apiKey, mcpUrl, agentPassportId, walletId });
-```
-
-The constitutional decision engine, parliament UI, and public gazette do not need to change.
-
-There is now a `KiteMcpProvider` stub in [adapters/kite-provider.js](./adapters/kite-provider.js). See:
-
-```text
-.env.example
-docs/KITE_INTEGRATION.md
-```
+产品飞轮：更多 Agent 国民带来更多服务需求，更多可支付服务让个人国度更有用，每次行为又沉淀为更准确的政策与信誉记录。
 
 ## Hackathon Scope
 
-P0 is intentionally narrow:
+本次 MVP 只把 Kite 国库做深。心灵花园、创作工坊、学院、外交邮局和道具铺保留完整入口与商业方向，但不伪装成已经完成的功能。
 
-- One personal constitution
-- One agent treasury
-- One personal nation setup flow
-- Four nation templates
-- Seven Agent citizen passport cards
-- One fiscal proposal workflow with three preset requests and custom input
-- Governed payment decision
-- A6 user override path with audit record
-- Kite-style trace envelope
-- Public gazette receipt
-- Downloadable payment trace JSON
-- Local gazette history in the browser
-- SHA-256 decision hash generated with Web Crypto when available
+## 官方参考
 
-Future departments such as Studio, Sanctuary, Academy, Embassy, and Archive are represented in the 国家地图 tab, but the hackathon build only executes the Kite treasury workflow.
-
-## Worldbuilding
-
-The inspiration is a pocket-sized imaginary nation: playful, accessible, and full of small "gadget-like" departments. The product avoids using any protected character or visual IP. The worldbuilding is documented in:
-
-```text
-docs/WORLD_BIBLE.md
-```
-
-The rule of thumb:
-
-> Playfulness gets users into the pocket nation. Kite treasury makes it a real product.
-
-## Technical Proof Points
-
-The implementation exposes these verifiable integration points:
-
-- `DemoKiteProvider` keeps the hackathon demo stable.
-- `KiteMcpProvider` is a real integration boundary for Kite MCP / SDK wiring.
-- `.env.example` lists the expected Kite runtime fields.
-- Trace JSON can be downloaded from the 国家公报 tab.
-- Gazette history is saved in localStorage as a lightweight audit log.
-- Review progress shows the payment-governance pipeline instead of a static screen.
-- Override decisions include `override: true` and `previousDecisionHash` for auditability.
-- `scripts/verify-kite-envelope.mjs` provides a runnable contract check.
-- Decision hashes use browser SHA-256 via Web Crypto, with a deterministic fallback.
-
-## Pitch
-
-AI agents will soon buy APIs, subscribe to tools, pay other agents, and move money on behalf of humans. Payment rails are not enough. Users need a way to define what agents are allowed to do.
-
-Pocket Republic turns the Kite wallet into a governed national treasury. Every payment becomes a proposal, every proposal is checked against the user's constitution, and every execution leaves a trace.
+- [Kite Agent Passport](https://docs.gokite.ai/kite-agent-passport)
+- [Kite Agent Passport CLI Reference](https://docs.gokite.ai/kite-agent-passport/cli-reference)
+- [Kite Service Provider Guide](https://docs.gokite.ai/kite-agent-passport/service-provider-guide)

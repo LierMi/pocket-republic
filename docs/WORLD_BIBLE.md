@@ -1,20 +1,20 @@
 # Pocket Republic World Bible
 
-版本：v0.1  
+版本：v0.2
 用途：统一世界观、产品入口和商业化叙事。  
-核心原则：**童趣负责让人想进入，Kite 国库负责让产品成立。**
+核心原则：**云上童话让人愿意把愿望写下来，Kite 国库让被授予的权力有边界。**
 
 ---
 
 ## 1. 世界观一句话
 
-Pocket Republic 是用户口袋里的一座 AI 小国。
+Pocket Republic 是一座漂浮在用户日常生活上方的 AI 云上小国。
 
-用户不是在管理一堆工具，而是在治理一个小小的共和国：Agent 是国民，Kite 钱包是国库，个人宪法是法律，所有花钱请求都要先投进“口袋邮筒”，经过国民议会审查，最后由国库执行并写入国家公报。
+每个人心里都有一块尚未升空的土地。用户写下它要保护的愿望、预算和边界，土地由此升空。Agent 是国民，Kite Passport Wallet 是国库，个人宪法是法律；所有花钱请求都先成为财政议案，经过国民审查，再由 Scoped Spending Session 放行并写入国家公报。
 
 这个世界观可以有童趣、道具感、冒险感，但不能让评委误解成儿童向游戏或泛聊天玩具。它的落点必须是：
 
-> AI Agent 时代，用户需要一个可爱但严肃的支付治理层。
+> 当 Agent 开始替你花钱，它需要的不只是一只钱包，而是一部宪法。
 
 ---
 
@@ -37,12 +37,12 @@ Pocket Republic 是用户口袋里的一座 AI 小国。
 避免使用：
 
 - 任何受版权保护的角色、形象、名字和视觉元素
-- 过度 fantasy 的王国、魔法、怪物、宠物设定
-- 让 Kite 钱包主线变弱的儿童化包装
+- 只剩空洞奇观、无法对应产品功能的魔法设定
+- 让 Kite Session 和支付主线变弱的儿童化包装
 
 推荐调性：
 
-> 像一个认真办事的童年道具箱。可爱，但不是幼稚；有想象力，但每个入口都能落到 Agent 行动和支付。
+> 像童年认真建造的一座云上国家。浪漫，但制度清楚；奇幻，但每一座建筑都对应 Agent 身份、权限、行动或支付。
 
 ---
 
@@ -69,7 +69,7 @@ Pocket Republic 是用户口袋里的一座 AI 小国。
 
 - 存放用户的个人宪法。
 - 定义支出限额、高风险上限、冷静期、override 条款。
-- A5 允许用户推翻议会，但必须生成 Override Gazette，保留原始 decision hash。
+- A6 允许用户推翻议会，但必须生成 Override Gazette，保留原始 decision hash。
 - 未来可以有模板：Builder、Web3、Student、Family、DAO。
 
 黑客松状态：已做基础版。
@@ -79,15 +79,16 @@ Pocket Republic 是用户口袋里的一座 AI 小国。
 - Pro 订阅的核心。
 - 高级用户会为更细的 policy guardrails 付费。
 
-### 3.3 Kite 国库 / Treasury
+### 3.3 Kite 国库与风门 / Treasury
 
 功能：
 
-- 连接 Kite Agent Passport、Allowance、Payment Intent、Payment Trace。
-- 根据议会结果执行 approve / reduce / delay / block。
-- 把每次支付变成可追踪账本。
+- 连接 Kite Agent Passport、Delegation、Scoped Spending Session、x402、Session 历史与 Receipt。
+- 议会通过后，由用户用 Passkey 批准 Session 的金额、时限、资产和 scope。
+- Agent 只在 Session 与宪法的双重边界内执行。
+- 把每次支付变成 receipt，并在有 settlement reference 时标记链上结算。
 
-黑客松状态：已做 `DemoKiteProvider`，预留真实 Kite/MCP provider。
+黑客松状态：已做明确非链上的 `DemoKiteProvider`，并通过本地安全桥接真实调用官方 `kpass` / `ksearch`。账户、Passkey、余额和第一笔结算仍需立宪者本人完成。
 
 商业价值：
 
@@ -113,7 +114,7 @@ Pocket Republic 是用户口袋里的一座 AI 小国。
 
 功能：
 
-- 记录 requester、触发条款、投票、批准金额、ledger、decision hash。
+- 记录 requester、触发条款、投票、Delegation、Session、批准金额、实际支付、receipt 与 decision hash。
 - 记录用户 override：被推翻的原始决策、previousDecisionHash、override 标记。
 - 未来可以接 0G / TEE 证明或链上存证。
 
@@ -318,6 +319,17 @@ Team：
 长期方向：
 
 > 任何 AI Agent 产品想替用户花钱，都可以接 Pocket Republic 的宪法审批层。
+
+产品飞轮：
+
+```text
+更多 Agent 国民
+  -> 更多 API / 数据 / 算力采购
+  -> 更多可支付服务进入道具铺与外交邮局
+  -> 个人国度能力更强
+  -> 行为沉淀为更准确的宪法模板与 Agent 信誉
+  -> 吸引更多用户与服务
+```
 
 收入：
 

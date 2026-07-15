@@ -1,88 +1,67 @@
 # Submission Checklist
 
-提交前检查清单。目标是避免评委觉得这是纯前端剧本或泛多 Agent 项目。
+## 产品
 
----
+- [ ] 开屏一句话讲清“Agent 花钱前需要一部个人宪法”。
+- [ ] 建国 -> 宪法 -> 财政议案 -> 国家地图 -> 国家公报连贯。
+- [ ] 用户可输入目标、预算并编辑宪法。
+- [ ] A2/A3 修改会改变真实决策。
+- [ ] 心灵花园等未来部门没有抢走国库主线。
+- [ ] 页面没有“评委一键演示”或自动制造记录。
 
-## 1. 产品主线
+## Kite
 
-- [ ] 开屏页一句话讲清楚：给 AI Agent 花钱前加一部个人宪法。
-- [ ] 页面流程像产品：开屏 -> 建国 -> 个人宪法 -> 财政议案 -> 国家地图 -> 国家公报。
-- [ ] 其他部门没有抢主线。
-- [ ] README 明确写：不是多 Agent 聊天室，而是 Agent 支付前治理层。
-- [ ] Product Map 展示世界观和商业化入口，但不削弱 Kite 国库主线。
-- [ ] 世界观参考 [docs/WORLD_BIBLE.md](./WORLD_BIBLE.md)。
-- [ ] 点击审查后才写入 Gazette History，页面不是自动刷记录。
-- [ ] 用户推翻条款明确表达用户主权和审计留痕。
+- [ ] `kpass --version` 与 `ksearch --version` 可运行。
+- [ ] `kpass health --output json` 返回 healthy。
+- [ ] `ksearch health --output json` 返回 healthy。
+- [ ] 真实账户已登录并设置 Passkey。
+- [ ] Passport Wallet 有演示所需余额。
+- [ ] 财政大臣 Agent 已注册。
+- [ ] Session Delegation 包含 asset、per-tx、total、TTL 和 endpoint scope。
+- [ ] Session Pending 明确等待 Passkey。
+- [ ] x402 执行返回 2xx 和服务结果。
+- [ ] Receipt 有 settlement reference 后才显示“链上已结算”。
+- [ ] `kpass user sessions --output json` 能找到该 Session，execute 结果含 receipt / settlement reference。
 
----
+## 诚实性
 
-## 2. Kite 贴合度
+- [ ] 沙盒凭证显示 `isOnchain: false`。
+- [ ] 沙盒不生成伪 tx hash。
+- [ ] 未登录、未批准、余额不足和服务失败都有清晰状态。
+- [ ] Vercel 页面不宣称保存用户 Kite 凭证。
+- [ ] README 明确区分线上沙盒与本地真实模式。
 
-- [ ] README 有 Kite section。
-- [ ] 页面显示 Kite Adapter 状态。
-- [ ] Payment Trace JSON 包含 `agentPassport`。
-- [ ] Payment Trace JSON 包含 `allowance`。
-- [ ] Payment Trace JSON 包含 `paymentIntent`。
-- [ ] Payment Trace JSON 包含 `paymentTrace`。
-- [ ] Payment Trace JSON 包含 `mcpToolCall`。
-- [ ] 代码里有独立 provider：[adapters/kite-provider.js](../adapters/kite-provider.js)。
-- [ ] 代码里有 `KiteMcpProvider` stub。
-- [ ] `.env.example` 包含 Kite 真实接入字段。
-- [ ] `国家公报`可以下载 Kite Trace JSON。
-- [ ] 国家公报有本地历史记录。
-- [ ] Decision hash 使用 SHA-256。
-- [ ] Override trace 包含 `override: true`。
-- [ ] Override trace 包含 `previousDecisionHash`。
-- [ ] `docs/SUBMISSION_PACKET.md` 可直接复制到提交表单。
+## 安全
 
----
+- [ ] `.kpass/`、`.kite-passport/`、`.kite-tools/` 未提交。
+- [ ] Git 中没有 JWT、OTP、私钥和邮箱 code。
+- [ ] x402 URL 只允许 HTTPS 与允许名单主机。
+- [ ] localhost、私网、metadata URL 测试通过。
+- [ ] 本地桥接不使用 shell 字符串拼接。
 
-## 3. Demo 稳定性
+## 自动化
 
-- [ ] `python3 -m http.server 5180` 可以启动。
-- [ ] 打开 `http://localhost:5180` 没有断图。
-- [ ] 点击“进入我的国度”能进入产品。
-- [ ] 三个示例议案都能切换。
-- [ ] Meme coin 场景显示 300 USDC -> 10 USDC。
-- [ ] 点击“召集国民议会”能看到审查步骤动画。
-- [ ] 点击用户推翻按钮能生成 override 记录。
-- [ ] API data 场景能显示较宽松审批。
-- [ ] AI tool 场景触发单笔限额。
-- [ ] Payment Trace 可以下载成 JSON。
-- [ ] 点击审查或 Override 后 Gazette History 会出现记录。
-
----
-
-## 4. 代码检查
-
+- [ ] `npm test`
 - [ ] `node --check app.js`
 - [ ] `node --check adapters/kite-provider.js`
-- [ ] `node scripts/verify-kite-envelope.mjs`
-- [ ] `curl -I http://localhost:5180/`
-- [ ] `curl -I http://localhost:5180/assets/hero-placeholder.svg`
-- [ ] `node scripts/verify-product-structure.mjs`
-- [ ] `node scripts/verify-effects-module.mjs`
-- [ ] `node scripts/verify-governance-logic.mjs`
+- [ ] `node --check server.mjs`
+- [ ] `curl -I http://127.0.0.1:5180/`
+- [ ] `curl http://127.0.0.1:5180/api/kite/status`
 
----
+## 浏览器
 
-## 5. UI 交付
+- [ ] 1280 x 800 开屏与五个视图无重叠。
+- [ ] 390 x 844 导航、国库风门、表单无横向溢出。
+- [ ] 320 x 568 最长中文与按钮不溢出。
+- [ ] WebGL canvas 非空，有 no-WebGL 回退。
+- [ ] reduced-motion 可用。
+- [ ] 控制台无 error。
 
-- [ ] UI 同学看过 [docs/UI_HANDOFF.md](./UI_HANDOFF.md)。
-- [ ] UI 同学知道图片入口在 [assets/UI_ASSET_BRIEF.md](../assets/UI_ASSET_BRIEF.md)。
-- [ ] 开屏主视觉替换。
-- [ ] Kite Treasury Visual 替换。
-- [ ] Agent 国民群像替换。
-- [ ] 替换后移动端不溢出。
+## 交付
 
----
-
-## 6. 视频提交
-
-- [ ] 录屏按 [docs/DEMO_SCRIPT.md](./DEMO_SCRIPT.md) 走。
-- [ ] 视频里出现代码层 Kite provider。
-- [ ] 视频里出现 Payment Trace JSON。
-- [ ] 提交说明引用 [docs/SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md)。
-- [ ] 视频不要花太多时间讲“未来能做情感陪伴/创作部”。
-- [ ] 最后一句收束到 Kite：Payment rails let agents pay. Pocket Republic decides whether they should pay.
+- [ ] UI 同学看过 `docs/UI_HANDOFF.md`。
+- [ ] UI 同学按 `assets/UI_ASSET_BRIEF.md` 输出 ART-00 至 ART-06。
+- [ ] 视频按 `docs/DEMO_SCRIPT.md` 录制。
+- [ ] 提交文案来自 `docs/SUBMISSION_PACKET.md`。
+- [ ] GitHub main 已推送。
+- [ ] Vercel 部署可访问。

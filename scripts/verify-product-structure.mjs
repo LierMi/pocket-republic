@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const html = await readFile(resolve(here, "../index.html"), "utf8");
 const appSource = await readFile(resolve(here, "../app.js"), "utf8");
+const vercelIgnore = await readFile(resolve(here, "../.vercelignore"), "utf8");
 
 const assertions = [
   [!html.includes('class="treasury-app"'), "旧的三栏 treasury-app 外壳已移除"],
@@ -25,6 +26,9 @@ const assertions = [
   [html.includes('id="nationNameInput"'), "建国流程允许命名个人国度"],
   [appSource.includes('aria-label="编辑宪法条款'), "宪法编辑框具有可访问名称"],
   [!appSource.includes("shouldAutoRunJudgeDemo"), "产品代码不包含评委自动演示捷径"],
+  [vercelIgnore.includes(".kite-passport/"), "Vercel 产物排除本地 Passport 凭证"],
+  [vercelIgnore.includes(".kite-tools/"), "Vercel 产物排除本地 Kite CLI"],
+  [vercelIgnore.includes("server.mjs"), "Vercel 沙盒不发布本地凭证桥接"],
 ];
 
 const viewNames = ["setup", "constitution", "review", "map", "trace"];

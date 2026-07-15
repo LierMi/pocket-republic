@@ -253,11 +253,12 @@ function createFluidScene(canvas, entryScreen, reducedMotion) {
       float warpB = fbm(centered * 3.8 + vec2(warpA * 1.8, time * 1.4));
       float field = fbm(centered * 2.5 + vec2(warpB, warpA) * 1.7 - pointer);
 
-      vec3 ink = vec3(0.051, 0.055, 0.098);
-      vec3 coral = vec3(1.0, 0.353, 0.322);
-      vec3 cyan = vec3(0.384, 0.796, 0.91);
-      vec3 yellow = vec3(1.0, 0.839, 0.353);
-      vec3 mint = vec3(0.365, 0.878, 0.757);
+      vec3 ink = vec3(0.055, 0.082, 0.145);
+      vec3 cloud = vec3(0.94, 0.95, 0.90);
+      vec3 coral = vec3(0.95, 0.36, 0.30);
+      vec3 cyan = vec3(0.42, 0.80, 0.84);
+      vec3 yellow = vec3(0.96, 0.81, 0.38);
+      vec3 mint = vec3(0.43, 0.78, 0.61);
 
       vec3 color = mix(coral, cyan, smoothstep(0.15, 0.82, field));
       color = mix(color, yellow, smoothstep(0.72, 0.95, warpA) * 0.74);
@@ -267,7 +268,7 @@ function createFluidScene(canvas, entryScreen, reducedMotion) {
 
       float grey = dot(color, vec3(0.22, 0.66, 0.12));
       float threshold = smoothstep(field - 0.24, field + 0.24, uReveal);
-      vec3 revealed = mix(mix(vec3(grey), ink, 0.44), color, threshold);
+      vec3 revealed = mix(mix(cloud, ink, 0.16 + grey * 0.08), color, threshold * 0.76);
       float grain = (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.035;
       gl_FragColor = vec4(revealed + grain, 0.9);
     }

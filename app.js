@@ -94,17 +94,22 @@ const requests = {
   },
   api: {
     id: "api",
-    title: "情绪 API 数据包",
+    title: "购买一封云外市场晨报",
     requester: "Ivo / 建设部长",
-    amount: 18,
+    amount: 3,
     currency: "USDC",
-    merchant: "AlphaSignal API",
-    category: "创作部 API 采购",
+    merchant: "StableCrypto / Kite 服务目录",
+    category: "外交邮局 · x402 数据采购",
     summary:
-      "创作部需要购买一个外部情绪数据包，为当前项目补充可验证的市场信号。",
+      "建设部长想雇佣一个国境外的数据服务，取得一份全球加密市场晨报，为今日的建设计划校准方向。",
     context:
-      "The Studio department needs an external sentiment data package. The purchase directly supports the current project mission.",
-    statusHint: "大概率通过",
+      "The Studio needs one external global crypto market report. This catalog-listed x402 data purchase directly supports the current project mission.",
+    serviceUrl: "https://stablecrypto.dev/api/coingecko/global",
+    serviceMethod: "POST",
+    serviceBody: {},
+    paymentAsset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    estimatedCost: 0.01,
+    statusHint: "Kite 目录可验证 · x402 实时报价",
   },
   tool: {
     id: "tool",
@@ -131,7 +136,7 @@ const agentProfiles = [
     department: "内阁",
     duty: "总结议案、协调各部门，并把最终建议翻译成用户能执行的动作。",
     permissions: ["summarize", "coordinate", "vote"],
-    passport: "kite-passport:prime-minister:sol:sandbox",
+    passport: "sandbox-agent:prime-minister:sol",
     reputation: 94,
     voteClass: "vote-approve",
   },
@@ -143,7 +148,7 @@ const agentProfiles = [
     department: "Kite 国库",
     duty: "读取预算、创建支付意图，并只让通过宪法的金额进入 Kite 国库。",
     permissions: ["read_budget", "propose_payment", "freeze_spend"],
-    passport: "kite-passport:treasurer:mira:sandbox",
+    passport: "sandbox-agent:treasurer:mira",
     reputation: 92,
     voteClass: "vote-reduce",
   },
@@ -155,7 +160,7 @@ const agentProfiles = [
     department: "审计院",
     duty: "检查风险信号、触发条款和历史记录，防止 Agent 迎合用户冲动。",
     permissions: ["audit", "risk_scan", "vote"],
-    passport: "kite-passport:auditor:rin:sandbox",
+    passport: "sandbox-agent:auditor:rin",
     reputation: 91,
     voteClass: "vote-oppose",
   },
@@ -167,7 +172,7 @@ const agentProfiles = [
     department: "创作工坊",
     duty: "把支出和项目目标对齐，提出更小、更可执行的替代方案。",
     permissions: ["plan_project", "suggest_alternative", "vote"],
-    passport: "kite-passport:builder:ivo:sandbox",
+    passport: "sandbox-agent:builder:ivo",
     reputation: 89,
     voteClass: "vote-approve",
   },
@@ -179,7 +184,7 @@ const agentProfiles = [
     department: "国民议会",
     duty: "强制提出反方观点，保护用户不被自己的情绪和单个 Agent 带着走。",
     permissions: ["debate", "veto_warning", "vote"],
-    passport: "kite-passport:opposition:noa:sandbox",
+    passport: "sandbox-agent:opposition:noa",
     reputation: 88,
     voteClass: "vote-delay",
   },
@@ -191,7 +196,7 @@ const agentProfiles = [
     department: "心灵花园",
     duty: "识别焦虑、FOMO 和强情绪状态，把不可逆决策先放进冷静期。",
     permissions: ["emotion_check", "cooling_period", "vote"],
-    passport: "kite-passport:caretaker:luma:sandbox",
+    passport: "sandbox-agent:caretaker:luma",
     reputation: 90,
     voteClass: "vote-delay",
   },
@@ -203,7 +208,7 @@ const agentProfiles = [
     department: "档案馆",
     duty: "生成国家公报、保存决策哈希、Kite 账本和用户推翻历史。",
     permissions: ["write_gazette", "hash_record", "export_trace"],
-    passport: "kite-passport:archivist:vale:sandbox",
+    passport: "sandbox-agent:archivist:vale",
     reputation: 93,
     voteClass: "vote-approve",
   },
@@ -214,7 +219,7 @@ const mapDepartments = {
     status: "正在运转",
     title: "Kite 国库",
     description:
-      "Agent Passport 是国民身份，Allowance 是财政权限，Payment Trace 是写进国家公报的执行记录。",
+      "Agent Passport 是国民身份，Scoped Spending Session 是财政权限，x402 Receipt 是写进国家公报的执行记录。",
     actionLabel: "前往财政议案",
     view: "review",
   },
@@ -281,6 +286,7 @@ const elements = {
   proposalTitleInput: document.querySelector("#proposalTitleInput"),
   proposalAmountInput: document.querySelector("#proposalAmountInput"),
   proposalContextInput: document.querySelector("#proposalContextInput"),
+  proposalServiceUrlInput: document.querySelector("#proposalServiceUrlInput"),
   requestList: document.querySelector("#requestList"),
   requestTitle: document.querySelector("#requestTitle"),
   requestSummary: document.querySelector("#requestSummary"),
@@ -313,6 +319,14 @@ const elements = {
   departmentTitle: document.querySelector("#departmentTitle"),
   departmentDescription: document.querySelector("#departmentDescription"),
   departmentAction: document.querySelector("#departmentAction"),
+  providerModeButton: document.querySelector("#providerModeButton"),
+  kiteGate: document.querySelector("#kiteGate"),
+  providerDetail: document.querySelector("#providerDetail"),
+  providerModeBadge: document.querySelector("#providerModeBadge"),
+  passportState: document.querySelector("#passportState"),
+  sessionState: document.querySelector("#sessionState"),
+  paymentState: document.querySelector("#paymentState"),
+  receiptState: document.querySelector("#receiptState"),
 };
 
 let activeRequestId = "meme";
@@ -321,6 +335,7 @@ let latestTrace = null;
 let latestExecution = null;
 let latestRequest = null;
 let latestAllowance = null;
+let latestPassport = null;
 let isReviewing = false;
 
 init();
@@ -369,6 +384,16 @@ function bindEvents() {
 
   elements.viewButtons.forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.viewTab));
+  });
+
+  elements.providerModeButton?.addEventListener("click", () => {
+    const url = new URL(window.location.href);
+    if (provider.providerMode === "kite-passport") {
+      url.searchParams.delete("provider");
+    } else {
+      url.searchParams.set("provider", "kite");
+    }
+    window.location.assign(url.toString());
   });
 
   document.querySelectorAll("[data-map-view]").forEach((button) => {
@@ -507,7 +532,7 @@ function renderCitizens() {
             <dl>
               <div>
                 <dt>护照</dt>
-                <dd>${escapeHtml(agent.passport)}</dd>
+                <dd>${escapeHtml(citizenPassportLabel(agent))}</dd>
               </div>
               <div>
                 <dt>权限</dt>
@@ -523,6 +548,13 @@ function renderCitizens() {
       )
       .join(""),
   );
+}
+
+function citizenPassportLabel(agent) {
+  if (provider.providerMode !== "kite-passport") return agent.passport;
+  if (agent.id !== "treasurer") return "后续阶段 · 待注册";
+  if (!latestPassport || latestPassport.agentPassportId === "not-registered") return "Kite Agent · 待注册";
+  return latestPassport.agentPassportId;
 }
 
 function renderMapDepartment(departmentId) {
@@ -602,23 +634,87 @@ async function renderProviderStatus() {
   try {
     const passport = await provider.getAgentPassport();
     const allowance = await provider.getAllowance();
+    latestPassport = passport;
     latestAllowance = allowance;
 
     setText(elements.providerName, providerDisplayName(provider.providerName));
     setText(elements.passportId, passport.agentPassportId);
-    setText(elements.allowanceText, `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency}`);
-    setText(elements.balanceMetric, `${allowance.remaining} ${allowance.currency}`);
-    setText(elements.treasuryHeroMetric, `${allowance.remaining} ${allowance.currency}`);
+    setText(elements.allowanceText, allowanceStatusText(allowance));
+    setText(
+      elements.balanceMetric,
+      provider.providerMode === "kite-passport"
+        ? allowance.walletBalance == null
+          ? "待读取"
+          : `${allowance.walletBalance} ${allowance.currency}`
+        : `${allowance.remaining} ${allowance.currency}`,
+    );
+    setText(
+      elements.treasuryHeroMetric,
+      allowance.totalLimit > 0 ? `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency}` : "尚未授权",
+    );
+    renderProtocolStatus(passport, allowance);
+    renderCitizens();
     return true;
   } catch (error) {
+    latestPassport = null;
     latestAllowance = null;
-    setText(elements.providerName, "Kite 国库配置待完成");
+    setText(elements.providerName, "Kite Passport 离线");
     setText(elements.passportId, "尚未连接 Agent Passport");
     setText(elements.allowanceText, providerErrorMessage(error));
     setText(elements.balanceMetric, "不可用");
     setText(elements.treasuryHeroMetric, "不可用");
+    renderProtocolError(error);
+    renderCitizens();
     return false;
   }
+}
+
+function renderProtocolStatus(passport, allowance) {
+  const isSandbox = provider.providerMode === "sandbox";
+  const isAuthenticated = passport.status !== "unauthenticated";
+  const hasAgent = passport.status === "active" || isSandbox;
+  const hasSession = allowance.status === "active" || allowance.status === "sandbox_active";
+
+  if (elements.kiteGate) {
+    elements.kiteGate.dataset.kiteState = isSandbox
+      ? "sandbox"
+      : !isAuthenticated
+        ? "unauthenticated"
+        : hasSession
+          ? "ready"
+          : "session-required";
+  }
+  setText(elements.providerModeBadge, isSandbox ? "沙盒推演 · 非链上" : "Kite Passport 真实模式");
+  setText(elements.passportState, isSandbox ? "演示身份" : !isAuthenticated ? "等待登录" : hasAgent ? "身份有效" : "待注册");
+  setText(elements.sessionState, isSandbox ? "本地额度" : hasSession ? "Session 生效" : "待立宪者批准");
+  setText(elements.paymentState, "等待议案");
+  setText(elements.receiptState, isSandbox ? "仅生成沙盒凭证" : "尚未生成");
+  setText(
+    elements.providerDetail,
+    isSandbox
+      ? "当前是可完整体验的沙盒国度。所有审查、额度和公报都会运行，但不会伪装成 Kite 链上交易。"
+      : !isAuthenticated
+        ? "Kite 生产后端已连接。立宪者完成邮箱登录与 Passkey 后，财政大臣才能申请 Spending Session。"
+        : hasSession
+          ? "财政大臣拥有一个仍在有效期内的 Scoped Session，可以在宪法与 Session 的双重边界内购买服务。"
+          : "Agent Passport 已连接，下一笔合规议案会生成 Delegation，并请求你用 Passkey 盖下国玺。",
+  );
+  if (elements.providerModeButton) {
+    const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+    elements.providerModeButton.hidden = !isLocal && isSandbox;
+    setText(elements.providerModeButton, isSandbox ? "启用真实 Passport" : "返回沙盒国库");
+  }
+}
+
+function renderProtocolError(error) {
+  if (elements.kiteGate) elements.kiteGate.dataset.kiteState = "offline";
+  setText(elements.providerModeBadge, "Kite 桥接未连接");
+  setText(elements.passportState, "不可用");
+  setText(elements.sessionState, "不可用");
+  setText(elements.paymentState, "未执行");
+  setText(elements.receiptState, "未生成");
+  setText(elements.providerDetail, providerErrorMessage(error));
+  if (elements.providerModeButton) setText(elements.providerModeButton, "返回沙盒国库");
 }
 
 function selectTemplate(templateId) {
@@ -664,6 +760,7 @@ async function submitCustomProposal() {
   const context =
     elements.proposalContextInput?.value.trim() ||
     "用户提交了一笔新的支出请求，希望国民议会根据个人宪法判断是否批准。";
+  const serviceUrl = elements.proposalServiceUrlInput?.value.trim() || null;
 
   requests.custom = {
     id: "custom",
@@ -675,6 +772,8 @@ async function submitCustomProposal() {
     category: "自定义财政议案",
     summary: context,
     context,
+    serviceUrl,
+    serviceMethod: "GET",
     statusHint: "等待议会审查",
   };
 
@@ -787,23 +886,36 @@ async function executeDecision(request, decision, options = {}) {
     );
     if (elements.downloadTraceButton) elements.downloadTraceButton.disabled = true;
     if (elements.overrideButton) elements.overrideButton.disabled = true;
+    setText(elements.paymentState, "执行失败");
+    setText(elements.receiptState, "未生成");
+    if (elements.kiteGate) elements.kiteGate.dataset.kiteState = "error";
     return false;
   }
   latestTrace = trace;
   latestExecution = execution;
 
-  setText(elements.decisionTitle, decisionTitleFor(decision.action));
-  setText(elements.decisionPolicy, decision.policy);
+  const isSessionPending = execution.status === "session_pending";
+  setText(elements.decisionTitle, isSessionPending ? "国玺待盖" : decisionTitleFor(decision.action));
+  setText(
+    elements.decisionPolicy,
+    isSessionPending
+      ? "宪法已经通过议案，Kite Spending Session 正在等待立宪者用 Passkey 批准。批准后再次运行，Agent 才能自主支付。"
+      : decision.policy,
+  );
   setText(elements.approvedAmount, `${decision.approvedAmount} ${request.currency}`);
   setText(
     elements.voteMetric,
     `${decision.vote.approve}:${decision.vote.oppose + decision.vote.reduce + decision.vote.delay}`,
   );
-  setText(elements.statusMetric, statusFor(decision.action));
+  setText(elements.statusMetric, executionStatusLabel(execution, decision));
   setText(elements.frozenMetric, `${decision.frozenAmount} ${request.currency}`);
-  setText(elements.balanceMetric, `${execution.remainingAllowance} ${request.currency}`);
-  setText(elements.treasuryHeroMetric, `${execution.remainingAllowance} ${request.currency}`);
-  if (latestAllowance) {
+  if (!isSessionPending && Number.isFinite(execution.remainingAllowance)) {
+    setText(elements.treasuryHeroMetric, `${execution.remainingAllowance} ${request.currency}`);
+    if (execution.txMode === "sandbox-ledger") {
+      setText(elements.balanceMetric, `${execution.remainingAllowance} ${request.currency}`);
+    }
+  }
+  if (latestAllowance && !isSessionPending && latestAllowance.totalLimit > 0) {
     latestAllowance.remaining = execution.remainingAllowance;
     setText(
       elements.allowanceText,
@@ -814,8 +926,11 @@ async function executeDecision(request, decision, options = {}) {
   setText(elements.tracePayload, JSON.stringify(trace, null, 2));
   if (elements.downloadTraceButton) elements.downloadTraceButton.disabled = false;
   if (elements.overrideButton) {
-    elements.overrideButton.disabled = decision.action === "override_execute" || decision.frozenAmount <= 0;
+    elements.overrideButton.disabled =
+      isSessionPending || decision.action === "override_execute" || decision.frozenAmount <= 0;
   }
+
+  renderExecutionProtocol(execution);
 
   renderDebate(decision.debate);
   renderGazette({ request, decision, execution });
@@ -830,6 +945,21 @@ async function executeDecision(request, decision, options = {}) {
   }
   renderGazetteHistory();
   return true;
+}
+
+function renderExecutionProtocol(execution) {
+  const pending = execution.status === "session_pending";
+  const settled = execution.status === "settled_onchain";
+  const sandbox = execution.txMode === "sandbox-ledger";
+  if (elements.kiteGate) {
+    elements.kiteGate.dataset.kiteState = pending ? "pending" : settled ? "settled" : sandbox ? "sandbox" : "receipt-pending";
+  }
+  setText(elements.sessionState, pending ? "等待 Passkey" : sandbox ? "本地额度已核验" : "Session 生效");
+  setText(elements.paymentState, pending ? "尚未执行" : sandbox ? "沙盒已执行" : "x402 服务已交付");
+  setText(
+    elements.receiptState,
+    settled ? "链上凭证已生成" : sandbox ? "沙盒凭证 · 非链上" : pending ? "等待批准" : "服务回执已到，链上引用待确认",
+  );
 }
 
 async function overrideActiveDecision() {
@@ -1108,6 +1238,13 @@ function renderGazetteDraft({ request, decision }) {
 }
 
 function renderGazette({ request, decision, execution }) {
+  const proofLabel = execution.isOnchain
+    ? "Kite 链上凭证"
+    : execution.txMode === "sandbox-ledger"
+      ? "沙盒推演 · 非链上"
+      : execution.status === "session_pending"
+        ? "Spending Session 等待 Passkey"
+        : "服务回执已到，结算引用待确认";
   setHtml(
     elements.gazetteCard,
     `
@@ -1131,8 +1268,16 @@ function renderGazette({ request, decision, execution }) {
           <dd>${decision.approvedAmount} ${escapeHtml(request.currency)}</dd>
         </div>
         <div>
-          <dt>账本编号</dt>
+          <dt>实际支付</dt>
+          <dd>${execution.executedAmount} ${escapeHtml(execution.currency)}</dd>
+        </div>
+        <div>
+          <dt>${execution.status === "session_pending" ? "Session 请求" : "账本编号"}</dt>
           <dd>${escapeHtml(execution.ledgerId)}</dd>
+        </div>
+        <div>
+          <dt>证明状态</dt>
+          <dd>${escapeHtml(proofLabel)}</dd>
         </div>
         <div>
           <dt>决策哈希</dt>
@@ -1153,8 +1298,10 @@ function recordGazette({ request, decision, execution, trace, kind }) {
     action: decision.action,
     requestedAmount: request.amount,
     approvedAmount: decision.approvedAmount,
+    executedAmount: execution.executedAmount,
     currency: request.currency,
     ledgerId: execution.ledgerId,
+    proofMode: execution.isOnchain ? "onchain" : execution.txMode === "sandbox-ledger" ? "sandbox" : execution.status,
     decisionHash: decision.decisionHash,
     createdAt: execution.executedAt,
     trace,
@@ -1178,7 +1325,7 @@ function renderGazetteHistory() {
                   <strong>${escapeHtml(item.title)}</strong>
                   <p>申请 ${item.requestedAmount} ${escapeHtml(item.currency)} · 批准 ${item.approvedAmount} ${escapeHtml(
                     item.currency,
-                  )}</p>
+                  )} · ${escapeHtml(historyProofLabel(item))}</p>
                 </div>
                 <code>${escapeHtml(item.ledgerId)}</code>
               </article>
@@ -1231,10 +1378,10 @@ async function playReviewProgress(steps = defaultReviewSteps()) {
 function defaultReviewSteps() {
   return [
     "读取个人宪法",
-    "召集国民议会",
-    "检查 Kite 授权额度",
-    "创建支付意图",
-    "生成国家公报",
+    "形成 Session Delegation",
+    "核验 Agent Passport",
+    "请求 x402 支付",
+    "写入 Receipt 与公报",
   ];
 }
 
@@ -1495,17 +1642,41 @@ function permissionLabel(permission) {
 }
 
 function providerDisplayName(providerName) {
-  if (providerName === "DemoKiteProvider") return "Kite 沙盒国库";
-  if (providerName === "KiteMcpProvider") return "Kite MCP 国库";
-  return "Kite 国库适配器";
+  if (providerName === "DemoKiteProvider") return "沙盒推演 · 非链上";
+  if (providerName === "KitePassportBridgeProvider") return "Kite Passport 真实模式";
+  return "Kite 国库";
 }
 
 function providerErrorMessage(error) {
   const message = error instanceof Error ? error.message : String(error ?? "");
-  if (message.includes("not configured") || message.includes("Missing:")) {
-    return "请完成 Kite MCP 地址、密钥、Agent Passport 与钱包配置。";
+  if (message.includes("fetch") || message.includes("HTTP 404") || message.includes("非 JSON")) {
+    return "真实 Passport 需要通过本地 Kite 桥接服务运行；当前页面没有连接到桥接端点。";
   }
-  return "Kite 服务暂时不可用，请稍后重试。";
+  return message || "Kite 服务暂时不可用，请稍后重试。";
+}
+
+function allowanceStatusText(allowance) {
+  if (allowance.status === "unauthenticated") return "等待立宪者登录 Kite Passport";
+  if (allowance.status === "no_active_session") return "尚无 Spending Session";
+  if (allowance.status === "sandbox_active") {
+    return `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency} · 沙盒额度`;
+  }
+  return `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency} · ${allowance.status}`;
+}
+
+function executionStatusLabel(execution, decision) {
+  if (execution.status === "session_pending") return "等待 Passkey";
+  if (execution.status === "settled_onchain") return "链上已结算";
+  if (execution.status === "service_delivered_receipt_pending") return "服务已交付";
+  if (execution.status === "executed_sandbox") return "沙盒已执行";
+  return statusFor(decision.action);
+}
+
+function historyProofLabel(item) {
+  if (item.proofMode === "onchain") return "链上凭证";
+  if (item.proofMode === "sandbox") return "沙盒凭证";
+  if (item.proofMode === "session_pending") return "等待 Passkey";
+  return "支付记录";
 }
 
 function stanceLabel(stance) {

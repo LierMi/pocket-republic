@@ -1,0 +1,12 @@
+.git/
+.vercel/
+.kite-passport/
+.kite-tools/
+.kpass/
+.env*
+
+docs/
+scripts/
+server.mjs
+README.md
+assets/*.md

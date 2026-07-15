@@ -3,3 +3,7 @@ node_modules/
 dist/
 *.log
 .vercel/
+
+.kite-passport/
+.kite-tools/
+.kpass/
