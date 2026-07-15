@@ -33,7 +33,7 @@ assert.equal(explorer.monthlyBudget, 150);
 assert.match(explorer.treasuryRule, /里程碑/);
 
 const web3Constitution = buildConstitution(web3);
-assert.match(web3Constitution.find((item) => item.id === "A3").text, /10 USDC/);
+assert.match(web3Constitution.find((item) => item.id === "A3").text, /10 USDT/);
 assert.match(web3Constitution.find((item) => item.id === "A4").text, /24 小时/);
 
 const sanctuaryConstitution = buildConstitution(sanctuary);

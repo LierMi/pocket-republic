@@ -45,13 +45,13 @@ const requests = {
     title: "AI meme coin 冲动买入",
     requester: "立宪者 / 用户临时请求",
     amount: 300,
-    currency: "USDC",
+    currency: "USDT",
     merchant: "未知 DEX 池",
     category: "高风险 Web3 交易",
     summary:
-      "用户想立刻花 300 USDC 买一个刚上线的 AI meme coin，因为 Telegram 群说今晚会 pump。",
+      "用户想立刻花 300 USDT 买一个刚上线的 AI meme coin，因为 Telegram 群说今晚会 pump。",
     context:
-      "Telegram 群里说这个 AI meme 币今晚就要拉盘，我怕错过下一个 100x，想立刻花 300 USDC 冲进去。",
+      "Telegram 群里说这个 AI meme 币今晚就要拉盘，我怕错过下一个 100x，想立刻花 300 USDT 冲进去。",
     statusHint: "大概率触发冷静期",
   },
   api: {
@@ -59,6 +59,7 @@ const requests = {
     title: "购买一封云外市场晨报",
     requester: "Ivo / 建设部长",
     amount: 3,
+    // 真实 x402 服务 StableCrypto 以 USDC 结算，此议案保持 USDC 以匹配链上实际资产。
     currency: "USDC",
     merchant: "StableCrypto / Kite 服务目录",
     category: "外交邮局 · x402 数据采购",
@@ -78,11 +79,11 @@ const requests = {
     title: "AI 设计工具订阅",
     requester: "Mira / 财政大臣",
     amount: 49,
-    currency: "USDC",
+    currency: "USDT",
     merchant: "CanvasForge Pro",
     category: "订阅支出审查",
     summary:
-      "创作者共和国想订阅一个 49 USDC/月的 AI 设计工具，但超过了单笔支出限额。",
+      "创作者共和国想订阅一个 49 USDT/月的 AI 设计工具，但超过了单笔支出限额。",
     context:
       "创作者共和国希望订阅一个月的设计工具。它能提升当前项目质量，但金额超过单笔支出限额。",
     statusHint: "需要限额审查",
@@ -487,10 +488,10 @@ function renderPolicyPreview(template = nationState) {
   const coolingLabel = template.coolingPeriodHours > 0 ? `${template.coolingPeriodHours} 小时` : "按议案触发";
   const rows = [
     ["当前共和国", `${template.cn} / ${template.en}`],
-    ["支付资产", "USDC"],
-    ["月度授权", `${template.monthlyBudget} USDC`],
-    ["单笔审查线", `${template.singleSpendLimit} USDC`],
-    ["高风险上限", `${template.highRiskLimit} USDC`],
+    ["支付资产", "USDT"],
+    ["月度授权", `${template.monthlyBudget} USDT`],
+    ["单笔审查线", `${template.singleSpendLimit} USDT`],
+    ["高风险上限", `${template.highRiskLimit} USDT`],
     ["冷静期", coolingLabel],
     ["审批路线", template.approvalRoute],
     ["运行环境", providerLabel],
@@ -546,8 +547,8 @@ function renderNationHeader() {
     [
       nationState.cn,
       `国民：${agentProfiles.length} 位`,
-      `单笔限额：${policy.singleSpendLimit} USDC`,
-      `高风险上限：${policy.highRiskLimit} USDC`,
+      `单笔限额：${policy.singleSpendLimit} USDT`,
+      `高风险上限：${policy.highRiskLimit} USDT`,
       "忠诚对象：宪法",
     ]
       .map((tag) => `<span>${escapeHtml(tag)}</span>`)
@@ -647,8 +648,8 @@ function renderConstitution() {
 
 function policyEffectLabel(articleId) {
   const policy = deriveConstitutionPolicy(constitutionArticles, nationState);
-  if (articleId === "A2") return `当前生效：单笔审查线 ${policy.singleSpendLimit} USDC`;
-  if (articleId === "A3") return `当前生效：高风险上限 ${policy.highRiskLimit} USDC`;
+  if (articleId === "A2") return `当前生效：单笔审查线 ${policy.singleSpendLimit} USDT`;
+  if (articleId === "A3") return `当前生效：高风险上限 ${policy.highRiskLimit} USDT`;
   if (articleId === "A4") return "当前生效：识别强时效与 FOMO 信号";
   if (articleId === "A6") return "当前生效：允许补付差额并保留完整审计记录";
   return "已纳入下一次财政审议";
@@ -817,7 +818,7 @@ async function submitCustomProposal() {
     title,
     requester: "立宪者 / 用户提交",
     amount,
-    currency: "USDC",
+    currency: "USDT",
     merchant: "用户指定服务",
     category: "自定义财政议案",
     summary: context,
@@ -847,6 +848,7 @@ async function selectRequest(requestId) {
   });
 
   latestRequest = request;
+  renderDebateLoading();
   latestDecision = await decide(request);
   latestTrace = null;
   latestExecution = null;
@@ -882,7 +884,7 @@ function renderDraftReview(request, decision) {
         notice:
           provider.providerMode === "sandbox"
             ? "点击“运行国库审查”后，系统会执行本地额度推演并生成明确标注非链上的国家公报。"
-            : "点击“运行国库审查”后，合规议案才会创建 Kite payment intent；0 USDC 拒绝案不会请求 Kite。",
+            : "点击“运行国库审查”后，合规议案才会创建 Kite payment intent；0 USDT 拒绝案不会请求 Kite。",
         nation: {
           name: nationState.nationName,
           template: nationState.label,
@@ -904,6 +906,7 @@ async function reviewActiveRequest() {
   const request = requests[activeRequestId];
   if (!request) return;
   latestRequest = request;
+  renderDebateLoading();
   latestDecision = await decide(request);
   await playReviewProgress(defaultReviewSteps(latestDecision));
   await executeDecision(request, latestDecision, { record: true });
@@ -1245,7 +1248,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
       stance: action === "approve" ? "approve" : "reduce",
       text:
         action === "approve"
-          ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDC 单笔限额，国库可以进入下一步。`
+          ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDT 单笔限额，国库可以进入下一步。`
           : `请求金额 ${request.amount} ${request.currency} 超出当前宪法边界，国库只放行 ${approvedAmount} ${request.currency}。`,
     },
     {
@@ -1352,6 +1355,23 @@ function renderTriggeredLaws(decision) {
         return `<span class="law-chip">${escapeHtml(articleId)} ${escapeHtml(article?.title ?? "自定义条款")}</span>`;
       })
       .join(""),
+  );
+}
+
+function renderDebateLoading() {
+  if (!elements.debateTimeline) return;
+  setHtml(
+    elements.debateTimeline,
+    `
+      <article class="debate-item debate-loading">
+        <div>
+          <strong>国民议会</strong>
+          <small>正在召集七位国民</small>
+          <span class="ai-voiced ai-thinking">AI 思考中…</span>
+        </div>
+        <p>议会正在依据你的宪法，逐条审议这笔支付……</p>
+      </article>
+    `,
   );
 }
 
@@ -1679,7 +1699,7 @@ function defaultReviewSteps(decision = latestDecision) {
   if (decision?.approvedAmount <= 0) {
     return [
       "读取个人宪法",
-      "确认批准金额为 0 USDC",
+      "确认批准金额为 0 USDT",
       "在应用层停止支付请求",
       "不创建 Kite Session",
       "写入宪法拒绝公报",
@@ -1712,7 +1732,7 @@ function monthlyExecutedAmount(now = new Date()) {
 function renderMonthlyBudgetMetric(pendingExecutedAmount = 0) {
   const spent = monthlyExecutedAmount() + normalizeLedgerAmount(pendingExecutedAmount);
   const remaining = Math.max(0, nationState.monthlyBudget - spent);
-  setText(elements.treasuryHeroMetric, `${remaining}/${nationState.monthlyBudget} USDC`);
+  setText(elements.treasuryHeroMetric, `${remaining}/${nationState.monthlyBudget} USDT`);
 }
 
 function recordMonthlySpend(entry) {

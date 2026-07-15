@@ -17,13 +17,13 @@ export const nationTemplates = [
     protectedAssets: ["时间", "专注力", "开发预算"],
     description: "保护交付节奏与开发预算的实干家内阁。",
     walletMetrics: [
-      { label: "免审额度", value: "20 USDC", detail: "小额工具与 API" },
-      { label: "月度预算", value: "200 USDC", detail: "超额进入议会" },
+      { label: "免审额度", value: "20 USDT", detail: "小额工具与 API" },
+      { label: "月度预算", value: "200 USDT", detail: "超额进入议会" },
     ],
     treasuryRule:
-      "超过 20 USDC 的 API、SaaS 与开发工具采购，必须由财政大臣与审计官共同审查 ROI。",
+      "超过 20 USDT 的 API、SaaS 与开发工具采购，必须由财政大臣与审计官共同审查 ROI。",
     policyTags: ["高效开发", "采购治理", "防止闲置订阅"],
-    demoHint: "示例场景：审议一笔 49 USDC 的 AI 设计工具订阅",
+    demoHint: "示例场景：审议一笔 49 USDT 的 AI 设计工具订阅",
     approvalRoute: "财政大臣 + 审计官",
     featured: "默认推荐",
   },
@@ -43,13 +43,13 @@ export const nationTemplates = [
     protectedAssets: ["链上本金", "钱包安全", "长期判断"],
     description: "你的链上投资防火墙与反 FOMO 冷静期系统。",
     walletMetrics: [
-      { label: "高风险上限", value: "10 USDC", detail: "未知资产强制缩减" },
+      { label: "高风险上限", value: "10 USDT", detail: "未知资产强制缩减" },
       { label: "冷静期", value: "24 小时", detail: "剩余金额不予放行" },
     ],
     treasuryRule:
-      "检测到 Meme 币、未知合约或 FOMO 信号时，国库把支付上限缩减为 10 USDC，其余金额进入 24 小时冷静期。",
+      "检测到 Meme 币、未知合约或 FOMO 信号时，国库把支付上限缩减为 10 USDT，其余金额进入 24 小时冷静期。",
     policyTags: ["钱包防护", "FOMO 拦截", "风险隔离"],
-    demoHint: "核心演示：300 USDC 高风险交易被缩减至 10 USDC",
+    demoHint: "核心演示：300 USDT 高风险交易被缩减至 10 USDT",
     approvalRoute: "财政大臣 + 审计官 + 议会 5:1",
     featured: "核心支付 Demo",
   },
@@ -69,8 +69,8 @@ export const nationTemplates = [
     protectedAssets: ["情绪稳定", "现实资产", "睡眠"],
     description: "在你情绪最强烈的时候，替你守住钱包和重要决定。",
     walletMetrics: [
-      { label: "强情绪限额", value: "0 USDC", detail: "非必要支付暂停" },
-      { label: "日常上限", value: "30 USDC", detail: "超额需二次审议" },
+      { label: "强情绪限额", value: "0 USDT", detail: "非必要支付暂停" },
+      { label: "日常上限", value: "30 USDT", detail: "超额需二次审议" },
     ],
     treasuryRule:
       "强情绪状态被用户标记或议会识别后，购物、打赏与娱乐等非必要支付进入延迟审议。",
@@ -95,13 +95,13 @@ export const nationTemplates = [
     protectedAssets: ["学习预算", "注意力", "长期积累"],
     description: "以结果为导向的知识进阶与自我奖励共和国。",
     walletMetrics: [
-      { label: "学习预算", value: "150 USDC", detail: "用于课程与工具" },
-      { label: "阶段奖励", value: "15 USDC", detail: "验证后提交放行议案" },
+      { label: "学习预算", value: "150 USDT", detail: "用于课程与工具" },
+      { label: "阶段奖励", value: "15 USDT", detail: "验证后提交放行议案" },
     ],
     treasuryRule:
       "MVP 记录立宪者的里程碑完成声明；Roadmap v0.2 由学院考官验证后解锁工具预算或奖励议案。",
     policyTags: ["里程碑支付", "知识奖励", "预算解锁"],
-    demoHint: "概念场景：完成测试后提交 15 USDC 学习奖励议案",
+    demoHint: "概念场景：完成测试后提交 15 USDT 学习奖励议案",
     approvalRoute: "立宪者背书 + 财政大臣",
     featured: null,
   },
@@ -163,15 +163,15 @@ export function buildConstitution(state) {
     {
       id: "A2",
       title: "国库审查",
-      text: `任何单笔超过 ${state.singleSpendLimit} USDC 的支出，必须进入财政部和国民议会审查。`,
+      text: `任何单笔超过 ${state.singleSpendLimit} USDT 的支出，必须进入财政部和国民议会审查。`,
     },
     {
       id: "A3",
       title: "高风险上限",
       text:
         state.highRiskLimit === 0
-          ? "强情绪状态下，高风险与非必要支付默认批准上限为 0 USDC。"
-          : `高风险 Web3 购买、meme coin、未知 DEX 池或强投机行为，默认最多批准 ${state.highRiskLimit} USDC。`,
+          ? "强情绪状态下，高风险与非必要支付默认批准上限为 0 USDT。"
+          : `高风险 Web3 购买、meme coin、未知 DEX 池或强投机行为，默认最多批准 ${state.highRiskLimit} USDT。`,
     },
     {
       id: "A4",

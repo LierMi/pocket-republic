@@ -16,8 +16,8 @@ const nation = {
 };
 
 const constitution = [
-  { id: "A2", text: "任何单笔超过 60 USDC 的支出必须进入国民议会审查。" },
-  { id: "A3", text: "高风险资产默认最多批准 250 USDC。" },
+  { id: "A2", text: "任何单笔超过 60 USDT 的支出必须进入国民议会审查。" },
+  { id: "A3", text: "高风险资产默认最多批准 250 USDT。" },
 ];
 
 const checks = [];
@@ -64,7 +64,7 @@ const builderDecision = buildPaymentDecision(
   buildConstitution(builder),
 );
 check(
-  "创作者共和国执行 20 USDC 采购审查线",
+  "创作者共和国执行 20 USDT 采购审查线",
   builderDecision.action === "require_confirmation" && builderDecision.approvedAmount === 20,
   JSON.stringify(builderDecision),
 );

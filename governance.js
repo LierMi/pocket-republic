@@ -82,12 +82,12 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
     action = "reduce_payment";
     approvedAmount = policyLimits.highRiskLimit;
     frozenAmount = request.amount - approvedAmount;
-    policy = `A3 高风险上限将付款缩减到 ${policyLimits.highRiskLimit} USDC。其余金额本次不予放行，并进入 ${policyLimits.coolingPeriodHours || 24} 小时冷静期。`;
+    policy = `A3 高风险上限将付款缩减到 ${policyLimits.highRiskLimit} USDT。其余金额本次不予放行，并进入 ${policyLimits.coolingPeriodHours || 24} 小时冷静期。`;
   } else if (exceedsSingleLimit) {
     action = "require_confirmation";
     approvedAmount = Math.min(request.amount, policyLimits.singleSpendLimit);
     frozenAmount = request.amount - approvedAmount;
-    policy = `A2 国库审查将首次执行限制为 ${policyLimits.singleSpendLimit} USDC，剩余金额需要用户再次确认。`;
+    policy = `A2 国库审查将首次执行限制为 ${policyLimits.singleSpendLimit} USDT，剩余金额需要用户再次确认。`;
   }
 
   if (action !== "deny" && approvedAmount > policyLimits.monthlyRemaining) {
@@ -95,7 +95,7 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
     frozenAmount = request.amount - approvedAmount;
     action = approvedAmount > 0 ? "reduce_payment" : "deny";
     riskSignals.push("over_monthly_budget");
-    policy = `A2 共和国月度预算仅剩 ${policyLimits.monthlyRemaining} USDC，本次最多放行 ${approvedAmount} USDC。`;
+    policy = `A2 共和国月度预算仅剩 ${policyLimits.monthlyRemaining} USDT，本次最多放行 ${approvedAmount} USDT。`;
   }
   const triggeredArticles = getTriggeredArticles(request, riskSignals, policyLimits);
 
@@ -163,7 +163,7 @@ function getTriggeredArticles(request, riskSignals, policy) {
 
 function articleLimit(articles, articleId, fallback) {
   const article = Array.isArray(articles) ? articles.find((item) => item.id === articleId) : null;
-  const match = String(article?.text ?? "").match(/(\d+(?:\.\d+)?)\s*USDC/i);
+  const match = String(article?.text ?? "").match(/(\d+(?:\.\d+)?)\s*USDT/i);
   return match ? normalizeLimit(match[1], fallback) : normalizeLimit(fallback, 0);
 }
 

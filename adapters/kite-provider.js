@@ -68,7 +68,7 @@ export class DemoKiteProvider extends KiteTreasuryProvider {
     };
     this.allowance = {
       sessionId: "sandbox-session:pocket-republic",
-      currency: "USDC",
+      currency: "USDT",
       totalLimit: 500,
       remaining: 500,
       singleSpendLimit: 30,
