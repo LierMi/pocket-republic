@@ -129,6 +129,7 @@ const realExecution = await realBridge.executePayment(realIntent);
 assert.equal(realExecution.status, "settled_onchain");
 assert.equal(realExecution.executedAmount, 0.01);
 assert.equal(realExecution.amountProvenance, "receipt");
+assert.equal(realExecution.budgetAccountedAmount, 0.01);
 assert.equal(realExecution.currency, "USDC");
 assert.equal(realExecution.paymentAsset, proposal.paymentAsset);
 assert.equal(realExecution.settlementReference, "0xsettled");
@@ -225,6 +226,54 @@ assert.equal(quoteOnlyExecution.status, "service_delivered_receipt_pending");
 assert.equal(quoteOnlyExecution.executedAmount, 0);
 assert.equal(quoteOnlyExecution.quotedAmount, 0.01);
 assert.equal(quoteOnlyExecution.amountProvenance, "quote_only");
+assert.equal(quoteOnlyExecution.budgetAccountedAmount, 0.01);
+assert.equal(quoteOnlyExecution.budgetProvenance, "session_usage_delta");
+
+const delayedUsageBridge = new KitePassportBridgeProvider({
+  fetchImpl: async (url) => {
+    if (url.endsWith("/status")) {
+      return jsonResponse({
+        status: {
+          user: { logged_in: true, user_id: "user_delayed_usage" },
+          agent: { registered: true, agent_id: "agent_delayed_usage" },
+          session: { active: false },
+        },
+      });
+    }
+    if (url.endsWith("/preflight")) {
+      return jsonResponse({
+        status: "payment_required",
+        requirement: {
+          network: "eip155:8453",
+          asset: proposal.paymentAsset,
+          assetSymbol: "USDC",
+          amountRaw: "10000",
+          amount: "0.01",
+          decimals: 6,
+        },
+      });
+    }
+    if (url.endsWith("/session/create")) return jsonResponse({ status: "success", session_id: "session_delayed" });
+    if (url.endsWith("/session/use")) return jsonResponse({ status: "success" });
+    if (url.endsWith("/session/execute")) {
+      return jsonResponse({
+        session_id: "session_delayed",
+        x402: { status_code: 200, parsed_response_body: { market: "delivered" } },
+        payment_requirement: { amount: "10000", asset: proposal.paymentAsset },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  },
+});
+const delayedIntent = await delayedUsageBridge.createPaymentIntent({
+  proposal,
+  decision,
+  decisionHash: decision.decisionHash,
+});
+const delayedExecution = await delayedUsageBridge.executePayment(delayedIntent);
+assert.equal(delayedExecution.executedAmount, 0);
+assert.equal(delayedExecution.budgetAccountedAmount, 0.01);
+assert.equal(delayedExecution.budgetProvenance, "verified_quote_fallback");
 
 console.log("Pocket Republic Kite provider verification passed");
 

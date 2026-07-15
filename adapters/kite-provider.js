@@ -144,6 +144,8 @@ export class DemoKiteProvider extends KiteTreasuryProvider {
       executedAmount: executed ? executionAmount : 0,
       quotedAmount: executionAmount,
       amountProvenance: "sandbox_simulation",
+      budgetAccountedAmount: executed ? executionAmount : 0,
+      budgetProvenance: "sandbox_simulation",
       currency: intent.currency,
       remainingAllowance,
       session: {
@@ -356,7 +358,7 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
         method: "POST",
         body: { sessionId: reusableSessionId },
       });
-      return this.executeX402(intent, reusableSessionId);
+      return this.executeX402(intent, reusableSessionId, sessionSpentBefore(snapshot, reusableSessionId));
     }
 
     const approvedSessionId = sessionResult.session_id ?? sessionResult.session?.session_id;
@@ -365,7 +367,7 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
         method: "POST",
         body: { sessionId: approvedSessionId },
       });
-      return this.executeX402(intent, approvedSessionId);
+      return this.executeX402(intent, approvedSessionId, sessionSpentBefore(snapshot, approvedSessionId));
     }
 
     const requestId = sessionResult.request_id ?? sessionResult.session_request_id ?? "kite-session-pending";
@@ -380,6 +382,8 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
       executedAmount: 0,
       quotedAmount: numberValue(intent.paymentQuote?.amount, 0),
       amountProvenance: "not_paid",
+      budgetAccountedAmount: 0,
+      budgetProvenance: "not_paid",
       currency: intent.currency,
       remainingAllowance: numberValue(policy.max_total_amount, 0),
       session: {
@@ -394,7 +398,7 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
     };
   }
 
-  async executeX402(intent, sessionId) {
+  async executeX402(intent, sessionId, spentBefore = 0) {
     const result = await this.request("/session/execute", {
       method: "POST",
       body: {
@@ -411,6 +415,10 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
     const total = numberValue(result.delegation?.payment_policy?.max_total_amount, intent.approvedAmount);
     const quotedAmount = numberValue(intent.paymentQuote?.amount, 0);
     const receiptAmount = extractReceiptAmount(result.payment_receipt ?? result.payment?.payment_receipt);
+    const usageDelta = Math.max(0, spent - numberValue(spentBefore, 0));
+    // A delivered service has consumed at least its verified quote even when the
+    // provider has not returned a receipt or refreshed Session usage yet.
+    const budgetAccountedAmount = receiptAmount ?? (usageDelta > 0 ? usageDelta : quotedAmount);
 
     if (statusCode < 200 || statusCode >= 300) {
       throw providerError("KITE_SERVICE_FAILED", `x402 服务返回 HTTP ${statusCode || "未知"}，支付未确认。`);
@@ -427,6 +435,9 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
       executedAmount: receiptAmount ?? 0,
       quotedAmount,
       amountProvenance: receiptAmount == null ? "quote_only" : "receipt",
+      budgetAccountedAmount,
+      budgetProvenance:
+        receiptAmount == null ? (usageDelta > 0 ? "session_usage_delta" : "verified_quote_fallback") : "receipt",
       currency: intent.currency,
       paymentAsset: result.payment_requirement?.asset ?? intent.paymentQuote?.asset ?? intent.paymentAsset,
       paymentQuote: intent.paymentQuote ?? null,
@@ -463,6 +474,8 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
         executedAmount: execution.executedAmount,
         quotedAmount: execution.quotedAmount,
         amountProvenance: execution.amountProvenance,
+        budgetAccountedAmount: execution.budgetAccountedAmount,
+        budgetProvenance: execution.budgetProvenance,
         currency: execution.currency,
         paymentAsset: execution.paymentAsset ?? intent.paymentAsset,
         paymentQuote: execution.paymentQuote ?? intent.paymentQuote ?? null,
@@ -552,6 +565,13 @@ function extractReusableSessionId(result) {
   if (fromCandidate) return fromCandidate;
   const commandMatch = String(result.next_command ?? "").match(/--session-id\s+([A-Za-z0-9:_-]+)/);
   return result.reuse_available ? commandMatch?.[1] ?? null : null;
+}
+
+function sessionSpentBefore(snapshot, sessionId) {
+  const session = extractActiveSession(snapshot);
+  const activeId = session?.session_id ?? session?.id;
+  if (!session || !activeId || String(activeId) !== String(sessionId)) return 0;
+  return numberValue(session.usage?.spent_total, 0);
 }
 
 function extractWalletAddress(wallet) {

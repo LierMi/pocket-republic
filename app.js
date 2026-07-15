@@ -9,8 +9,11 @@ import {
 } from "./nation-policies.js";
 import {
   buildPaymentDecision,
+  calculateMonthlySpend,
   calculateOverrideAmount,
+  cooldownScopeForRequest,
   deriveConstitutionPolicy,
+  shouldStartCooldown,
 } from "./governance.js";
 import {
   initVisualEffects,
@@ -251,6 +254,7 @@ const elements = {
   proposalAmountInput: document.querySelector("#proposalAmountInput"),
   proposalContextInput: document.querySelector("#proposalContextInput"),
   proposalServiceUrlInput: document.querySelector("#proposalServiceUrlInput"),
+  milestoneVerifiedInput: document.querySelector("#milestoneVerifiedInput"),
   requestList: document.querySelector("#requestList"),
   requestTitle: document.querySelector("#requestTitle"),
   requestSummary: document.querySelector("#requestSummary"),
@@ -820,6 +824,10 @@ async function submitCustomProposal() {
     context,
     serviceUrl,
     serviceMethod: "GET",
+    milestoneAttestation:
+      elements.milestoneVerifiedInput?.checked === true
+        ? { status: "user_attested", source: "proposal_form", recordedAt: new Date().toISOString() }
+        : null,
     statusHint: "等待议会审查",
   };
 
@@ -871,7 +879,10 @@ function renderDraftReview(request, decision) {
     elements.tracePayload,
     JSON.stringify(
       {
-        notice: "点击“运行国库审查”后，财政大臣会创建 Kite payment intent 并生成国家公报。",
+        notice:
+          provider.providerMode === "sandbox"
+            ? "点击“运行国库审查”后，系统会执行本地额度推演并生成明确标注非链上的国家公报。"
+            : "点击“运行国库审查”后，合规议案才会创建 Kite payment intent；0 USDC 拒绝案不会请求 Kite。",
         nation: {
           name: nationState.nationName,
           template: nationState.label,
@@ -961,7 +972,7 @@ async function executeDecision(request, decision, options = {}) {
   setText(elements.statusMetric, executionStatusLabel(execution, decision));
   setText(elements.frozenMetric, `${decision.frozenAmount} ${request.currency}`);
   if (!isSessionPending && Number.isFinite(execution.remainingAllowance)) {
-    renderMonthlyBudgetMetric(execution.executedAmount);
+    renderMonthlyBudgetMetric(execution.budgetAccountedAmount ?? execution.executedAmount);
     if (execution.txMode === "sandbox-ledger") {
       setText(elements.balanceMetric, `${execution.remainingAllowance} ${request.currency}`);
     }
@@ -1010,6 +1021,8 @@ function createPolicyBlockedExecution(request, decision) {
     executedAmount: 0,
     quotedAmount: null,
     amountProvenance: "not_paid",
+    budgetAccountedAmount: 0,
+    budgetProvenance: "not_paid",
     currency: request.currency,
     remainingAllowance: latestAllowance?.remaining ?? 0,
     session: null,
@@ -1039,11 +1052,23 @@ function renderExecutionProtocol(execution) {
   const pending = execution.status === "session_pending";
   const settled = execution.status === "settled_onchain";
   const sandbox = execution.txMode === "sandbox-ledger";
+  const policyBlocked = execution.txMode === "pocket-republic-policy";
   const blocked = execution.status === "blocked_by_constitution" || execution.status === "blocked_by_allowance";
   if (elements.kiteGate) {
-    elements.kiteGate.dataset.kiteState = pending ? "pending" : settled ? "settled" : sandbox ? "sandbox" : "receipt-pending";
+    elements.kiteGate.dataset.kiteState = policyBlocked
+      ? "policy-blocked"
+      : pending
+        ? "pending"
+        : settled
+          ? "settled"
+          : sandbox
+            ? "sandbox"
+            : "receipt-pending";
   }
-  setText(elements.sessionState, pending ? "等待 Passkey" : sandbox ? "本地额度已核验" : "Session 生效");
+  setText(
+    elements.sessionState,
+    policyBlocked ? "未创建 Session" : pending ? "等待 Passkey" : sandbox ? "本地额度已核验" : "Session 生效",
+  );
   setText(
     elements.paymentState,
     pending ? "尚未执行" : blocked ? "宪法已拦截" : sandbox ? "沙盒已执行" : "x402 服务已交付",
@@ -1072,7 +1097,7 @@ async function overrideActiveDecision() {
     "记录立宪者推翻操作",
     "检查 A6 用户主权条款",
     "生成推翻国家公报",
-    "更新 Kite 凭证包",
+    provider.providerMode === "sandbox" ? "更新非链上沙盒记录" : "更新 Kite 执行记录",
   ]);
   await executeDecision(latestRequest, overrideDecision, { record: true });
 }
@@ -1081,7 +1106,7 @@ async function decide(request) {
   const policyState = {
     ...nationState,
     monthlySpent: monthlyExecutedAmount(),
-    activeCooldownUntil: readCooldownUntil(request.id),
+    activeCooldownUntil: readCooldownUntil(cooldownKeyFor(request)),
   };
   const coreDecision = buildPaymentDecision(request, policyState, constitutionArticles);
   const { action, approvedAmount, frozenAmount, policyLimits, riskSignals, triggeredArticles, policy } =
@@ -1168,7 +1193,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
       stance: action === "approve" ? "approve" : "reduce",
       text:
         action === "approve"
-          ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDC 单笔限额，Kite 国库可以执行。`
+          ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDC 单笔限额，国库可以进入下一步。`
           : `请求金额 ${request.amount} ${request.currency} 超出当前宪法边界，国库只放行 ${approvedAmount} ${request.currency}。`,
     },
     {
@@ -1306,7 +1331,11 @@ function resetReviewProgress() {
     `
       <div class="progress-step muted">
         <span>0</span>
-        <strong>已生成议会预审，等待财政大臣执行 Kite 国库审查</strong>
+        <strong>${
+          provider.providerMode === "sandbox"
+            ? "已生成议会预审，等待财政大臣运行本地国库推演"
+            : "已生成议会预审，等待财政大臣执行 Kite 国库审查"
+        }</strong>
       </div>
     `,
   );
@@ -1337,7 +1366,7 @@ function renderGazetteDraft({ request, decision }) {
         </div>
         <div>
           <dt>状态</dt>
-          <dd>等待 Kite 国库执行</dd>
+          <dd>${provider.providerMode === "sandbox" ? "等待本地国库推演" : "等待 Kite Session 执行"}</dd>
         </div>
       </dl>
     `,
@@ -1486,8 +1515,8 @@ function executionAmountLabel(execution) {
 
 function recordGazette({ request, decision, execution, trace, kind }) {
   const coolingUntil =
-    decision.frozenAmount > 0 && decision.policyLimits.coolingPeriodHours > 0
-      ? ensureCooldown(request.id, decision.policyLimits.coolingPeriodHours, execution.executedAt)
+    shouldStartCooldown(decision)
+      ? ensureCooldown(cooldownKeyFor(request), decision.policyLimits.coolingPeriodHours, execution.executedAt)
       : null;
   const entry = {
     id: `${kind}:${request.id}:${execution.ledgerId}`,
@@ -1499,9 +1528,11 @@ function recordGazette({ request, decision, execution, trace, kind }) {
     requestedAmount: request.amount,
     approvedAmount: decision.approvedAmount,
     executedAmount: execution.executedAmount,
+    budgetAccountedAmount: execution.budgetAccountedAmount ?? execution.executedAmount,
     currency: request.currency,
     ledgerId: execution.ledgerId,
     proofMode: execution.isOnchain ? "onchain" : execution.txMode === "sandbox-ledger" ? "sandbox" : execution.status,
+    providerMode: provider.providerMode,
     decisionHash: decision.decisionHash,
     coolingUntil,
     createdAt: execution.executedAt,
@@ -1543,7 +1574,12 @@ async function playReviewProgress(steps = defaultReviewSteps()) {
   setDisabled(elements.runReviewButton, true);
   setDisabled(elements.overrideButton, true);
   setText(elements.decisionTitle, "正在审查议案");
-  setText(elements.decisionPolicy, "Agent 国民正在根据你的宪法和 Kite 授权额度检查这笔请求。");
+  setText(
+    elements.decisionPolicy,
+    provider.providerMode === "sandbox"
+      ? "Agent 国民正在根据你的宪法和本地沙盒额度推演这笔请求。"
+      : "Agent 国民正在根据你的宪法和 Kite Session 授权额度检查这笔请求。",
+  );
   setText(elements.statusMetric, "审查中");
   setText(elements.voteMetric, "...");
   setHtml(
@@ -1617,9 +1653,7 @@ function syncProviderPolicy() {
 
 function monthlyExecutedAmount(now = new Date()) {
   const monthKey = now.toISOString().slice(0, 7);
-  return readSpendLedger()
-    .filter((entry) => String(entry.createdAt ?? "").startsWith(monthKey))
-    .reduce((sum, entry) => sum + normalizeLedgerAmount(entry.executedAmount), 0);
+  return calculateMonthlySpend(readSpendLedger(), provider.providerMode, monthKey);
 }
 
 function renderMonthlyBudgetMetric(pendingExecutedAmount = 0) {
@@ -1629,17 +1663,22 @@ function renderMonthlyBudgetMetric(pendingExecutedAmount = 0) {
 }
 
 function recordMonthlySpend(entry) {
-  if (normalizeLedgerAmount(entry.executedAmount) <= 0) return;
+  const accountedAmount = normalizeLedgerAmount(entry.budgetAccountedAmount ?? entry.executedAmount);
+  if (accountedAmount <= 0) return;
   const ledger = readSpendLedger();
   if (ledger.some((item) => item.id === entry.id)) return;
   ledger.unshift({
     id: entry.id,
     executedAmount: normalizeLedgerAmount(entry.executedAmount),
+    budgetAccountedAmount: accountedAmount,
     currency: entry.currency,
     createdAt: entry.createdAt,
     proofMode: entry.proofMode,
+    providerMode: entry.providerMode,
   });
-  window.localStorage.setItem(storageKeys.spendLedger, JSON.stringify(ledger.slice(0, 120)));
+  const currentYear = new Date().getUTCFullYear();
+  const retained = ledger.filter((item) => Number(String(item.createdAt ?? "").slice(0, 4)) >= currentYear - 1);
+  window.localStorage.setItem(storageKeys.spendLedger, JSON.stringify(retained));
 }
 
 function readSpendLedger() {
@@ -1654,6 +1693,12 @@ function readSpendLedger() {
 function normalizeLedgerAmount(value) {
   const amount = Number(value);
   return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function cooldownKeyFor(request) {
+  const scope = cooldownScopeForRequest(request);
+  if (request.id !== "custom") return scope;
+  return `custom:${stableHex(scope, 20)}`;
 }
 
 function readCooldownUntil(requestId) {

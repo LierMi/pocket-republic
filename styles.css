@@ -1613,6 +1613,42 @@ body:not(.pre-entry) .entry-screen {
   gap: 17px;
 }
 
+.milestone-field {
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.milestone-field input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 2px 0 0;
+  accent-color: var(--mint);
+}
+
+.milestone-field span {
+  display: grid;
+  gap: 3px;
+}
+
+.milestone-field strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.milestone-field small {
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 .proposal-examples {
   display: grid;
   align-content: start;

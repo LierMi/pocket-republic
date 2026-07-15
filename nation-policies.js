@@ -87,7 +87,7 @@ export const nationTemplates = [
     subtitle: "知识预算与里程碑国度",
     audience: "终身学习者、学生、需要掌握新技能的职场人",
     nationName: "长青探索成长国度",
-    mission: "让学习预算为真正的知识掌握买单，用可验证里程碑解锁下一阶段支付。",
+    mission: "让学习预算为真正的知识掌握买单，用有来源记录的里程碑解锁下一阶段支付。",
     monthlyBudget: 150,
     singleSpendLimit: 15,
     highRiskLimit: 5,
@@ -99,10 +99,10 @@ export const nationTemplates = [
       { label: "阶段奖励", value: "15 USDC", detail: "验证后提交放行议案" },
     ],
     treasuryRule:
-      "学院考官确认学习里程碑后，解锁下一阶段工具预算或 15 USDC 奖励议案。",
+      "MVP 记录立宪者的里程碑完成声明；Roadmap v0.2 由学院考官验证后解锁工具预算或奖励议案。",
     policyTags: ["里程碑支付", "知识奖励", "预算解锁"],
     demoHint: "概念场景：完成测试后提交 15 USDC 学习奖励议案",
-    approvalRoute: "Examiner + Treasurer",
+    approvalRoute: "Founder Attestation + Treasurer",
     featured: null,
   },
 ];
@@ -200,7 +200,7 @@ function protectionArticle(state) {
     return "强情绪状态未解除前，购物、打赏、游戏充值和娱乐订阅等非必要支付必须由心灵部与财政部联合复核。";
   }
   if (state.id === "learning") {
-    return "学院考官确认学习里程碑后，才能解锁下一阶段工具预算或提交 15 USDC 奖励议案；实际支付仍需经过 Kite 授权。";
+    return "MVP 由立宪者提交并留存学习里程碑完成声明后，才能解锁下一阶段工具预算；学院考官验证属于 Roadmap v0.2，实际支付仍需经过 Kite 授权。";
   }
   if (state.id === "builder") {
     return "超过免审额度的 API、SaaS 与开发工具采购，必须由财政大臣与审计官共同审查 ROI。";

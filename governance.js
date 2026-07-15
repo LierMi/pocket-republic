@@ -54,14 +54,14 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
   const milestoneMissing =
     nationState.id === "learning" &&
     riskSignals.includes("learning_purchase") &&
-    request.milestoneVerified !== true;
+    request.milestoneAttestation?.status !== "user_attested";
   const highRisk = riskSignals.includes("high_risk_asset") || riskSignals.includes("fomo");
   const exceedsSingleLimit = request.amount > policyLimits.singleSpendLimit;
 
   let action = "approve";
   let approvedAmount = request.amount;
   let frozenAmount = 0;
-  let policy = "所有宪法检查已通过，Kite 国库可以执行这笔付款。";
+  let policy = "所有宪法检查已通过，国库可以继续处理这笔付款。";
 
   if (activeCooldown) {
     action = "deny";
@@ -77,7 +77,7 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
     action = "deny";
     approvedAmount = 0;
     frozenAmount = request.amount;
-    policy = "A5 里程碑条款已触发：学院尚未收到完成证明，本阶段学习支付不予放行。";
+    policy = "A5 里程碑条款已触发：尚未提交完成声明，本阶段学习支付不予放行。";
   } else if (highRisk && request.amount > policyLimits.highRiskLimit) {
     action = "reduce_payment";
     approvedAmount = policyLimits.highRiskLimit;
@@ -112,6 +112,38 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
 
 export function calculateOverrideAmount(requestedAmount, alreadyExecutedAmount) {
   return Math.max(0, normalizeLimit(requestedAmount, 0) - normalizeLimit(alreadyExecutedAmount, 0));
+}
+
+export function calculateMonthlySpend(entries, providerMode, monthKey) {
+  if (!Array.isArray(entries)) return 0;
+  return entries
+    .filter((entry) => {
+      const entryMode = entry.providerMode ?? (entry.proofMode === "sandbox" ? "sandbox" : "kite-passport");
+      return entryMode === providerMode && String(entry.createdAt ?? "").startsWith(monthKey);
+    })
+    .reduce(
+      (sum, entry) =>
+        sum + normalizeLimit(entry.budgetAccountedAmount ?? entry.executedAmount, 0),
+      0,
+    );
+}
+
+export function shouldStartCooldown(decision) {
+  if (!decision || decision.frozenAmount <= 0 || decision.policyLimits?.coolingPeriodHours <= 0) return false;
+  const signals = decision.riskSignals ?? [];
+  return (
+    signals.includes("fomo") ||
+    signals.includes("high_risk_asset") ||
+    signals.includes("active_cooling_period") ||
+    (signals.includes("strong_emotion") && signals.includes("non_essential_spend"))
+  );
+}
+
+export function cooldownScopeForRequest(request) {
+  if (request?.id && request.id !== "custom") return request.id;
+  return [request?.title, request?.merchant, request?.category, request?.serviceUrl]
+    .map((value) => String(value ?? "").trim().toLowerCase())
+    .join("|");
 }
 
 function getTriggeredArticles(request, riskSignals, policy) {

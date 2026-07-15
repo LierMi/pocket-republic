@@ -1,8 +1,11 @@
 import {
   buildPaymentDecision,
+  calculateMonthlySpend,
   calculateOverrideAmount,
+  cooldownScopeForRequest,
   deriveConstitutionPolicy,
   detectRiskSignals,
+  shouldStartCooldown,
 } from "../governance.js";
 import { buildConstitution, nationTemplates } from "../nation-policies.js";
 
@@ -88,7 +91,7 @@ const unverifiedLearningDecision = buildPaymentDecision(
     amount: 10,
     title: "下一阶段课程订阅",
     context: "购买下一章节的学习工具。",
-    milestoneVerified: false,
+    milestoneAttestation: null,
   },
   explorer,
   buildConstitution(explorer),
@@ -104,7 +107,7 @@ const verifiedLearningDecision = buildPaymentDecision(
     amount: 10,
     title: "下一阶段课程订阅",
     context: "购买下一章节的学习工具。",
-    milestoneVerified: true,
+    milestoneAttestation: { status: "user_attested", source: "test" },
   },
   explorer,
   buildConstitution(explorer),
@@ -143,6 +146,68 @@ check(
   "生效中的冷静期会拒绝重复支付",
   coolingDecision.action === "deny" && coolingDecision.riskSignals.includes("active_cooling_period"),
   JSON.stringify(coolingDecision),
+);
+
+const mixedModeLedger = [
+  {
+    id: "sandbox:1",
+    providerMode: "sandbox",
+    budgetAccountedAmount: 10,
+    createdAt: "2026-07-15T00:00:00.000Z",
+  },
+  {
+    id: "real:1",
+    providerMode: "kite-passport",
+    executedAmount: 0,
+    budgetAccountedAmount: 0.01,
+    createdAt: "2026-07-15T00:00:00.000Z",
+  },
+];
+check(
+  "沙盒推演不会占用真实 Passport 的月度预算",
+  calculateMonthlySpend(mixedModeLedger, "kite-passport", "2026-07") === 0.01,
+);
+check(
+  "沙盒支出只计入沙盒月度预算",
+  calculateMonthlySpend(mixedModeLedger, "sandbox", "2026-07") === 10,
+);
+
+check(
+  "普通单笔限额缩减不会误触发冷静期",
+  !shouldStartCooldown({
+    frozenAmount: 20,
+    policyLimits: { coolingPeriodHours: 12 },
+    riskSignals: ["over_single_spend_limit"],
+  }),
+);
+check(
+  "FOMO 缩减会触发冷静期",
+  shouldStartCooldown({
+    frozenAmount: 290,
+    policyLimits: { coolingPeriodHours: 24 },
+    riskSignals: ["fomo"],
+  }),
+);
+check(
+  "高风险资产即使没有 FOMO 词也会触发冷静期",
+  shouldStartCooldown({
+    frozenAmount: 90,
+    policyLimits: { coolingPeriodHours: 24 },
+    riskSignals: ["high_risk_asset"],
+  }),
+);
+check(
+  "强情绪下的必要支出不会误触发冷静期",
+  !shouldStartCooldown({
+    frozenAmount: 20,
+    policyLimits: { coolingPeriodHours: 12 },
+    riskSignals: ["strong_emotion", "over_single_spend_limit"],
+  }),
+);
+check(
+  "不同自定义议案拥有不同冷静期作用域",
+  cooldownScopeForRequest({ id: "custom", title: "Meme A", merchant: "DEX A" }) !==
+    cooldownScopeForRequest({ id: "custom", title: "课程 B", merchant: "School B" }),
 );
 
 check("Override 只支付未执行差额", calculateOverrideAmount(300, 10) === 290);
