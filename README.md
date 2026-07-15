@@ -24,13 +24,14 @@ Kite 让 Agent 获得可验证身份、受控钱包和支付能力。Pocket Repu
 ## 已实现
 
 - 完整建国流程：四套国度与 Kite 国库宪法模板、国家名称、使命和预算。
-- 可编辑个人宪法，A2/A3 条款会真实改变审查结果。
+- 可编辑个人宪法，A2-A5 会实际执行单笔限额、月度预算、强情绪拒付、学习里程碑和冷静期规则。
 - 七位不同职责的 Agent 国民与强制反方意见。
 - 财政议案：批准、限额、冷静期和有留痕的用户主权操作。
 - 沙盒 Provider：完整可演示，所有凭证明确标记“非链上”。
 - 真实 Provider：通过本地安全桥接调用 Kite 官方 `kpass` / `ksearch` CLI。
 - Kite 状态机：未登录、Agent 待注册、Session 待批准、Session 生效、x402 执行、Receipt 结算。
 - Scoped Delegation：金额、总额、TTL、资产、HTTP method、host 和 path 都进入 Session policy。
+- 双层预算：Pocket Republic 用本地月度支出账本计算国度剩余额度，每一笔获批金额再成为 Kite Spending Session 的硬上限。
 - x402 无签名预检：先读取 `payment-required` 中的网络、资产合约与真实报价，再创建授权。
 - x402 示例：建设部长通过 Kite 目录中的 StableCrypto 购买一份全球市场数据。
 - Session 历史、x402 Receipt 接入口、动态执行终端与国家公报 JSON 导出。
@@ -115,7 +116,8 @@ x402 服务返回结果与 Receipt
 - `.vercelignore` 会在构建时排除 `.kite-passport/`、`.kpass/`、本地 CLI 和桥接服务，线上只发布无凭证的前端沙盒。
 - 只有官方返回 settlement reference 时，页面才显示“链上已结算”。
 - 钱包余额不作为支付成功的唯一证据；Receipt 与服务响应才是结算判断依据。
-- 宪法批准额是上限，真实成交额取自 x402 报价和 Receipt，两者分开记录。
+- 宪法批准额是上限，x402 预检报价与 Receipt 实付金额分开记录；只有 Receipt 明确返回的金额才会显示为 `Paid Amount`。
+- 国度月度预算属于 Pocket Republic 应用层政策，可由用户清除本地数据后重建；Kite 负责强制执行当前 Spending Session 的金额、时限、资产与 endpoint 边界。
 
 ## 测试
 

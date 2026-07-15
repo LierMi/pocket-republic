@@ -1,3 +1,5 @@
+export const nationPolicyVersion = 2;
+
 export const nationTemplates = [
   {
     id: "builder",
@@ -107,6 +109,42 @@ export const nationTemplates = [
 
 export function getNationTemplate(templateId) {
   return nationTemplates.find((item) => item.id === templateId) ?? nationTemplates[0];
+}
+
+export function migrateNationState(storedState) {
+  const parsed = storedState && typeof storedState === "object" ? storedState : {};
+  const template = getNationTemplate(parsed.id);
+  if (parsed.policyVersion === nationPolicyVersion) {
+    return { ...template, ...parsed, policyVersion: nationPolicyVersion };
+  }
+
+  const legacyNames = new Set([
+    "Emily's Builder Republic",
+    "Emily's Web3 Republic",
+    "Emily's Healing Republic",
+    "Emily's Learning Republic",
+  ]);
+  const legacyMission = parsed.mission === "在 7 月 16 日前完成 Kite 赛道黑客松 MVP。";
+  return {
+    ...template,
+    policyVersion: nationPolicyVersion,
+    nationName:
+      parsed.nationName && !legacyNames.has(parsed.nationName) ? parsed.nationName : template.nationName,
+    mission: parsed.mission && !legacyMission ? parsed.mission : template.mission,
+  };
+}
+
+export function encodeConstitutionRecord(articles) {
+  return {
+    policyVersion: nationPolicyVersion,
+    articles: Array.isArray(articles) ? articles : [],
+  };
+}
+
+export function decodeConstitutionRecord(record) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) return null;
+  if (record.policyVersion !== nationPolicyVersion || !Array.isArray(record.articles)) return null;
+  return record.articles;
 }
 
 export function buildConstitution(state) {

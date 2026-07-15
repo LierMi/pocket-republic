@@ -1,5 +1,12 @@
 import { createKiteProvider } from "./adapters/kite-provider.js";
-import { buildConstitution, nationTemplates } from "./nation-policies.js";
+import {
+  buildConstitution,
+  decodeConstitutionRecord,
+  encodeConstitutionRecord,
+  migrateNationState,
+  nationPolicyVersion,
+  nationTemplates,
+} from "./nation-policies.js";
 import {
   buildPaymentDecision,
   calculateOverrideAmount,
@@ -20,9 +27,11 @@ const storageKeys = {
   nation: "pocket-republic:nation",
   constitution: "pocket-republic:constitution",
   gazette: "pocket-republic:gazette-history",
+  spendLedger: "pocket-republic:monthly-spend-ledger",
+  cooldowns: "pocket-republic:cooldowns",
 };
 
-const defaultNationState = { ...nationTemplates[0] };
+const defaultNationState = migrateNationState(null);
 
 let nationState = readNationState();
 let constitutionArticles = readConstitutionArticles() ?? buildConstitution(nationState);
@@ -527,7 +536,7 @@ function renderNationHeader() {
   const policy = deriveConstitutionPolicy(constitutionArticles, nationState);
   setText(elements.nationName, nationState.nationName);
   setText(elements.nationMission, `本阶段目标：${nationState.mission}`);
-  setText(elements.treasuryHeroMetric, `${nationState.monthlyBudget} USDC`);
+  renderMonthlyBudgetMetric();
   setHtml(
     elements.nationTags,
     [
@@ -683,10 +692,7 @@ async function renderProviderStatus() {
           : `${allowance.walletBalance} ${allowance.currency}`
         : `${allowance.remaining} ${allowance.currency}`,
     );
-    setText(
-      elements.treasuryHeroMetric,
-      allowance.totalLimit > 0 ? `${allowance.remaining}/${allowance.totalLimit} ${allowance.currency}` : "尚未授权",
-    );
+    renderMonthlyBudgetMetric();
     renderProtocolStatus(passport, allowance);
     renderPolicyPreview(nationState);
     renderCitizens();
@@ -698,7 +704,7 @@ async function renderProviderStatus() {
     setText(elements.passportId, "尚未连接 Agent Passport");
     setText(elements.allowanceText, providerErrorMessage(error));
     setText(elements.balanceMetric, "不可用");
-    setText(elements.treasuryHeroMetric, "不可用");
+    renderMonthlyBudgetMetric();
     renderProtocolError(error);
     renderPolicyPreview(nationState);
     renderCitizens();
@@ -759,6 +765,7 @@ function selectTemplate(templateId) {
   if (!template) return;
   nationState = {
     ...template,
+    policyVersion: nationPolicyVersion,
     mission: template.mission,
   };
   constitutionArticles = buildConstitution(nationState);
@@ -886,8 +893,8 @@ async function reviewActiveRequest() {
   const request = requests[activeRequestId];
   if (!request) return;
   latestRequest = request;
-  await playReviewProgress();
   latestDecision = await decide(request);
+  await playReviewProgress(defaultReviewSteps(latestDecision));
   await executeDecision(request, latestDecision, { record: true });
 }
 
@@ -897,13 +904,18 @@ async function executeDecision(request, decision, options = {}) {
   let execution;
   let trace;
   try {
-    intent = await provider.createPaymentIntent({
-      proposal: request,
-      decision,
-      decisionHash: decision.decisionHash,
-    });
-    execution = await provider.executePayment(intent);
-    trace = await provider.tracePayment({ proposal: request, decision, intent, execution });
+    if (provider.providerMode === "kite-passport" && decision.approvedAmount <= 0) {
+      execution = createPolicyBlockedExecution(request, decision);
+      trace = createPolicyBlockedTrace(request, decision, execution);
+    } else {
+      intent = await provider.createPaymentIntent({
+        proposal: request,
+        decision,
+        decisionHash: decision.decisionHash,
+      });
+      execution = await provider.executePayment(intent);
+      trace = await provider.tracePayment({ proposal: request, decision, intent, execution });
+    }
   } catch (error) {
     latestTrace = null;
     latestExecution = null;
@@ -949,7 +961,7 @@ async function executeDecision(request, decision, options = {}) {
   setText(elements.statusMetric, executionStatusLabel(execution, decision));
   setText(elements.frozenMetric, `${decision.frozenAmount} ${request.currency}`);
   if (!isSessionPending && Number.isFinite(execution.remainingAllowance)) {
-    setText(elements.treasuryHeroMetric, `${execution.remainingAllowance} ${request.currency}`);
+    renderMonthlyBudgetMetric(execution.executedAmount);
     if (execution.txMode === "sandbox-ledger") {
       setText(elements.balanceMetric, `${execution.remainingAllowance} ${request.currency}`);
     }
@@ -986,18 +998,69 @@ async function executeDecision(request, decision, options = {}) {
   return true;
 }
 
+function createPolicyBlockedExecution(request, decision) {
+  return {
+    ledgerId: `policy-denial:${decision.decisionHash.slice(2, 18)}`,
+    status: "blocked_by_constitution",
+    txMode: "pocket-republic-policy",
+    txHash: null,
+    settlementReference: null,
+    paymentReceipt: null,
+    isOnchain: false,
+    executedAmount: 0,
+    quotedAmount: null,
+    amountProvenance: "not_paid",
+    currency: request.currency,
+    remainingAllowance: latestAllowance?.remaining ?? 0,
+    session: null,
+    executedAt: new Date().toISOString(),
+  };
+}
+
+function createPolicyBlockedTrace(request, decision, execution) {
+  return {
+    schema: "pocket-republic.policy-denial",
+    mode: "application-policy",
+    notice: "Pocket Republic 宪法已在应用层拦截；未创建 Kite Session，未请求 x402，未发生链上支付。",
+    agentPassport: latestPassport?.status === "active" ? latestPassport : null,
+    proposal: request,
+    decision: {
+      action: decision.action,
+      approvedAmount: decision.approvedAmount,
+      triggeredArticles: decision.triggeredArticles,
+      decisionHash: decision.decisionHash,
+    },
+    paymentReceipt: null,
+    execution,
+  };
+}
+
 function renderExecutionProtocol(execution) {
   const pending = execution.status === "session_pending";
   const settled = execution.status === "settled_onchain";
   const sandbox = execution.txMode === "sandbox-ledger";
+  const blocked = execution.status === "blocked_by_constitution" || execution.status === "blocked_by_allowance";
   if (elements.kiteGate) {
     elements.kiteGate.dataset.kiteState = pending ? "pending" : settled ? "settled" : sandbox ? "sandbox" : "receipt-pending";
   }
   setText(elements.sessionState, pending ? "等待 Passkey" : sandbox ? "本地额度已核验" : "Session 生效");
-  setText(elements.paymentState, pending ? "尚未执行" : sandbox ? "沙盒已执行" : "x402 服务已交付");
+  setText(
+    elements.paymentState,
+    pending ? "尚未执行" : blocked ? "宪法已拦截" : sandbox ? "沙盒已执行" : "x402 服务已交付",
+  );
   setText(
     elements.receiptState,
-    settled ? "链上凭证已生成" : sandbox ? "沙盒凭证 · 非链上" : pending ? "等待批准" : "服务回执已到，链上引用待确认",
+    settled
+      ? "链上凭证已生成"
+      : blocked
+        ? execution.txMode === "pocket-republic-policy"
+          ? "未请求 Kite · 本地拒绝记录"
+          : "沙盒拒绝记录 · 非链上"
+        : sandbox
+          ? "沙盒凭证 · 非链上"
+          : pending
+            ? "等待批准"
+            : "服务回执已到，链上引用待确认",
   );
 }
 
@@ -1015,7 +1078,12 @@ async function overrideActiveDecision() {
 }
 
 async function decide(request) {
-  const coreDecision = buildPaymentDecision(request, nationState, constitutionArticles);
+  const policyState = {
+    ...nationState,
+    monthlySpent: monthlyExecutedAmount(),
+    activeCooldownUntil: readCooldownUntil(request.id),
+  };
+  const coreDecision = buildPaymentDecision(request, policyState, constitutionArticles);
   const { action, approvedAmount, frozenAmount, policyLimits, riskSignals, triggeredArticles, policy } =
     coreDecision;
 
@@ -1279,6 +1347,8 @@ function renderGazetteDraft({ request, decision }) {
 function renderGazette({ request, decision, execution }) {
   const proofLabel = execution.isOnchain
     ? "Kite 链上凭证"
+    : execution.txMode === "pocket-republic-policy"
+      ? "Pocket Republic 宪法拦截 · 未请求 Kite"
     : execution.txMode === "sandbox-ledger"
       ? "沙盒推演 · 非链上"
       : execution.status === "session_pending"
@@ -1308,7 +1378,7 @@ function renderGazette({ request, decision, execution }) {
         </div>
         <div>
           <dt>实际支付</dt>
-          <dd>${execution.executedAmount} ${escapeHtml(execution.currency)}</dd>
+          <dd>${escapeHtml(executionAmountLabel(execution))}</dd>
         </div>
         <div>
           <dt>${execution.status === "session_pending" ? "Session 请求" : "账本编号"}</dt>
@@ -1329,8 +1399,25 @@ function renderGazette({ request, decision, execution }) {
 }
 
 function renderGazetteTerminal({ decision, execution }) {
+  if (execution.txMode === "pocket-republic-policy") {
+    return `
+      <section class="gazette-terminal" data-execution-mode="policy-denial" aria-label="应用层宪法拦截记录">
+        <div class="gazette-terminal-heading">
+          <span>POCKET REPUBLIC POLICY GATE</span>
+          <strong>未请求 Kite</strong>
+        </div>
+        <dl>
+          <div><dt>宪法决定</dt><dd>${escapeHtml(decisionTitleFor(decision.action))}</dd></div>
+          <div><dt>批准金额</dt><dd>0 ${escapeHtml(execution.currency)}</dd></div>
+          <div><dt>决策哈希</dt><dd>${escapeHtml(decision.decisionHash)}</dd></div>
+        </dl>
+        <p>请求已在 Pocket Republic 应用层停止，因此没有 Agent Session、x402 请求、Receipt 或链上结算字段。</p>
+      </section>
+    `;
+  }
   const isSandbox = execution.txMode === "sandbox-ledger";
   if (isSandbox) {
+    const blocked = execution.status === "blocked_by_constitution" || execution.status === "blocked_by_allowance";
     return `
       <section class="gazette-terminal" data-execution-mode="sandbox" aria-label="沙盒执行记录">
         <div class="gazette-terminal-heading">
@@ -1340,7 +1427,9 @@ function renderGazetteTerminal({ decision, execution }) {
         <dl>
           <div><dt>本地 Agent</dt><dd>${escapeHtml(latestPassport?.agentPassportId ?? "sandbox-agent")}</dd></div>
           <div><dt>本地 Session</dt><dd>${escapeHtml(execution.session?.sessionId ?? "sandbox-session")}</dd></div>
-          <div><dt>推演支付</dt><dd>${execution.executedAmount} ${escapeHtml(execution.currency)}</dd></div>
+          <div><dt>${blocked ? "推演结果" : "推演支付"}</dt><dd>${
+            blocked ? `宪法已拦截（0 ${escapeHtml(execution.currency)}）` : `${execution.executedAmount} ${escapeHtml(execution.currency)}`
+          }</dd></div>
           <div><dt>宪法决策</dt><dd>${escapeHtml(decision.decisionHash)}</dd></div>
         </dl>
         <p>这份记录只证明 Pocket Republic 的宪法、议会与额度流程已经运行，不是 Kite 链上凭证，也不包含伪造交易哈希。</p>
@@ -1351,7 +1440,10 @@ function renderGazetteTerminal({ decision, execution }) {
   const agentPassportId = latestPassport?.status === "active" ? latestPassport.agentPassportId : null;
   const sessionId = execution.session?.sessionId || null;
   const settlementReference = execution.isOnchain ? execution.settlementReference : null;
-  const paidAmount = execution.executedAmount > 0 ? `${execution.executedAmount} ${execution.currency}` : null;
+  const paidAmount =
+    execution.amountProvenance === "receipt" && execution.executedAmount > 0
+      ? `${execution.executedAmount} ${execution.currency}`
+      : null;
   const fields = [
     ["Agent Passport ID", agentPassportId],
     ["Spending Session ID", sessionId],
@@ -1378,7 +1470,25 @@ function renderGazetteTerminal({ decision, execution }) {
   `;
 }
 
+function executionAmountLabel(execution) {
+  if (execution.txMode === "sandbox-ledger") {
+    return `${execution.executedAmount} ${execution.currency}（沙盒推演）`;
+  }
+  if (execution.amountProvenance === "receipt") {
+    return `${execution.executedAmount} ${execution.currency}`;
+  }
+  if (execution.status === "session_pending") return "尚未执行";
+  if (execution.amountProvenance === "quote_only") {
+    return `Receipt 待确认（预检报价 ${execution.quotedAmount} ${execution.currency}）`;
+  }
+  return "Receipt 尚未确认";
+}
+
 function recordGazette({ request, decision, execution, trace, kind }) {
+  const coolingUntil =
+    decision.frozenAmount > 0 && decision.policyLimits.coolingPeriodHours > 0
+      ? ensureCooldown(request.id, decision.policyLimits.coolingPeriodHours, execution.executedAt)
+      : null;
   const entry = {
     id: `${kind}:${request.id}:${execution.ledgerId}`,
     kind,
@@ -1393,9 +1503,11 @@ function recordGazette({ request, decision, execution, trace, kind }) {
     ledgerId: execution.ledgerId,
     proofMode: execution.isOnchain ? "onchain" : execution.txMode === "sandbox-ledger" ? "sandbox" : execution.status,
     decisionHash: decision.decisionHash,
+    coolingUntil,
     createdAt: execution.executedAt,
     trace,
   };
+  recordMonthlySpend(entry);
   const history = readGazetteHistory().filter((item) => item.id !== entry.id);
   history.unshift(entry);
   window.localStorage.setItem(storageKeys.gazette, JSON.stringify(history.slice(0, 8)));
@@ -1465,11 +1577,29 @@ async function playReviewProgress(steps = defaultReviewSteps()) {
   isReviewing = false;
 }
 
-function defaultReviewSteps() {
+function defaultReviewSteps(decision = latestDecision) {
+  if (provider.providerMode === "sandbox") {
+    return [
+      "读取个人宪法",
+      "生成本地 Delegation 草案",
+      "核验沙盒 Agent 身份",
+      "推演本地额度变化",
+      "生成非链上公报",
+    ];
+  }
+  if (decision?.approvedAmount <= 0) {
+    return [
+      "读取个人宪法",
+      "确认批准金额为 0 USDC",
+      "在应用层停止支付请求",
+      "不创建 Kite Session",
+      "写入宪法拒绝公报",
+    ];
+  }
   return [
     "读取个人宪法",
-    "形成 Session Delegation",
-    "核验 Agent Passport",
+    "生成 Kite Session Delegation",
+    "核验真实 Agent Passport",
     "请求 x402 支付",
     "写入 Receipt 与公报",
   ];
@@ -1478,53 +1608,111 @@ function defaultReviewSteps() {
 function syncProviderPolicy() {
   if (!provider.allowance) return;
   const policy = deriveConstitutionPolicy(constitutionArticles, nationState);
-  const spent = Math.max(0, provider.allowance.totalLimit - provider.allowance.remaining);
+  const spent = monthlyExecutedAmount();
   provider.allowance.totalLimit = nationState.monthlyBudget;
   provider.allowance.remaining = Math.max(0, nationState.monthlyBudget - spent);
   provider.allowance.singleSpendLimit = policy.singleSpendLimit;
   provider.allowance.highRiskLimit = policy.highRiskLimit;
 }
 
+function monthlyExecutedAmount(now = new Date()) {
+  const monthKey = now.toISOString().slice(0, 7);
+  return readSpendLedger()
+    .filter((entry) => String(entry.createdAt ?? "").startsWith(monthKey))
+    .reduce((sum, entry) => sum + normalizeLedgerAmount(entry.executedAmount), 0);
+}
+
+function renderMonthlyBudgetMetric(pendingExecutedAmount = 0) {
+  const spent = monthlyExecutedAmount() + normalizeLedgerAmount(pendingExecutedAmount);
+  const remaining = Math.max(0, nationState.monthlyBudget - spent);
+  setText(elements.treasuryHeroMetric, `${remaining}/${nationState.monthlyBudget} USDC`);
+}
+
+function recordMonthlySpend(entry) {
+  if (normalizeLedgerAmount(entry.executedAmount) <= 0) return;
+  const ledger = readSpendLedger();
+  if (ledger.some((item) => item.id === entry.id)) return;
+  ledger.unshift({
+    id: entry.id,
+    executedAmount: normalizeLedgerAmount(entry.executedAmount),
+    currency: entry.currency,
+    createdAt: entry.createdAt,
+    proofMode: entry.proofMode,
+  });
+  window.localStorage.setItem(storageKeys.spendLedger, JSON.stringify(ledger.slice(0, 120)));
+}
+
+function readSpendLedger() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(storageKeys.spendLedger) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeLedgerAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function readCooldownUntil(requestId) {
+  try {
+    const cooldowns = JSON.parse(window.localStorage.getItem(storageKeys.cooldowns) ?? "{}");
+    const expiresAt = cooldowns[requestId];
+    return expiresAt && Date.parse(expiresAt) > Date.now() ? expiresAt : null;
+  } catch {
+    return null;
+  }
+}
+
+function ensureCooldown(requestId, hours, startedAt) {
+  try {
+    const cooldowns = JSON.parse(window.localStorage.getItem(storageKeys.cooldowns) ?? "{}");
+    const current = cooldowns[requestId];
+    if (current && Date.parse(current) > Date.now()) return current;
+    const startTime = Number.isFinite(Date.parse(startedAt)) ? Date.parse(startedAt) : Date.now();
+    const expiresAt = new Date(startTime + hours * 60 * 60 * 1000).toISOString();
+    cooldowns[requestId] = expiresAt;
+    window.localStorage.setItem(storageKeys.cooldowns, JSON.stringify(cooldowns));
+    return expiresAt;
+  } catch {
+    return null;
+  }
+}
+
 function readNationState() {
   try {
     const raw = window.localStorage.getItem(storageKeys.nation);
     if (!raw) return { ...defaultNationState };
-    const parsed = JSON.parse(raw);
-    const template = nationTemplates.find((item) => item.id === parsed.id) ?? defaultNationState;
-    const migrated = { ...template, ...parsed };
-    const legacyNames = [
-      "Emily's Builder Republic",
-      "Emily's Web3 Republic",
-      "Emily's Healing Republic",
-      "Emily's Learning Republic",
-    ];
-    if (legacyNames.includes(parsed.nationName)) migrated.nationName = template.nationName;
-    if (parsed.mission === "在 7 月 16 日前完成 Kite 赛道黑客松 MVP。") {
-      migrated.mission = template.mission;
-    }
-    return migrated;
+    return migrateNationState(JSON.parse(raw));
   } catch {
     return { ...defaultNationState };
   }
 }
 
 function saveNationState() {
-  window.localStorage.setItem(storageKeys.nation, JSON.stringify(nationState));
+  window.localStorage.setItem(
+    storageKeys.nation,
+    JSON.stringify({ ...nationState, policyVersion: nationPolicyVersion }),
+  );
 }
 
 function readConstitutionArticles() {
   try {
     const raw = window.localStorage.getItem(storageKeys.constitution);
     if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : null;
+    return decodeConstitutionRecord(JSON.parse(raw));
   } catch {
     return null;
   }
 }
 
 function saveConstitutionArticles() {
-  window.localStorage.setItem(storageKeys.constitution, JSON.stringify(constitutionArticles));
+  window.localStorage.setItem(
+    storageKeys.constitution,
+    JSON.stringify(encodeConstitutionRecord(constitutionArticles)),
+  );
 }
 
 async function constitutionHash() {
@@ -1669,6 +1857,11 @@ function riskSignalLabel(signal) {
     high_risk_asset: "高风险资产",
     fomo: "FOMO 冲动",
     mission_aligned: "服务当前目标",
+    strong_emotion: "强情绪状态",
+    non_essential_spend: "非必要支出",
+    learning_purchase: "学习预算",
+    over_monthly_budget: "超过月度预算",
+    active_cooling_period: "冷静期生效中",
   };
   return labels[signal] ?? signal.replaceAll("_", " ");
 }

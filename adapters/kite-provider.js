@@ -142,6 +142,8 @@ export class DemoKiteProvider extends KiteTreasuryProvider {
       },
       isOnchain: false,
       executedAmount: executed ? executionAmount : 0,
+      quotedAmount: executionAmount,
+      amountProvenance: "sandbox_simulation",
       currency: intent.currency,
       remainingAllowance,
       session: {
@@ -376,6 +378,8 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
       paymentReceipt: null,
       isOnchain: false,
       executedAmount: 0,
+      quotedAmount: numberValue(intent.paymentQuote?.amount, 0),
+      amountProvenance: "not_paid",
       currency: intent.currency,
       remainingAllowance: numberValue(policy.max_total_amount, 0),
       session: {
@@ -405,7 +409,8 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
     const isOnchain = Boolean(settlementReference);
     const spent = numberValue(result.usage?.spent_total, 0);
     const total = numberValue(result.delegation?.payment_policy?.max_total_amount, intent.approvedAmount);
-    const paidAmount = numberValue(intent.paymentQuote?.amount, 0);
+    const quotedAmount = numberValue(intent.paymentQuote?.amount, 0);
+    const receiptAmount = extractReceiptAmount(result.payment_receipt ?? result.payment?.payment_receipt);
 
     if (statusCode < 200 || statusCode >= 300) {
       throw providerError("KITE_SERVICE_FAILED", `x402 服务返回 HTTP ${statusCode || "未知"}，支付未确认。`);
@@ -419,7 +424,9 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
       settlementReference,
       paymentReceipt: result.payment_receipt ?? result.payment?.payment_receipt ?? null,
       isOnchain,
-      executedAmount: paidAmount,
+      executedAmount: receiptAmount ?? 0,
+      quotedAmount,
+      amountProvenance: receiptAmount == null ? "quote_only" : "receipt",
       currency: intent.currency,
       paymentAsset: result.payment_requirement?.asset ?? intent.paymentQuote?.asset ?? intent.paymentAsset,
       paymentQuote: intent.paymentQuote ?? null,
@@ -454,6 +461,8 @@ export class KitePassportBridgeProvider extends KiteTreasuryProvider {
         requestedAmount: proposal.amount,
         approvedAmount: decision.approvedAmount,
         executedAmount: execution.executedAmount,
+        quotedAmount: execution.quotedAmount,
+        amountProvenance: execution.amountProvenance,
         currency: execution.currency,
         paymentAsset: execution.paymentAsset ?? intent.paymentAsset,
         paymentQuote: execution.paymentQuote ?? intent.paymentQuote ?? null,
@@ -561,6 +570,16 @@ function extractWalletBalance(wallet) {
   if (direct != null) return numberValue(direct, 0);
   const asset = wallet?.assets?.find((item) => String(item.symbol ?? item.asset).toUpperCase().includes("USDC"));
   return numberValue(asset?.balance ?? asset?.amount, 0);
+}
+
+function extractReceiptAmount(receipt) {
+  if (!receipt || typeof receipt !== "object") return null;
+  const candidates = [receipt.paid_amount, receipt.amount_paid, receipt.amount, receipt.value];
+  for (const candidate of candidates) {
+    const amount = Number(candidate);
+    if (Number.isFinite(amount) && amount >= 0) return amount;
+  }
+  return null;
 }
 
 function extractSettlementReference(result) {

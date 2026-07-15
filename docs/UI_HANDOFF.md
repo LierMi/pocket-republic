@@ -57,7 +57,7 @@ Pocket Republic 不是多 Agent 聊天室，也不是传统钱包 Dashboard。
 
 - 先展示“国库风门”：Passport、Session、x402、Receipt 四道门。
 - ART-04 根据风险、Pending、Settled 有天气变化。
-- 申请金额、批准金额、实际支付必须分开。
+- 申请金额、批准金额、预检报价和 Receipt 实付金额必须分开。
 - 沙盒状态明确写“非链上”；真实结算才显示链上凭证。
 
 ### 国家地图
@@ -71,7 +71,7 @@ Pocket Republic 不是多 Agent 聊天室，也不是传统钱包 Dashboard。
 - 像正式档案与诗意旅行凭证的结合。
 - ART-06 是国玺与星轨装饰。
 - JSON 是可展开的技术证据，不是页面主角。
-- 公报终端在沙盒模式明确写“非链上记录”；真实模式只展示 Kite 实际返回的 Agent、Session、支付金额与结算引用。
+- 公报终端在沙盒模式明确写“非链上记录”；真实模式只展示 Kite 实际返回的 Agent、Session、Receipt 支付金额与结算引用。只有报价时不能写成 `Paid Amount`。
 
 ## 图片替换
 

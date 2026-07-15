@@ -112,7 +112,7 @@ const realBridge = new KitePassportBridgeProvider({
       return jsonResponse({
         session_id: "session_demo",
         x402: { status_code: 200, parsed_response_body: { market: "delivered" } },
-        payment: { transaction_hash: "0xsettled" },
+        payment_receipt: { transaction_hash: "0xsettled", amount: "0.01", currency: "USDC" },
         payment_requirement: { amount: "10000", asset: proposal.paymentAsset },
         usage: { spent_total: "0.01" },
       });
@@ -128,6 +128,7 @@ const realIntent = await realBridge.createPaymentIntent({
 const realExecution = await realBridge.executePayment(realIntent);
 assert.equal(realExecution.status, "settled_onchain");
 assert.equal(realExecution.executedAmount, 0.01);
+assert.equal(realExecution.amountProvenance, "receipt");
 assert.equal(realExecution.currency, "USDC");
 assert.equal(realExecution.paymentAsset, proposal.paymentAsset);
 assert.equal(realExecution.settlementReference, "0xsettled");
@@ -176,6 +177,54 @@ await assert.rejects(
   (error) => error.code === "KITE_QUOTE_EXCEEDS_CONSTITUTION",
 );
 assert.equal(overLimitCalls.some((url) => url.endsWith("/session/create")), false);
+
+const quoteOnlyBridge = new KitePassportBridgeProvider({
+  fetchImpl: async (url) => {
+    if (url.endsWith("/status")) {
+      return jsonResponse({
+        status: {
+          user: { logged_in: true, user_id: "user_quote_only" },
+          agent: { registered: true, agent_id: "agent_quote_only" },
+          session: { active: false },
+        },
+      });
+    }
+    if (url.endsWith("/preflight")) {
+      return jsonResponse({
+        status: "payment_required",
+        requirement: {
+          network: "eip155:8453",
+          asset: proposal.paymentAsset,
+          assetSymbol: "USDC",
+          amountRaw: "10000",
+          amount: "0.01",
+          decimals: 6,
+        },
+      });
+    }
+    if (url.endsWith("/session/create")) return jsonResponse({ status: "success", session_id: "session_quote_only" });
+    if (url.endsWith("/session/use")) return jsonResponse({ status: "success" });
+    if (url.endsWith("/session/execute")) {
+      return jsonResponse({
+        session_id: "session_quote_only",
+        x402: { status_code: 200, parsed_response_body: { market: "delivered" } },
+        payment_requirement: { amount: "10000", asset: proposal.paymentAsset },
+        usage: { spent_total: "0.01" },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  },
+});
+const quoteOnlyIntent = await quoteOnlyBridge.createPaymentIntent({
+  proposal,
+  decision,
+  decisionHash: decision.decisionHash,
+});
+const quoteOnlyExecution = await quoteOnlyBridge.executePayment(quoteOnlyIntent);
+assert.equal(quoteOnlyExecution.status, "service_delivered_receipt_pending");
+assert.equal(quoteOnlyExecution.executedAmount, 0);
+assert.equal(quoteOnlyExecution.quotedAmount, 0.01);
+assert.equal(quoteOnlyExecution.amountProvenance, "quote_only");
 
 console.log("Pocket Republic Kite provider verification passed");
 

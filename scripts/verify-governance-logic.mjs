@@ -4,6 +4,7 @@ import {
   deriveConstitutionPolicy,
   detectRiskSignals,
 } from "../governance.js";
+import { buildConstitution, nationTemplates } from "../nation-policies.js";
 
 const nation = {
   monthlyBudget: 500,
@@ -47,6 +48,101 @@ check(
   "实际决策使用 A3 自定义上限",
   highRiskDecision.action === "reduce_payment" && highRiskDecision.approvedAmount === 250,
   JSON.stringify(highRiskDecision),
+);
+
+const builder = nationTemplates.find((item) => item.id === "builder");
+const builderDecision = buildPaymentDecision(
+  {
+    amount: 49,
+    title: "AI 开发工具订阅",
+    context: "为当前 MVP 购买一个 SaaS 开发工具。",
+  },
+  builder,
+  buildConstitution(builder),
+);
+check(
+  "创作者国度执行 20 USDC 采购审查线",
+  builderDecision.action === "require_confirmation" && builderDecision.approvedAmount === 20,
+  JSON.stringify(builderDecision),
+);
+
+const sanctuary = nationTemplates.find((item) => item.id === "healing");
+const sanctuaryDecision = buildPaymentDecision(
+  {
+    amount: 100,
+    title: "深夜冲动购物",
+    context: "我现在很焦虑，也很孤独，想立刻购物和游戏充值。",
+  },
+  sanctuary,
+  buildConstitution(sanctuary),
+);
+check(
+  "心灵自律国度在强情绪下拒绝非必要支付",
+  sanctuaryDecision.action === "deny" && sanctuaryDecision.approvedAmount === 0,
+  JSON.stringify(sanctuaryDecision),
+);
+
+const explorer = nationTemplates.find((item) => item.id === "learning");
+const unverifiedLearningDecision = buildPaymentDecision(
+  {
+    amount: 10,
+    title: "下一阶段课程订阅",
+    context: "购买下一章节的学习工具。",
+    milestoneVerified: false,
+  },
+  explorer,
+  buildConstitution(explorer),
+);
+check(
+  "探索成长国度在里程碑未验证时拒绝学习支付",
+  unverifiedLearningDecision.action === "deny" && unverifiedLearningDecision.approvedAmount === 0,
+  JSON.stringify(unverifiedLearningDecision),
+);
+
+const verifiedLearningDecision = buildPaymentDecision(
+  {
+    amount: 10,
+    title: "下一阶段课程订阅",
+    context: "购买下一章节的学习工具。",
+    milestoneVerified: true,
+  },
+  explorer,
+  buildConstitution(explorer),
+);
+check(
+  "探索成长国度在里程碑验证后允许额度内支付",
+  verifiedLearningDecision.action === "approve" && verifiedLearningDecision.approvedAmount === 10,
+  JSON.stringify(verifiedLearningDecision),
+);
+
+const monthlyBudgetDecision = buildPaymentDecision(
+  {
+    amount: 18,
+    title: "API 数据采购",
+    context: "购买支持当前项目的 API 数据。",
+  },
+  { ...builder, monthlySpent: 195 },
+  buildConstitution(builder),
+);
+check(
+  "所有模板受当月剩余额度约束",
+  monthlyBudgetDecision.approvedAmount === 5 && monthlyBudgetDecision.policyLimits.monthlyRemaining === 5,
+  JSON.stringify(monthlyBudgetDecision),
+);
+
+const coolingDecision = buildPaymentDecision(
+  {
+    amount: 10,
+    title: "重复提交高风险交易",
+    context: "再次购买 meme coin。",
+  },
+  { ...nationTemplates.find((item) => item.id === "web3"), activeCooldownUntil: "2999-01-01T00:00:00.000Z" },
+  buildConstitution(nationTemplates.find((item) => item.id === "web3")),
+);
+check(
+  "生效中的冷静期会拒绝重复支付",
+  coolingDecision.action === "deny" && coolingDecision.riskSignals.includes("active_cooling_period"),
+  JSON.stringify(coolingDecision),
 );
 
 check("Override 只支付未执行差额", calculateOverrideAmount(300, 10) === 290);

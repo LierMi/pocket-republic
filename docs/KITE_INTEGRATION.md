@@ -133,7 +133,8 @@ kpass wallet balance --output json
 - 建立 Session 前先对服务发起无签名请求，解析 `payment-required` 中的 Base USDC 合约、原始金额与小数精度。
 - x402 合约地址用于验证报价和 Receipt；Kite Spending Session 按官方 CLI 约定使用 `USDC` 资产符号。
 - 预检报价必须不高于议会批准上限；否则不创建 Session。
-- 议会批准额和 x402 实际成交额分开记录。
+- 议会批准额、x402 预检报价和 Receipt 实付金额分开记录；只有 Receipt 明确返回的金额才标记为已支付。
+- 国度月度预算由 Pocket Republic 本地支出账本累计，每一笔通过后的剩余额度再限制本次 Kite Session；Kite 本身只强制当前 Session 的授权范围。
 
 ## 6. 本地桥接 API
 
