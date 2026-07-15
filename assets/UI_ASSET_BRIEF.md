@@ -22,26 +22,26 @@
 
 场景图优先 WebP/AVIF，质量 78-86；透明装饰用 WebP/PNG。
 
-## ART-00 尚未升空的国度
+## ART-00 口袋共和国全景
 
 - 文件：`assets/art-00-entry-world.webp`
 - 尺寸：1920 x 1200
 - 用途：全屏开场，左侧叠文字。
-- 构图：左侧 45% 安静、低细节；右侧出现一块刚从云海浮起的土地。远方有小型宪法庭、风塔、镜湖和还没点亮的国库。
+- 构图：左侧 45% 安静、低细节；右侧呈现一座完整但仍可继续扩建的个人国度。中央议会、宪法庭、国库与 Agent 国民构成第一视觉。
 
 ```text
-An original personal cloud nation at dawn, a floating green land slowly rising from a vast soft cloud sea, tiny civic palace, wind towers, mirrored ponds, distant treasury not yet illuminated, poetic utopia, surreal childlike imagination with sophisticated tactile materials, cloud white, sky cyan, deep navy, coral seal and mint accents, quiet negative space on the left for title, richly detailed right side, no typography, no logos, no recognizable cartoon characters, cinematic 16:10
+An original complete personal AI nation above a vast soft cloud sea at dawn, central parliament, constitution court, treasury and tiny AI citizens visibly connected by civic paths, poetic utopia, surreal childlike imagination with sophisticated tactile materials, cloud white, sky cyan, deep navy, coral seal and mint accents, quiet negative space on the left for title, richly detailed right side, no typography, no logos, no recognizable cartoon characters, cinematic 16:10
 ```
 
-## ART-01 云海里的国家种子
+## ART-01 四座国度的概念版图
 
 - 文件：`assets/art-01-founding-territory.webp`
 - 尺寸：1200 x 900
 - 用途：建国与国家性格选择。
-- 构图：柔软云层托起一小块草地，中央是一扇未命名的门；四条风路通向建设、探索、守护、成长四种生态萌芽。
+- 构图：云海上连接着四座微型领地，分别对应创作者、链上主权、心灵自律与探索成长；中央国库用发光航线连接每一种治理方式。
 
 ```text
-An original tiny nation seed floating above clouds, one unnamed doorway at the center, four wind paths growing into a builder workshop, adventurous observatory, emotional garden and academy, dreamlike literary fantasy, soft surreal architecture, sophisticated toy-like material, cloud white, teal sky, coral, mint and warm gold accents, lower right kept simple for UI, no text, no logos, 4:3
+Four original miniature AI nations connected above the clouds, a builder workshop republic, a protected onchain republic, an emotional sanctuary and a learning explorer republic, one central treasury connected by luminous civic paths, dreamlike literary fantasy, soft surreal architecture, sophisticated toy-like material, cloud white, teal sky, coral, mint and warm gold accents, lower right kept simple for UI, no text, no logos, 4:3
 ```
 
 ## ART-02 七位云上 Agent 国民
@@ -114,7 +114,7 @@ An original cloud-pattern national seal and archival ornament on transparent bac
 
 ## 动效交接
 
-- 开屏：云层被光标轻轻扰动，点击后像一块土地从云海升起。
+- 开屏：云层被光标轻轻扰动，点击后由国玺形光圈揭开完整的个人国度工作区。
 - 风险：国库天气转沉，珊瑚红风线靠近风门。
 - Session Pending：云层短暂停住，国玺灯闪烁。
 - Settled：薄荷绿星轨贯穿四道协议门，最终凝成公报凭证。

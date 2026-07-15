@@ -23,7 +23,7 @@ Kite 让 Agent 获得可验证身份、受控钱包和支付能力。Pocket Repu
 
 ## 已实现
 
-- 完整建国流程：国家模板、国家名称、使命和预算。
+- 完整建国流程：四套国度与 Kite 国库宪法模板、国家名称、使命和预算。
 - 可编辑个人宪法，A2/A3 条款会真实改变审查结果。
 - 七位不同职责的 Agent 国民与强制反方意见。
 - 财政议案：批准、限额、冷静期和有留痕的用户主权操作。
@@ -33,7 +33,7 @@ Kite 让 Agent 获得可验证身份、受控钱包和支付能力。Pocket Repu
 - Scoped Delegation：金额、总额、TTL、资产、HTTP method、host 和 path 都进入 Session policy。
 - x402 无签名预检：先读取 `payment-required` 中的网络、资产合约与真实报价，再创建授权。
 - x402 示例：建设部长通过 Kite 目录中的 StableCrypto 购买一份全球市场数据。
-- Session 历史、x402 Receipt 接入口与国家公报 JSON 导出。
+- Session 历史、x402 Receipt 接入口、动态执行终端与国家公报 JSON 导出。
 - SSRF 防护、参数白名单、CLI 超时、输出上限和安全响应头。
 - 原创 WebGL 云海显色、章节切换、按钮涟漪和 reduced-motion 回退。
 
@@ -168,7 +168,7 @@ pocket-republic/
 
 ## Hackathon Scope
 
-本次 MVP 只把 Kite 国库做深。心灵花园、创作工坊、学院、外交邮局和道具铺保留完整入口与商业方向，但不伪装成已经完成的功能。
+本次 MVP 只把 Kite 国库做深。创作工坊已接入一条 API / x402 数据采购试验；心灵花园、学院、外交邮局和道具铺保留为 `Roadmap v0.2` 入口，不伪装成已经完成的功能。
 
 ## 官方参考
 

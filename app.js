@@ -759,7 +759,7 @@ function selectTemplate(templateId) {
   if (!template) return;
   nationState = {
     ...template,
-    mission: elements.missionInput?.value.trim() || template.mission,
+    mission: template.mission,
   };
   constitutionArticles = buildConstitution(nationState);
   saveNationState();

@@ -33,6 +33,7 @@ const assertions = [
   [html.includes('id="policyPreview"'), "建国页包含 Kite 国库策略预览"],
   [html.includes("Kite Treasury Policy Preview"), "策略预览使用明确的 Kite 标题"],
   [appSource.includes("function renderPolicyPreview"), "策略预览会随国家模板动态渲染"],
+  [appSource.includes("mission: template.mission"), "切换国家模板会载入对应的默认使命"],
   [appSource.includes("walletMetrics") && appSource.includes("approvalRoute"), "国家模板卡展示钱包指标与审批路线"],
   [appSource.includes("providerMode") && appSource.includes("policyPreview"), "策略预览区分沙盒与真实 Passport"],
   [appSource.includes('status: "概念版图 · Roadmap v0.2"'), "未来部门明确标注 Roadmap 状态"],
