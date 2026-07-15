@@ -24,6 +24,7 @@ const assertions = [
   [html.includes('id="departmentDescription"'), "地图存在动态部门说明"],
   [html.includes('id="departmentAction"'), "地图存在动态部门动作"],
   [html.includes('id="nationNameInput"'), "建国流程允许命名个人国度"],
+  [html.includes('<strong id="nationName">大雄的云上王国</strong>'), "默认国名使用大雄的云上王国"],
   [html.includes('id="milestoneVerifiedInput"'), "财政议案可提交学习里程碑证明"],
   [appSource.includes("milestoneVerifiedInput?.checked"), "学习里程碑完成声明进入实际决策请求"],
   [appSource.includes('status: "user_attested"'), "学习里程碑声明带有来源标记"],

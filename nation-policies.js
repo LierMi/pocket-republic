@@ -1,4 +1,4 @@
-export const nationPolicyVersion = 2;
+export const nationPolicyVersion = 3;
 
 export const nationTemplates = [
   {
@@ -8,7 +8,7 @@ export const nationTemplates = [
     en: "Builder Republic",
     subtitle: "开发与采购专项国度",
     audience: "黑客松选手、独立开发者、Solo Founder",
-    nationName: "星芽创作者国度",
+    nationName: "大雄的云上王国",
     mission: "在截止日期前交付 MVP，把时间、专注力与开发预算留给当前主线。",
     monthlyBudget: 200,
     singleSpendLimit: 20,
@@ -34,7 +34,7 @@ export const nationTemplates = [
     en: "DeGen Republic",
     subtitle: "链上交易风控与防 FOMO 国度",
     audience: "Web3 玩家、加密交易者、空投交互用户",
-    nationName: "星潮链上主权国度",
+    nationName: "大雄的云上王国",
     mission: "保护链上本金，识别 FOMO，并对未知资产支付执行强制风险上限。",
     monthlyBudget: 500,
     singleSpendLimit: 30,
@@ -60,7 +60,7 @@ export const nationTemplates = [
     en: "Sanctuary Republic",
     subtitle: "冲动消费拦截与情绪守财国度",
     audience: "需要防止强情绪状态下冲动支出的用户",
-    nationName: "微光心灵自律国度",
+    nationName: "大雄的云上王国",
     mission: "在高压、焦虑或深夜强情绪状态下，暂停非必要支付与重大决策。",
     monthlyBudget: 300,
     singleSpendLimit: 30,
@@ -86,7 +86,7 @@ export const nationTemplates = [
     en: "Explorer Republic",
     subtitle: "知识预算与里程碑国度",
     audience: "终身学习者、学生、需要掌握新技能的职场人",
-    nationName: "长青探索成长国度",
+    nationName: "大雄的云上王国",
     mission: "让学习预算为真正的知识掌握买单，用有来源记录的里程碑解锁下一阶段支付。",
     monthlyBudget: 150,
     singleSpendLimit: 15,
@@ -123,6 +123,12 @@ export function migrateNationState(storedState) {
     "Emily's Web3 Republic",
     "Emily's Healing Republic",
     "Emily's Learning Republic",
+    "星芽建设者共和国",
+    "星芽创作者国度",
+    "星潮链上主权国度",
+    "微光心灵花园国",
+    "微光心灵自律国度",
+    "长青探索成长国度",
   ]);
   const legacyMission = parsed.mission === "在 7 月 16 日前完成 Kite 赛道黑客松 MVP。";
   return {

@@ -9,6 +9,7 @@ import {
 } from "../nation-policies.js";
 
 assert.equal(nationTemplates.length, 4);
+assert.ok(nationTemplates.every((item) => item.nationName === "大雄的云上王国"));
 
 const builder = nationTemplates.find((item) => item.id === "builder");
 assert.equal(builder.cn, "创作者国度");
@@ -63,6 +64,20 @@ const currentBuilder = migrateNationState({
   singleSpendLimit: 17,
 });
 assert.equal(currentBuilder.singleSpendLimit, 17);
+
+const migratedGeneratedName = migrateNationState({
+  id: "healing",
+  policyVersion: 2,
+  nationName: "微光心灵花园国",
+});
+assert.equal(migratedGeneratedName.nationName, "大雄的云上王国");
+
+const preservedCustomName = migrateNationState({
+  id: "healing",
+  policyVersion: 2,
+  nationName: "小明自己起的国家",
+});
+assert.equal(preservedCustomName.nationName, "小明自己起的国家");
 
 assert.equal(decodeConstitutionRecord(builderConstitution), null);
 const encodedConstitution = encodeConstitutionRecord(builderConstitution);
