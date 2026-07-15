@@ -38,7 +38,7 @@ An original complete personal AI nation above a vast soft cloud sea at dawn, cen
 - 文件：`assets/art-01-founding-territory.webp`
 - 尺寸：1200 x 900
 - 用途：建国与国家性格选择。
-- 构图：云海上连接着四座微型领地，分别对应创作者、链上主权、心灵自律与探索成长；中央国库用发光航线连接每一种治理方式。
+- 构图：云海上连接着四座微型领地，分别对应创作者、链上主权、心灵花园与探索成长；中央国库用发光航线连接每一种治理方式。
 
 ```text
 Four original miniature AI nations connected above the clouds, a builder workshop republic, a protected onchain republic, an emotional sanctuary and a learning explorer republic, one central treasury connected by luminous civic paths, dreamlike literary fantasy, soft surreal architecture, sophisticated toy-like material, cloud white, teal sky, coral, mint and warm gold accents, lower right kept simple for UI, no text, no logos, 4:3

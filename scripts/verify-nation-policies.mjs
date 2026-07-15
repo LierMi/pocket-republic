@@ -12,23 +12,23 @@ assert.equal(nationTemplates.length, 4);
 assert.ok(nationTemplates.every((item) => item.nationName === "大雄的云上王国"));
 
 const builder = nationTemplates.find((item) => item.id === "builder");
-assert.equal(builder.cn, "创作者国度");
+assert.equal(builder.cn, "创作者共和国");
 assert.equal(builder.singleSpendLimit, 20);
 assert.equal(builder.monthlyBudget, 200);
 assert.equal(builder.walletMetrics.length, 2);
 const builderConstitution = buildConstitution(builder);
 
 const web3 = nationTemplates.find((item) => item.id === "web3");
-assert.equal(web3.cn, "链上主权国度");
+assert.equal(web3.cn, "链上主权共和国");
 assert.equal(web3.highRiskLimit, 10);
 assert.equal(web3.coolingPeriodHours, 24);
 
 const sanctuary = nationTemplates.find((item) => item.id === "healing");
-assert.equal(sanctuary.cn, "心灵自律国度");
+assert.equal(sanctuary.cn, "心灵花园共和国");
 assert.match(sanctuary.treasuryRule, /强情绪/);
 
 const explorer = nationTemplates.find((item) => item.id === "learning");
-assert.equal(explorer.cn, "探索成长国度");
+assert.equal(explorer.cn, "探索成长共和国");
 assert.equal(explorer.monthlyBudget, 150);
 assert.match(explorer.treasuryRule, /里程碑/);
 

@@ -72,7 +72,7 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
     action = "deny";
     approvedAmount = 0;
     frozenAmount = request.amount;
-    policy = "A5 心灵自律条款已触发：强情绪状态下，购物、打赏、充值与娱乐等非必要支付不予放行。";
+    policy = "A5 心灵守护条款已触发：强情绪状态下，购物、打赏、充值与娱乐等非必要支付不予放行。";
   } else if (milestoneMissing) {
     action = "deny";
     approvedAmount = 0;
@@ -95,7 +95,7 @@ export function buildPaymentDecision(request, nationState, constitutionArticles)
     frozenAmount = request.amount - approvedAmount;
     action = approvedAmount > 0 ? "reduce_payment" : "deny";
     riskSignals.push("over_monthly_budget");
-    policy = `A2 国度月度预算仅剩 ${policyLimits.monthlyRemaining} USDC，本次最多放行 ${approvedAmount} USDC。`;
+    policy = `A2 共和国月度预算仅剩 ${policyLimits.monthlyRemaining} USDC，本次最多放行 ${approvedAmount} USDC。`;
   }
   const triggeredArticles = getTriggeredArticles(request, riskSignals, policyLimits);
 

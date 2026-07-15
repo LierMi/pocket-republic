@@ -64,7 +64,7 @@ const builderDecision = buildPaymentDecision(
   buildConstitution(builder),
 );
 check(
-  "创作者国度执行 20 USDC 采购审查线",
+  "创作者共和国执行 20 USDC 采购审查线",
   builderDecision.action === "require_confirmation" && builderDecision.approvedAmount === 20,
   JSON.stringify(builderDecision),
 );
@@ -80,7 +80,7 @@ const sanctuaryDecision = buildPaymentDecision(
   buildConstitution(sanctuary),
 );
 check(
-  "心灵自律国度在强情绪下拒绝非必要支付",
+  "心灵花园共和国在强情绪下拒绝非必要支付",
   sanctuaryDecision.action === "deny" && sanctuaryDecision.approvedAmount === 0,
   JSON.stringify(sanctuaryDecision),
 );
@@ -97,7 +97,7 @@ const unverifiedLearningDecision = buildPaymentDecision(
   buildConstitution(explorer),
 );
 check(
-  "探索成长国度在里程碑未验证时拒绝学习支付",
+  "探索成长共和国在里程碑未验证时拒绝学习支付",
   unverifiedLearningDecision.action === "deny" && unverifiedLearningDecision.approvedAmount === 0,
   JSON.stringify(unverifiedLearningDecision),
 );
@@ -113,7 +113,7 @@ const verifiedLearningDecision = buildPaymentDecision(
   buildConstitution(explorer),
 );
 check(
-  "探索成长国度在里程碑验证后允许额度内支付",
+  "探索成长共和国在里程碑验证后允许额度内支付",
   verifiedLearningDecision.action === "approve" && verifiedLearningDecision.approvedAmount === 10,
   JSON.stringify(verifiedLearningDecision),
 );

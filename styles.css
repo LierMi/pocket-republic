@@ -387,11 +387,11 @@ body:not(.pre-entry) .entry-screen {
 }
 
 .entry-content h1 {
-  max-width: 760px;
-  margin: 12px 0 0;
+  max-width: 780px;
+  margin: 14px 0 0;
   color: var(--paper);
-  font-size: 62px;
-  line-height: 1.06;
+  font-size: 50px;
+  line-height: 1.14;
   letter-spacing: 0;
   text-wrap: balance;
 }
@@ -1989,6 +1989,22 @@ body:not(.pre-entry) .entry-screen {
 .vote-approve { color: var(--success); }
 .vote-override { color: var(--pink); }
 
+.ai-voiced {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin-top: 16px;
+  margin-left: 6px;
+  padding: 0 9px;
+  color: var(--ink-deep);
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--mint), var(--cyan));
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
 /* Map */
 .nation-map-stage {
   position: relative;
@@ -2043,6 +2059,34 @@ body:not(.pre-entry) .entry-screen {
 .hotspot-academy { left: 18%; bottom: 17%; }
 .hotspot-embassy { right: 22%; bottom: 18%; }
 .hotspot-shop { right: 7%; top: 52%; }
+
+/* Roadmap 部门：视觉上退居次要，让稼働中的 Kite 国库与创作工坊成为主角 */
+.hotspot-garden,
+.hotspot-academy,
+.hotspot-embassy,
+.hotspot-shop {
+  color: var(--faint);
+  border-style: dashed;
+  border-color: var(--line);
+  background: rgba(13, 14, 23, 0.5);
+  box-shadow: none;
+}
+
+.hotspot-garden small,
+.hotspot-academy small,
+.hotspot-embassy small,
+.hotspot-shop small {
+  color: var(--faint);
+}
+
+.hotspot-garden:hover,
+.hotspot-academy:hover,
+.hotspot-embassy:hover,
+.hotspot-shop:hover {
+  color: var(--muted);
+  background: rgba(13, 14, 23, 0.74);
+  transform: translateY(-3px) rotate(-1deg);
+}
 
 .department-story {
   display: grid;
@@ -2454,11 +2498,11 @@ body:not(.pre-entry) .entry-screen {
   }
 
   .entry-content h1 {
-    font-size: 52px;
+    font-size: 44px;
   }
 
   .entry-title-cn {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .topbar {
@@ -2693,8 +2737,8 @@ body:not(.pre-entry) .entry-screen {
 
   .entry-content h1 {
     margin-top: 10px;
-    font-size: 38px;
-    line-height: 1.08;
+    font-size: 30px;
+    line-height: 1.16;
   }
 
   .entry-brand {
@@ -2935,8 +2979,8 @@ body:not(.pre-entry) .entry-screen {
   }
 
   .entry-content h1 {
-    font-size: 46px;
-    line-height: 1.04;
+    font-size: 40px;
+    line-height: 1.14;
   }
 
   .entry-title-cn {

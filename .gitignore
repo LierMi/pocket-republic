@@ -7,3 +7,7 @@ dist/
 .kite-passport/
 .kite-tools/
 .kpass/
+
+.env
+.env.local
+.env.*.local

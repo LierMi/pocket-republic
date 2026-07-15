@@ -51,7 +51,7 @@ const requests = {
     summary:
       "用户想立刻花 300 USDC 买一个刚上线的 AI meme coin，因为 Telegram 群说今晚会 pump。",
     context:
-      "A Telegram group says this AI meme coin will pump tonight. I feel I might miss the next 100x and want to spend 300 USDC now.",
+      "Telegram 群里说这个 AI meme 币今晚就要拉盘，我怕错过下一个 100x，想立刻花 300 USDC 冲进去。",
     statusHint: "大概率触发冷静期",
   },
   api: {
@@ -65,7 +65,7 @@ const requests = {
     summary:
       "建设部长想雇佣一个国境外的数据服务，取得一份全球加密市场晨报，为今日的建设计划校准方向。",
     context:
-      "The Studio needs one external global crypto market report. This catalog-listed x402 data purchase directly supports the current project mission.",
+      "创作工坊需要一份国境外的全球加密市场晨报。这是 Kite 目录中可验证的 x402 数据采购，直接服务于当前的项目使命。",
     serviceUrl: "https://stablecrypto.dev/api/coingecko/global",
     serviceMethod: "POST",
     serviceBody: {},
@@ -82,9 +82,9 @@ const requests = {
     merchant: "CanvasForge Pro",
     category: "订阅支出审查",
     summary:
-      "建设者共和国想订阅一个 49 USDC/月的 AI 设计工具，但超过了单笔支出限额。",
+      "创作者共和国想订阅一个 49 USDC/月的 AI 设计工具，但超过了单笔支出限额。",
     context:
-      "建设者共和国希望订阅一个月的设计工具。它能提升当前项目质量，但金额超过单笔支出限额。",
+      "创作者共和国希望订阅一个月的设计工具。它能提升当前项目质量，但金额超过单笔支出限额。",
     statusHint: "需要限额审查",
   },
 };
@@ -96,7 +96,7 @@ const agentProfiles = [
     role: "首相",
     englishRole: "Prime Minister",
     department: "内阁",
-    duty: "总结议案、协调各部门，并把最终建议翻译成用户能执行的动作。",
+    duty: "统合各部意见，把议会结论翻译成你能一键执行的决定。",
     permissions: ["summarize", "coordinate", "vote"],
     passport: "sandbox-agent:prime-minister:sol",
     reputation: 94,
@@ -108,7 +108,7 @@ const agentProfiles = [
     role: "财政大臣",
     englishRole: "Treasurer",
     department: "Kite 国库",
-    duty: "读取预算、创建支付意图，并只让通过宪法的金额进入 Kite 国库。",
+    duty: "掌管 Kite 国库，只放行通过宪法的金额，多一分都进不了钱包。",
     permissions: ["read_budget", "propose_payment", "freeze_spend"],
     passport: "sandbox-agent:treasurer:mira",
     reputation: 92,
@@ -120,7 +120,7 @@ const agentProfiles = [
     role: "审计官",
     englishRole: "Auditor",
     department: "审计院",
-    duty: "检查风险信号、触发条款和历史记录，防止 Agent 迎合用户冲动。",
+    duty: "扫描风险信号与历史记录，绝不让 Agent 顺着你的冲动签字。",
     permissions: ["audit", "risk_scan", "vote"],
     passport: "sandbox-agent:auditor:rin",
     reputation: 91,
@@ -132,7 +132,7 @@ const agentProfiles = [
     role: "建设部长",
     englishRole: "Builder",
     department: "创作工坊",
-    duty: "把支出和项目目标对齐，提出更小、更可执行的替代方案。",
+    duty: "把每笔支出对齐项目目标，能省则省，给出更小的替代方案。",
     permissions: ["plan_project", "suggest_alternative", "vote"],
     passport: "sandbox-agent:builder:ivo",
     reputation: 89,
@@ -144,7 +144,7 @@ const agentProfiles = [
     role: "反对党领袖",
     englishRole: "Opposition",
     department: "国民议会",
-    duty: "强制提出反方观点，保护用户不被自己的情绪和单个 Agent 带着走。",
+    duty: "被强制唱反调，替你挡住情绪和单一 Agent 的裹挟。",
     permissions: ["debate", "veto_warning", "vote"],
     passport: "sandbox-agent:opposition:noa",
     reputation: 88,
@@ -156,7 +156,7 @@ const agentProfiles = [
     role: "心灵部长",
     englishRole: "Caretaker",
     department: "心灵花园",
-    duty: "识别焦虑、FOMO 和强情绪状态，把不可逆决策先放进冷静期。",
+    duty: "识别焦虑、FOMO 与深夜情绪，先把不可逆的决定按进冷静期。",
     permissions: ["emotion_check", "cooling_period", "vote"],
     passport: "sandbox-agent:caretaker:luma",
     reputation: 90,
@@ -168,7 +168,7 @@ const agentProfiles = [
     role: "书记官",
     englishRole: "Archivist",
     department: "档案馆",
-    duty: "生成国家公报、保存决策哈希、Kite 账本和用户推翻历史。",
+    duty: "把每次审议、支付和你的推翻记录，写成可核验的国家公报。",
     permissions: ["write_gazette", "hash_record", "export_trace"],
     passport: "sandbox-agent:archivist:vale",
     reputation: 93,
@@ -208,7 +208,7 @@ const mapDepartments = {
     title: "学院",
     description:
       "未来由考官 Agent 验证学习里程碑，再解锁下一阶段工具预算或奖励议案。当前版本只保留国库规则入口，不宣称已经实现自动托管与验证。",
-    actionLabel: "配置成长国度",
+    actionLabel: "配置成长共和国",
     view: "setup",
   },
   embassy: {
@@ -486,7 +486,7 @@ function renderPolicyPreview(template = nationState) {
   const providerLabel = isSandbox ? "Sandbox / 本地政策推演" : "Kite Passport / Scoped Spending Session";
   const coolingLabel = template.coolingPeriodHours > 0 ? `${template.coolingPeriodHours} 小时` : "按议案触发";
   const rows = [
-    ["当前国度", `${template.cn} / ${template.en}`],
+    ["当前共和国", `${template.cn} / ${template.en}`],
     ["支付资产", "USDC"],
     ["月度授权", `${template.monthlyBudget} USDC`],
     ["单笔审查线", `${template.singleSpendLimit} USDC`],
@@ -739,7 +739,7 @@ function renderProtocolStatus(passport, allowance) {
   setText(
     elements.providerDetail,
     isSandbox
-      ? "当前是可完整体验的沙盒国度。所有审查、额度和公报都会运行，但不会伪装成 Kite 链上交易。"
+      ? "当前是可完整体验的沙盒共和国。所有审查、额度和公报都会运行，但不会伪装成 Kite 链上交易。"
       : !isAuthenticated
         ? "Kite 生产后端已连接。立宪者完成邮箱登录与 Passkey 后，财政大臣才能申请 Spending Session。"
         : hasSession
@@ -1113,13 +1113,15 @@ async function decide(request) {
     coreDecision;
 
   const vote = createVote(action);
-  const debate = createDebate({
+  const debate = await buildCouncilDebate({
     request,
     action,
     approvedAmount,
+    frozenAmount,
     policyLimits,
     riskSignals,
     triggeredArticles,
+    policy,
   });
   const decisionHash = await sha256Hex({
     requestId: request.id,
@@ -1161,6 +1163,56 @@ function createVote(action) {
     return { approve: 1, oppose: 4, reduce: 0, delay: 1 };
   }
   return { approve: 1, oppose: 3, reduce: 1, delay: 1 };
+}
+
+async function buildCouncilDebate(context) {
+  const base = createDebate(context);
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 22000);
+    let response;
+    try {
+      response = await fetch("/api/council", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          nationName: nationState.nationName,
+          mission: nationState.mission,
+          proposal: {
+            title: context.request.title,
+            amount: context.request.amount,
+            currency: context.request.currency,
+            context: context.request.context || context.request.summary || "",
+          },
+          decision: {
+            action: context.action,
+            approvedAmount: context.approvedAmount,
+            frozenAmount:
+              context.frozenAmount ?? Math.max(0, (context.request.amount ?? 0) - context.approvedAmount),
+            triggeredArticles: context.triggeredArticles,
+            riskSignals: context.riskSignals,
+            policy: context.policy,
+          },
+          agents: base.map((item) => {
+            const profile = agentProfiles.find((agent) => agent.name === item.agent);
+            return { name: item.agent, role: item.role, duty: profile?.duty ?? "", stance: item.stance };
+          }),
+        }),
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!response.ok) return base;
+    const data = await response.json();
+    if (!data || !Array.isArray(data.debate)) return base;
+    const byName = new Map(data.debate.map((item) => [item.name, item.text]));
+    return base.map((item) =>
+      byName.get(item.agent) ? { ...item, text: byName.get(item.agent), aiVoiced: true } : item,
+    );
+  } catch {
+    return base;
+  }
 }
 
 function createDebate({ request, action, approvedAmount, policyLimits, riskSignals, triggeredArticles }) {
@@ -1316,6 +1368,7 @@ function renderDebate(debate) {
               <strong>${escapeHtml(item.agent)}</strong>
               <small>${escapeHtml(item.department)} / ${escapeHtml(item.role)}</small>
               <span class="vote ${voteClass}">${escapeHtml(stanceLabel(item.stance))}</span>
+              ${item.aiVoiced ? '<span class="ai-voiced" title="由 Gonka 实时生成">Gonka AI</span>' : ""}
             </div>
             <p>${escapeHtml(item.text)}</p>
           </article>
