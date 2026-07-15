@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const html = await readFile(resolve(here, "../index.html"), "utf8");
 const appSource = await readFile(resolve(here, "../app.js"), "utf8");
+const styles = await readFile(resolve(here, "../styles.css"), "utf8");
 const vercelIgnore = await readFile(resolve(here, "../.vercelignore"), "utf8");
 
 const assertions = [
@@ -32,6 +33,7 @@ const assertions = [
   [appSource.includes('aria-label="编辑宪法条款'), "宪法编辑框具有可访问名称"],
   [!appSource.includes("shouldAutoRunJudgeDemo"), "产品代码不包含评委自动演示捷径"],
   [html.includes("Pocket Republic / 口袋共和国"), "Hero 显示中英文品牌"],
+  [/\.entry-brand\s*\{[^}]*font-size:\s*34px/s.test(styles), "Hero 品牌名使用放大的桌面字级"],
   [html.includes("建立你的个人 AI 国度"), "Hero 直接定义个人 AI 国度"],
   [html.includes('data-entry-action="review"'), "Hero 提供财政议案快捷入口"],
   [!/尚未升空|让我的国度升空|国家种子/.test(html), "Hero 删除升空隐喻"],

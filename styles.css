@@ -400,8 +400,9 @@ body:not(.pre-entry) .entry-screen {
   margin: 0;
   color: var(--paper);
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 34px;
   font-weight: 900;
+  line-height: 1.08;
 }
 
 .entry-track {
@@ -2697,7 +2698,7 @@ body:not(.pre-entry) .entry-screen {
   }
 
   .entry-brand {
-    font-size: 16px;
+    font-size: 22px;
   }
 
   .entry-track {
@@ -3398,6 +3399,10 @@ body::before {
 }
 
 @media (max-width: 390px) {
+  .entry-brand {
+    font-size: 19px;
+  }
+
   .protocol-steps {
     grid-template-columns: 1fr;
   }
