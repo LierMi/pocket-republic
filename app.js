@@ -166,7 +166,7 @@ const agentProfiles = [
 
 const mapDepartments = {
   treasury: {
-    status: "正在运转",
+    status: "当前开放 · MVP",
     title: "Kite 国库",
     description:
       "Agent Passport 是国民身份，Scoped Spending Session 是财政权限，x402 Receipt 是写进国家公报的执行记录。",
@@ -174,44 +174,47 @@ const mapDepartments = {
     view: "review",
   },
   garden: {
-    status: "未来入口",
+    status: "概念版图 · Roadmap v0.2",
     title: "心灵花园",
     description:
-      "不同陪伴 Agent 会识别焦虑、FOMO 和关系冲突，在重大行动前先提供稳定建议。商业上可发展为长期陪伴与关系复盘订阅。",
-    actionLabel: "等待部门启用",
-    view: null,
+      "未来由陪伴 Agent 协助用户标记焦虑、FOMO 与关系冲突，再把非必要支出送入国库冷静期。可进一步接入可验证推理服务；当前版本优先开放 Kite 国库治理。",
+    actionLabel: "查看国库治理",
+    view: "review",
+    requestId: "meme",
   },
   studio: {
-    status: "未来入口",
+    status: "已接入国库试验",
     title: "创作工坊",
     description:
-      "建设部长和创作 Agent 与用户共创项目、拆解任务，并在购买 API、素材和数据时自动提交国库议案。",
-    actionLabel: "等待部门启用",
-    view: null,
+      "建设部长与用户共创项目，并把 API、数据和工具采购提交为财政议案。当前可体验一笔外部 x402 数据服务采购，由宪法先审议，再交给 Kite 支付层。",
+    actionLabel: "审议一笔 API 采购",
+    view: "review",
+    requestId: "api",
   },
   academy: {
-    status: "未来入口",
+    status: "概念版图 · Roadmap v0.2",
     title: "学院",
     description:
-      "学习 Agent 负责课程规划、训练、考试和复盘。后续可以连接付费课程、教练和学习工具市场。",
-    actionLabel: "等待部门启用",
-    view: null,
+      "未来由考官 Agent 验证学习里程碑，再解锁下一阶段工具预算或奖励议案。当前版本只保留国库规则入口，不宣称已经实现自动托管与验证。",
+    actionLabel: "配置成长国度",
+    view: "setup",
   },
   embassy: {
-    status: "未来入口",
+    status: "概念版图 · Roadmap v0.2",
     title: "外交邮局",
     description:
-      "外交 Agent 代表用户与外部 Agent、商家和服务谈判，所有付费承诺都必须先经过个人宪法。",
-    actionLabel: "等待部门启用",
-    view: null,
+      "未来通过 Kite MCP 与外部 Agent、商家和按次付费服务协作；所有报价仍需先通过个人宪法，再进入受限 Spending Session。当前尚未开放自动谈判。",
+    actionLabel: "查看财政议案",
+    view: "review",
+    requestId: "api",
   },
   shop: {
-    status: "未来入口",
+    status: "概念版图 · Roadmap v0.2",
     title: "道具铺",
     description:
-      "用户可以安装专业 Agent 国民、国家模板和工作流。平台通过 Agent 订阅与工具交易抽成形成商业复利。",
-    actionLabel: "等待部门启用",
-    view: null,
+      "未来提供专业 Agent 国民、国库宪法模板和工作流市场，并由 Kite 国库完成受控购买。它将成为模板订阅、Agent 交易与平台抽成的商业入口。",
+    actionLabel: "选择国库模板",
+    view: "setup",
   },
 };
 
@@ -350,7 +353,8 @@ function bindEvents() {
   });
 
   document.querySelectorAll("[data-map-view]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
+      if (button.dataset.mapRequest) await selectRequest(button.dataset.mapRequest);
       if (button.dataset.mapView) setView(button.dataset.mapView);
     });
   });
@@ -582,6 +586,9 @@ function citizenPassportLabel(agent) {
 
 function renderMapDepartment(departmentId) {
   const department = mapDepartments[departmentId] ?? mapDepartments.treasury;
+  document.querySelectorAll("[data-map-target]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.mapTarget === departmentId);
+  });
   setText(elements.departmentStatus, department.status);
   setText(elements.departmentTitle, department.title);
   setText(elements.departmentDescription, department.description);
@@ -592,6 +599,11 @@ function renderMapDepartment(departmentId) {
       elements.departmentAction.dataset.mapView = department.view;
     } else {
       delete elements.departmentAction.dataset.mapView;
+    }
+    if (department.requestId) {
+      elements.departmentAction.dataset.mapRequest = department.requestId;
+    } else {
+      delete elements.departmentAction.dataset.mapRequest;
     }
   }
   if (elements.departmentCurrent) {
@@ -1311,8 +1323,59 @@ function renderGazette({ request, decision, execution }) {
           <dd>${escapeHtml(decision.decisionHash)}</dd>
         </div>
       </dl>
+      ${renderGazetteTerminal({ decision, execution })}
     `,
   );
+}
+
+function renderGazetteTerminal({ decision, execution }) {
+  const isSandbox = execution.txMode === "sandbox-ledger";
+  if (isSandbox) {
+    return `
+      <section class="gazette-terminal" data-execution-mode="sandbox" aria-label="沙盒执行记录">
+        <div class="gazette-terminal-heading">
+          <span>[SANDBOX] POCKET REPUBLIC POLICY SIMULATION</span>
+          <strong>非链上记录</strong>
+        </div>
+        <dl>
+          <div><dt>本地 Agent</dt><dd>${escapeHtml(latestPassport?.agentPassportId ?? "sandbox-agent")}</dd></div>
+          <div><dt>本地 Session</dt><dd>${escapeHtml(execution.session?.sessionId ?? "sandbox-session")}</dd></div>
+          <div><dt>推演支付</dt><dd>${execution.executedAmount} ${escapeHtml(execution.currency)}</dd></div>
+          <div><dt>宪法决策</dt><dd>${escapeHtml(decision.decisionHash)}</dd></div>
+        </dl>
+        <p>这份记录只证明 Pocket Republic 的宪法、议会与额度流程已经运行，不是 Kite 链上凭证，也不包含伪造交易哈希。</p>
+      </section>
+    `;
+  }
+
+  const agentPassportId = latestPassport?.status === "active" ? latestPassport.agentPassportId : null;
+  const sessionId = execution.session?.sessionId || null;
+  const settlementReference = execution.isOnchain ? execution.settlementReference : null;
+  const paidAmount = execution.executedAmount > 0 ? `${execution.executedAmount} ${execution.currency}` : null;
+  const fields = [
+    ["Agent Passport ID", agentPassportId],
+    ["Spending Session ID", sessionId],
+    ["Settlement Reference", settlementReference],
+    ["Paid Amount", paidAmount],
+  ].filter(([, value]) => Boolean(value));
+
+  return `
+    <section class="gazette-terminal" data-execution-mode="kite-passport" aria-label="Kite 真实执行字段">
+      <div class="gazette-terminal-heading">
+        <span>KITE PASSPORT EXECUTION</span>
+        <strong>${fields.length ? "Kite 返回字段" : "等待 Kite 返回执行字段"}</strong>
+      </div>
+      ${
+        fields.length
+          ? `<dl>${fields
+              .map(
+                ([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`,
+              )
+              .join("")}</dl>`
+          : '<p class="gazette-terminal-empty">当前尚无可展示的 Kite 执行字段。未返回的 Agent、Session 与结算信息不会被补造。</p>'
+      }
+    </section>
+  `;
 }
 
 function recordGazette({ request, decision, execution, trace, kind }) {

@@ -2068,8 +2068,17 @@ body:not(.pre-entry) .entry-screen {
 }
 
 .future-departments strong {
+  display: block;
+  margin-top: 7px;
   font-family: var(--display);
   font-size: 18px;
+}
+
+.future-departments article > span {
+  color: var(--mint);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 900;
 }
 
 .future-departments p {
@@ -2159,6 +2168,89 @@ body:not(.pre-entry) .entry-screen {
   font-size: 14px;
   font-weight: 800;
   line-height: 1.5;
+}
+
+.gazette-terminal {
+  margin-top: 24px;
+  overflow: hidden;
+  color: #e6e9e3;
+  border: 1px solid rgba(32, 32, 42, 0.8);
+  border-radius: var(--radius);
+  background: #151720;
+}
+
+.gazette-terminal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(248, 245, 237, 0.12);
+}
+
+.gazette-terminal-heading span,
+.gazette-terminal-heading strong,
+.gazette-terminal dt,
+.gazette-terminal dd {
+  font-family: var(--mono);
+}
+
+.gazette-terminal-heading span {
+  color: var(--mint);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.gazette-terminal-heading strong {
+  color: var(--yellow);
+  font-size: 9px;
+}
+
+.gazette-terminal dl {
+  margin: 0;
+  padding: 5px 14px;
+}
+
+.gazette-terminal dl div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(248, 245, 237, 0.08);
+}
+
+.gazette-terminal dl div:last-child {
+  border-bottom: 0;
+}
+
+.gazette-terminal dt {
+  color: #858598;
+  font-size: 9px;
+}
+
+.gazette-terminal dd {
+  margin: 0;
+  color: #d7e8e2;
+  font-size: 9px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.gazette-terminal > p {
+  margin: 0;
+  padding: 10px 14px;
+  color: #9ca0aa;
+  border-top: 1px solid rgba(248, 245, 237, 0.08);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.gazette-terminal[data-execution-mode="sandbox"] {
+  border-color: rgba(255, 214, 90, 0.36);
+}
+
+.gazette-terminal-empty {
+  border-top: 0 !important;
 }
 
 .gazette-side {
