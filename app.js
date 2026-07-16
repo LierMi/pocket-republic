@@ -57,7 +57,7 @@ const requests = {
   api: {
     id: "api",
     title: "购买一封云外市场晨报",
-    requester: "Ivo / 建设部长",
+    requester: "达·芬奇 / 建设部长",
     amount: 3,
     // 真实 x402 服务 StableCrypto 以 USDC 结算，此议案保持 USDC 以匹配链上实际资产。
     currency: "USDC",
@@ -77,7 +77,7 @@ const requests = {
   tool: {
     id: "tool",
     title: "AI 设计工具订阅",
-    requester: "Mira / 财政大臣",
+    requester: "巴菲特 / 财政大臣",
     amount: 49,
     currency: "USDT",
     merchant: "CanvasForge Pro",
@@ -93,85 +93,92 @@ const requests = {
 const agentProfiles = [
   {
     id: "prime",
-    name: "Sol",
+    name: "丘吉尔",
     role: "首相",
     englishRole: "Prime Minister",
     department: "内阁",
+    persona: "以决断与号召力著称的战时首相，善于在混乱中给出清晰方向。",
     duty: "统合各部意见，把议会结论翻译成你能一键执行的决定。",
     permissions: ["summarize", "coordinate", "vote"],
-    passport: "sandbox-agent:prime-minister:sol",
+    passport: "sandbox-agent:prime-minister:churchill",
     reputation: 94,
     voteClass: "vote-approve",
   },
   {
     id: "treasurer",
-    name: "Mira",
+    name: "巴菲特",
     role: "财政大臣",
     englishRole: "Treasurer",
     department: "Kite 国库",
+    persona: "极度自律的价值投资者，只为有把握的长期价值动用国库。",
     duty: "掌管 Kite 国库，只放行通过宪法的金额，多一分都进不了钱包。",
     permissions: ["read_budget", "propose_payment", "freeze_spend"],
-    passport: "sandbox-agent:treasurer:mira",
+    passport: "sandbox-agent:treasurer:buffett",
     reputation: 92,
     voteClass: "vote-reduce",
   },
   {
     id: "auditor",
-    name: "Rin",
+    name: "包拯",
     role: "审计官",
     englishRole: "Auditor",
     department: "审计院",
+    persona: "铁面无私的判官，最擅长识破话术与风险，绝不徇私。",
     duty: "扫描风险信号与历史记录，绝不让 Agent 顺着你的冲动签字。",
     permissions: ["audit", "risk_scan", "vote"],
-    passport: "sandbox-agent:auditor:rin",
+    passport: "sandbox-agent:auditor:baozheng",
     reputation: 91,
     voteClass: "vote-oppose",
   },
   {
     id: "builder",
-    name: "Ivo",
+    name: "达·芬奇",
     role: "建设部长",
     englishRole: "Builder",
     department: "创作工坊",
+    persona: "文艺复兴的全才工匠，把每一笔投入都对齐真正要做成的作品。",
     duty: "把每笔支出对齐项目目标，能省则省，给出更小的替代方案。",
     permissions: ["plan_project", "suggest_alternative", "vote"],
-    passport: "sandbox-agent:builder:ivo",
+    passport: "sandbox-agent:builder:davinci",
     reputation: 89,
     voteClass: "vote-approve",
   },
   {
     id: "opposition",
-    name: "Noa",
+    name: "苏格拉底",
     role: "反对党领袖",
     englishRole: "Opposition",
     department: "国民议会",
+    persona: "以诘问著称的哲人，永远追问“你真的需要它吗”。",
     duty: "被强制唱反调，替你挡住情绪和单一 Agent 的裹挟。",
     permissions: ["debate", "veto_warning", "vote"],
-    passport: "sandbox-agent:opposition:noa",
+    passport: "sandbox-agent:opposition:socrates",
     reputation: 88,
     voteClass: "vote-delay",
   },
   {
     id: "caretaker",
-    name: "Luma",
+    name: "尼采",
     role: "心灵部长",
     englishRole: "Caretaker",
     department: "心灵花园",
+    persona: "洞察情绪与意志的哲人，警惕从众与冲动，主张先克制再行动。",
     duty: "识别焦虑、FOMO 与深夜情绪，先把不可逆的决定按进冷静期。",
     permissions: ["emotion_check", "cooling_period", "vote"],
-    passport: "sandbox-agent:caretaker:luma",
+    passport: "sandbox-agent:caretaker:nietzsche",
     reputation: 90,
     voteClass: "vote-delay",
   },
   {
     id: "archivist",
-    name: "Vale",
+    name: "博尔赫斯",
     role: "书记官",
     englishRole: "Archivist",
     department: "档案馆",
+    persona: "痴迷图书馆与档案的作家，视世界为一座无穷图书馆，执着让每条记录精确、可追溯、不可篡改。",
     duty: "把每次审议、支付和你的推翻记录，写成可核验的国家公报。",
     permissions: ["write_gazette", "hash_record", "export_trace"],
-    passport: "sandbox-agent:archivist:vale",
+    passport: "sandbox-agent:archivist:borges",
     reputation: 93,
     voteClass: "vote-approve",
   },
@@ -627,11 +634,18 @@ function renderMapDepartment(departmentId) {
 }
 
 function renderConstitution() {
+  let lastChapter = "";
   setHtml(
     elements.constitutionGrid,
     constitutionArticles
-      .map(
-        (article) => `
+      .map((article) => {
+        const chapterHeader =
+          article.chapter && article.chapter !== lastChapter
+            ? `<h4 class="policy-chapter">${escapeHtml(article.chapter)}</h4>`
+            : "";
+        lastChapter = article.chapter || lastChapter;
+        return `
+          ${chapterHeader}
           <article class="policy-card editable-policy">
             <span>${escapeHtml(article.id)}</span>
             <strong>${escapeHtml(article.title)}</strong>
@@ -640,8 +654,8 @@ function renderConstitution() {
               <small class="policy-effect">${escapeHtml(policyEffectLabel(article.id))}</small>
             </div>
           </article>
-        `,
-      )
+        `;
+      })
       .join(""),
   );
 }
@@ -651,7 +665,11 @@ function policyEffectLabel(articleId) {
   if (articleId === "A2") return `当前生效：单笔审查线 ${policy.singleSpendLimit} USDT`;
   if (articleId === "A3") return `当前生效：高风险上限 ${policy.highRiskLimit} USDT`;
   if (articleId === "A4") return "当前生效：识别强时效与 FOMO 信号";
+  if (articleId === "A5") return "当前生效：情绪、里程碑与高风险行动保护";
   if (articleId === "A6") return "当前生效：允许补付差额并保留完整审计记录";
+  if (articleId === "A7") return "当前生效：多部门会签，任何 Agent 不得单独放行";
+  if (articleId === "A8") return "当前生效：全部写入国家公报并附决策哈希";
+  if (articleId === "A9") return "当前生效：忠于宪法，不迎合冲动、不泄露数据";
   return "已纳入下一次财政审议";
 }
 
@@ -1199,7 +1217,13 @@ async function buildCouncilDebate(context) {
           },
           agents: base.map((item) => {
             const profile = agentProfiles.find((agent) => agent.name === item.agent);
-            return { name: item.agent, role: item.role, duty: profile?.duty ?? "", stance: item.stance };
+            return {
+              name: item.agent,
+              role: item.role,
+              duty: profile?.duty ?? "",
+              persona: profile?.persona ?? "",
+              stance: item.stance,
+            };
           }),
         }),
       });
@@ -1226,14 +1250,14 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
 
   return [
     {
-      agent: "Vale",
+      agent: "博尔赫斯",
       role: "书记官",
       department: "档案馆",
       stance: "approve",
       text: `议案已登记：${request.title}，申请 ${request.amount} ${request.currency}。触发条款：${articleText}。`,
     },
     {
-      agent: "Rin",
+      agent: "包拯",
       role: "审计官",
       department: "审计院",
       stance: highRisk ? "oppose" : "approve",
@@ -1242,7 +1266,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
         : `未发现高风险资产信号，可以进入国库额度检查。`,
     },
     {
-      agent: "Mira",
+      agent: "巴菲特",
       role: "财政大臣",
       department: "Kite 国库",
       stance: action === "approve" ? "approve" : "reduce",
@@ -1252,7 +1276,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
           : `请求金额 ${request.amount} ${request.currency} 超出当前宪法边界，国库只放行 ${approvedAmount} ${request.currency}。`,
     },
     {
-      agent: "Ivo",
+      agent: "达·芬奇",
       role: "建设部长",
       department: "创作工坊",
       stance: missionAligned ? "approve" : "reduce",
@@ -1261,7 +1285,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
         : `建议先缩小试验金额，把剩余预算留给更确定的工具、API 或项目资产。`,
     },
     {
-      agent: "Noa",
+      agent: "苏格拉底",
       role: "反对党领袖",
       department: "国民议会",
       stance: fomo ? "delay" : "oppose",
@@ -1270,7 +1294,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
         : `我反对无条件通过，请先证明它符合国家目标和预算纪律。`,
     },
     {
-      agent: "Luma",
+      agent: "尼采",
       role: "心灵部长",
       department: "心灵花园",
       stance: fomo ? "delay" : "approve",
@@ -1279,7 +1303,7 @@ function createDebate({ request, action, approvedAmount, policyLimits, riskSigna
         : `没有明显强情绪信号，心灵部不阻止本次议案继续审议。`,
     },
     {
-      agent: "Sol",
+      agent: "丘吉尔",
       role: "首相",
       department: "内阁",
       stance: action === "approve" ? "approve" : "reduce",

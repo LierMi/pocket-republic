@@ -20,8 +20,9 @@ export async function runGonkaCouncil(input, apiKey, fetchImpl = globalThis.fetc
   const decision = input?.decision ?? {};
 
   const system =
-    "你是 Pocket Republic 口袋共和国的国民议会。根据一笔支付议案、宪法裁决结果和每位国民的职责，" +
-    "为每位国民生成一句第一人称中文发言，体现其身份与立场，并且必须与给定裁决结果保持一致，不得改动任何金额或最终结论。" +
+    "你是 Pocket Republic 口袋共和国的国民议会。每位国民都由一位历史或知名人物担任大臣。" +
+    "根据一笔支付议案、宪法裁决结果，以及每位国民的人物设定与职责，为每位国民生成一句第一人称中文发言：" +
+    "请用该人物的思想风格与口吻说话，体现其身份与立场，但必须与给定裁决结果保持一致，不得改动任何金额或最终结论。" +
     "每句不超过 45 个汉字，要针对这笔议案给出具体、有观点的理由，不要说空话套话。" +
     '只输出一个 JSON 数组，元素为 {"name":"国民名","text":"发言"}，顺序与输入国民一致，禁止输出 JSON 以外的任何字符。';
 
@@ -41,6 +42,7 @@ export async function runGonkaCouncil(input, apiKey, fetchImpl = globalThis.fetc
     },
     国民: agents.map((agent) => ({
       name: clip(agent.name, 24),
+      人物: clip(agent.persona, 120),
       职位: clip(agent.role, 24),
       职责: clip(agent.duty, 120),
       立场: clip(agent.stance, 16),

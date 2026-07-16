@@ -1354,8 +1354,9 @@ body:not(.pre-entry) .entry-screen {
 
 .citizen-list {
   display: grid;
-  grid-template-columns: 1.25fr 0.86fr 0.86fr 1.08fr;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 12px;
+  align-items: stretch;
 }
 
 .citizen-card {
@@ -1369,16 +1370,6 @@ body:not(.pre-entry) .entry-screen {
   background: var(--surface);
   transition: transform 260ms var(--ease-spring), border-color 180ms ease, box-shadow 220ms ease;
   transform-style: preserve-3d;
-}
-
-.citizen-card:nth-child(5),
-.citizen-card:nth-child(6),
-.citizen-card:nth-child(7) {
-  grid-column: span 1;
-}
-
-.citizen-card:nth-child(5) {
-  grid-column: 1 / span 2;
 }
 
 .citizen-card:hover {
@@ -1410,11 +1401,15 @@ body:not(.pre-entry) .entry-screen {
   place-items: center;
   width: 62px;
   height: 72px;
+  padding: 0 4px;
   color: #21130f;
   border-radius: 48% 52% 42% 58% / 58% 40% 60% 42%;
   background: var(--coral);
   font-family: var(--display);
+  font-size: 15px;
   font-weight: 900;
+  line-height: 1.05;
+  text-align: center;
 }
 
 .citizen-card:nth-child(4n + 2) .citizen-head span { background: var(--mint); }
@@ -1536,6 +1531,20 @@ body:not(.pre-entry) .entry-screen {
   display: grid;
   gap: 0;
   margin-top: 34px;
+}
+
+.policy-chapter {
+  margin: 26px 0 0;
+  color: var(--paper-ink);
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+
+.policy-chapter:first-child {
+  margin-top: 6px;
 }
 
 .policy-card {
@@ -2488,10 +2497,6 @@ body:not(.pre-entry) .entry-screen {
 
   .citizen-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .citizen-card:nth-child(5) {
-    grid-column: auto;
   }
 
   .request-list {

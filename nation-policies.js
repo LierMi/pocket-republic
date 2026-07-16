@@ -1,4 +1,4 @@
-export const nationPolicyVersion = 3;
+export const nationPolicyVersion = 4;
 
 export const nationTemplates = [
   {
@@ -154,39 +154,67 @@ export function decodeConstitutionRecord(record) {
 }
 
 export function buildConstitution(state) {
+  const protectedAssets =
+    Array.isArray(state.protectedAssets) && state.protectedAssets.length
+      ? state.protectedAssets.join("、")
+      : "时间、预算与长期判断";
   return [
     {
       id: "A1",
-      title: "国家目标",
-      text: `本阶段最重要的目标是：${state.mission}`,
+      chapter: "第一章 · 国家目标",
+      title: "国家使命",
+      text: `本阶段最重要的目标是：${state.mission} 国家优先保护${protectedAssets}；当任何支出与此目标冲突时，国库以长期利益为准，不为一时冲动让路。`,
     },
     {
       id: "A2",
-      title: "国库审查",
-      text: `任何单笔超过 ${state.singleSpendLimit} USDT 的支出，必须进入财政部和国民议会审查。`,
+      chapter: "第二章 · 财政纪律",
+      title: "国库审查线",
+      text: `任何单笔超过 ${state.singleSpendLimit} USDT 的支出，必须进入财政部和国民议会审查，说明用途、金额与预期回报后方可放行。`,
     },
     {
       id: "A3",
+      chapter: "第二章 · 财政纪律",
       title: "高风险上限",
       text:
         state.highRiskLimit === 0
-          ? "强情绪状态下，高风险与非必要支付默认批准上限为 0 USDT。"
-          : `高风险 Web3 购买、meme coin、未知 DEX 池或强投机行为，默认最多批准 ${state.highRiskLimit} USDT。`,
+          ? "强情绪状态下，高风险与非必要支付默认批准上限为 0 USDT，直到情绪解除。"
+          : `高风险 Web3 购买、meme coin、未知 DEX 池或强投机行为，默认最多批准 ${state.highRiskLimit} USDT，超出部分一律冻结。`,
     },
     {
       id: "A4",
+      chapter: "第二章 · 财政纪律",
       title: "冷静期",
       text: coolingArticle(state),
     },
     {
       id: "A5",
+      chapter: "第二章 · 财政纪律",
       title: state.id === "learning" ? "里程碑放行" : "行动保护",
       text: protectionArticle(state),
     },
     {
       id: "A6",
+      chapter: "第三章 · 立宪者权利",
       title: "用户主权",
-      text: "用户可以强制推翻议会，但必须生成用户主权国家公报，记录原始建议、决策哈希和最终执行金额。",
+      text: "立宪者可以强制推翻议会，但必须生成用户主权国家公报，记录原始建议、决策哈希与最终执行金额，任何推翻都留痕、不可抵赖。",
+    },
+    {
+      id: "A7",
+      chapter: "第四章 · 治理原则",
+      title: "议会制衡",
+      text: "任何单个 Agent 都无权单独放行支付。超过免审额度的议案，必须由财政大臣、审计官与相关部长会签，反对党领袖有权要求复议。",
+    },
+    {
+      id: "A8",
+      chapter: "第四章 · 治理原则",
+      title: "透明留痕",
+      text: "每一次审议、批准、执行、拒绝与推翻，都写入国家公报，附带决策哈希与时间戳，立宪者可随时导出与审计。",
+    },
+    {
+      id: "A9",
+      chapter: "第四章 · 治理原则",
+      title: "数据与忠诚",
+      text: "Agent 国民只为立宪者的长期利益服务：不得将国库数据泄露给外部，不得为迎合情绪而放宽宪法，不得隐瞒风险。",
     },
   ];
 }
