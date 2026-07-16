@@ -154,18 +154,50 @@ cp .env.example .env      # 填入 GONKA_API_KEY
 npm start                 # 打开 http://127.0.0.1:5180
 ```
 
-### 3. Kite Passport 真实支付模式
+### 3. Kite Passport 真实模式（含免费测试网）
 
-需要官方 CLI、登录、Passkey 与可用余额，凭证只留本机：
+官方 CLI 已内置在 `.kite-tools/bin/`，凭证只留本机（`.gitignore` / `.vercelignore` 已排除）。
+
+**A · 测试网（推荐，零真钱）** —— 用 Kite `dev` 环境 + faucet 免费领测试稳定币：
 
 ```bash
-curl -fsSL https://agentpassport.ai/install.sh | bash
-kpass login init && kpass login verify
-npm start
-# 打开 http://127.0.0.1:5180/?provider=kite
+DEV=https://passport.dev.gokite.ai
+K=./.kite-tools/bin/kpass
+
+# 1) 注册/登录（邮件收 8 位码）
+$K signup init  --email <邮箱> --base-url $DEV --client agent --output json
+$K signup exchange --signup-id <上一步 id> --code <邮件里的码> --base-url $DEV --output json
+
+# 2) 注册 Agent（财政大臣）
+$K agent:register --type pocket-republic-treasurer --base-url $DEV --output json
+
+# 3) 领免费测试稳定币（测试网用 PIEUSD，不是 USDC）
+$K wallet address --base-url $DEV --output json           # 取 Base 地址
+$K faucet drop --recipient <地址> --token PIEUSD --base-url $DEV --output json
+
+# 4) 创建 Spending Session → 打开返回的 approval_url，用 Passkey 批准（首次会引导建 Passkey）
+$K agent:session create --base-url $DEV --output json \
+  --delegation '{"task":{"summary":"x402 test"},"payment_policy":{"assets":["0x38129cf4CE5E183eFF248F42A7D345Bb1B47621A"],"max_amount_per_tx":"1","max_total_amount":"2","ttl_seconds":3600},"execution_constraints":{"x402_http":{"scope_mode":"scoped","allowed_endpoints":[{"method":"GET","host":"passport.dev.gokite.ai","path_prefix":"/x402/test"}]}}}'
 ```
 
-完整步骤见 [`docs/KITE_INTEGRATION.md`](./docs/KITE_INTEGRATION.md)。
+让 app 连到 dev（写进本地 `.env`，勿提交），再启动：
+
+```bash
+# .env
+KITE_PASSPORT_BASE_URL=https://passport.dev.gokite.ai
+KITE_ALLOWED_HOSTS=stablecrypto.dev,x402.dev.gokite.ai,passport.dev.gokite.ai
+```
+```bash
+npm start    # 打开 http://127.0.0.1:5180/?provider=kite
+```
+
+`?provider=kite` 下，国库大门四道门会显示**真实身份 + 真实已批准 Session**。
+
+> ⚠️ **诚实说明**：Kite 测试网的付款*执行*受"可执行服务目录"白名单限制——自助账户能预检、能创建并 Passkey 批准 Session，但对测试端点的最终结算需 Kite 为你的账户开白名单。未放行时页面诚实标注 **「测试网结算待放行 · Roadmap v0.2」**，绝不伪造 tx。
+
+**B · 主网（真实结算，约几分钱）** —— 同上但去掉 `--base-url`（默认 prod）、给钱包充值几毛 **USDC（Base）**，议案走可执行目录里的服务（如 StableCrypto），即可拿到真实 Receipt + settlement reference。
+
+更多细节见 [`docs/KITE_INTEGRATION.md`](./docs/KITE_INTEGRATION.md)。
 
 ---
 

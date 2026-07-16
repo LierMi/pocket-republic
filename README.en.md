@@ -154,18 +154,50 @@ cp .env.example .env      # add your GONKA_API_KEY
 npm start                 # open http://127.0.0.1:5180
 ```
 
-### 3. Kite Passport real-payment mode
+### 3. Kite Passport real mode (with a free testnet)
 
-Requires the official CLI, login, a Passkey, and a funded balance — credentials stay on your machine:
+The official CLI ships in `.kite-tools/bin/`; credentials stay on your machine (excluded by `.gitignore` / `.vercelignore`).
+
+**A · Testnet (recommended, zero real money)** — use Kite's `dev` environment + faucet for free test stablecoin:
 
 ```bash
-curl -fsSL https://agentpassport.ai/install.sh | bash
-kpass login init && kpass login verify
-npm start
-# open http://127.0.0.1:5180/?provider=kite
+DEV=https://passport.dev.gokite.ai
+K=./.kite-tools/bin/kpass
+
+# 1) Sign up / log in (an 8-char code is emailed to you)
+$K signup init  --email <email> --base-url $DEV --client agent --output json
+$K signup exchange --signup-id <id from step 1> --code <code from email> --base-url $DEV --output json
+
+# 2) Register the agent (the Treasurer)
+$K agent:register --type pocket-republic-treasurer --base-url $DEV --output json
+
+# 3) Claim free test stablecoin (testnet uses PIEUSD, not USDC)
+$K wallet address --base-url $DEV --output json           # get the Base address
+$K faucet drop --recipient <address> --token PIEUSD --base-url $DEV --output json
+
+# 4) Create a Spending Session → open the returned approval_url and approve with a Passkey
+$K agent:session create --base-url $DEV --output json \
+  --delegation '{"task":{"summary":"x402 test"},"payment_policy":{"assets":["0x38129cf4CE5E183eFF248F42A7D345Bb1B47621A"],"max_amount_per_tx":"1","max_total_amount":"2","ttl_seconds":3600},"execution_constraints":{"x402_http":{"scope_mode":"scoped","allowed_endpoints":[{"method":"GET","host":"passport.dev.gokite.ai","path_prefix":"/x402/test"}]}}}'
 ```
 
-Full steps in [`docs/KITE_INTEGRATION.md`](./docs/KITE_INTEGRATION.md).
+Point the app at dev (in a local `.env`, do not commit), then start:
+
+```bash
+# .env
+KITE_PASSPORT_BASE_URL=https://passport.dev.gokite.ai
+KITE_ALLOWED_HOSTS=stablecrypto.dev,x402.dev.gokite.ai,passport.dev.gokite.ai
+```
+```bash
+npm start    # open http://127.0.0.1:5180/?provider=kite
+```
+
+Under `?provider=kite`, the treasury's four gates light up with a **real identity + a real, Passkey-approved Session**.
+
+> ⚠️ **Honest note:** paid *execution* on Kite's testnet is gated by an "executable service catalog" allowlist — a self-serve account can preflight and create/approve a Session, but final settlement against the test endpoint needs Kite to allowlist your account. Until then the UI honestly shows **"testnet settlement pending · Roadmap v0.2"** and never fakes a tx.
+
+**B · Mainnet (real settlement, a few cents)** — same steps without `--base-url` (prod is default), fund the wallet with a little **USDC (Base)**, and route the motion to a catalog service (e.g. StableCrypto) to get a real Receipt + settlement reference.
+
+More detail in [`docs/KITE_INTEGRATION.md`](./docs/KITE_INTEGRATION.md).
 
 ---
 

@@ -951,16 +951,25 @@ async function executeDecision(request, decision, options = {}) {
   } catch (error) {
     latestTrace = null;
     latestExecution = null;
-    setText(elements.decisionTitle, "Kite 国库执行失败");
-    setText(elements.decisionPolicy, `议会结论已保留，但付款没有执行。${providerErrorMessage(error)}`);
-    setText(elements.statusMetric, "未执行");
-    setText(elements.traceId, "未生成账本");
+    const gated = isTestnetSettlementGated(error);
+    setText(elements.decisionTitle, gated ? "测试网结算待放行" : "Kite 国库执行失败");
+    setText(
+      elements.decisionPolicy,
+      gated
+        ? "身份、授权与 Passkey 批准已在 Kite 测试网全部完成；最终结算需 Kite 官方可执行目录白名单放行，属 Roadmap v0.2。议会结论已保留，绝不伪造链上凭证。"
+        : `议会结论已保留，但付款没有执行。${providerErrorMessage(error)}`,
+    );
+    setText(elements.statusMetric, gated ? "待放行" : "未执行");
+    setText(elements.traceId, gated ? "测试网待放行" : "未生成账本");
     setText(
       elements.tracePayload,
       JSON.stringify(
         {
-          status: "payment_not_executed",
+          status: gated ? "settlement_pending_testnet_allowlist" : "payment_not_executed",
           decisionHash: decision.decisionHash,
+          note: gated
+            ? "Kite 测试网身份、授权与 Passkey 批准已完成；结算受官方可执行目录白名单限制（Roadmap v0.2），未伪造 tx。"
+            : undefined,
           message: providerErrorMessage(error),
         },
         null,
@@ -969,9 +978,9 @@ async function executeDecision(request, decision, options = {}) {
     );
     if (elements.downloadTraceButton) elements.downloadTraceButton.disabled = true;
     if (elements.overrideButton) elements.overrideButton.disabled = true;
-    setText(elements.paymentState, "执行失败");
-    setText(elements.receiptState, "未生成");
-    if (elements.kiteGate) elements.kiteGate.dataset.kiteState = "error";
+    setText(elements.paymentState, gated ? "测试网待放行" : "执行失败");
+    setText(elements.receiptState, gated ? "Roadmap v0.2" : "未生成");
+    if (elements.kiteGate) elements.kiteGate.dataset.kiteState = gated ? "pending" : "error";
     return false;
   }
   latestTrace = trace;
@@ -2035,6 +2044,15 @@ function providerDisplayName(providerName) {
   if (providerName === "DemoKiteProvider") return "沙盒推演 · 非链上";
   if (providerName === "KitePassportBridgeProvider") return "Kite Passport 真实模式";
   return "Kite 国库";
+}
+
+function isTestnetSettlementGated(error) {
+  const message = (error instanceof Error ? error.message : String(error ?? "")).toLowerCase();
+  return (
+    message.includes("executable_catalog") ||
+    message.includes("not allowlisted for paid execution") ||
+    message.includes("payment_target_forbidden")
+  );
 }
 
 function providerErrorMessage(error) {
