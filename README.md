@@ -9,6 +9,7 @@
 [![Track](https://img.shields.io/badge/Kite%20AI-Make%20It%20Agent--Payable-ff5a52)](https://docs.gokite.ai/)
 [![AI Council](https://img.shields.io/badge/AI%20Council-Gonka-5de0c1)](https://gonkarouter.io/docs)
 [![Demo](https://img.shields.io/badge/Live-Sandbox-62cbe8)](https://pocket-republic.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-f5c451.svg)](./LICENSE)
 
 **🌐 [在线体验 pocket-republic.vercel.app](https://pocket-republic.vercel.app)**<br>
 **🎬 [Demo 演示视频](https://drive.google.com/file/d/19AXeu_3nqX_VKWEkK3kvlVZXHv-bjso5/view?usp=sharing)**
@@ -333,6 +334,10 @@ pocket-republic/
 
 - **[Kite AI](https://gokite.ai/)** —— Agent Passport、Scoped Spending Session、x402，让 Agent 拥有可验证的经济身份。
 - **[Gonka](https://gonkarouter.io/)** —— 为国民议会提供真实 AI 推理。
+
+## 📄 开源许可
+
+Pocket Republic 的项目代码采用 [MIT License](./LICENSE)。你可以使用、修改、分发和商用代码，但需要保留原始版权与许可声明。仓库中引用的第三方品牌、字体与视觉素材仍遵循各自的授权条款。
 
 <div align="center">
 
