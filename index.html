@@ -19,43 +19,51 @@
 
     <section class="entry-screen" id="entryScreen" aria-label="Pocket Republic 开屏页">
       <canvas id="entryFluidCanvas" class="entry-fluid-canvas" aria-hidden="true"></canvas>
-      <div class="entry-image art-slot art-slot-cover" data-art-slot="ART-00" aria-label="开屏主视觉占位">
-        <div class="art-slot-note">
-          <code>ART-00</code>
-          <strong>口袋共和国全景</strong>
-          <span>1920 x 1200，横版。云海中的完整幻想共和国，中央议会、国库、宪法庭与 Agent 国民清晰可见；童趣、超现实、原创，不出现任何现成动画角色。</span>
-        </div>
+      <div class="entry-figma-backdrop" data-art-slot="ART-00" aria-hidden="true">
+        <img src="./assets/figma-homepage/hero-background.png" alt="" />
       </div>
       <div class="entry-vignette" aria-hidden="true"></div>
-      <div class="entry-orbit entry-orbit-one" aria-hidden="true"></div>
-      <div class="entry-orbit entry-orbit-two" aria-hidden="true"></div>
+
+      <header class="entry-topnav">
+        <button class="entry-nav-brand" type="button" data-entry-action="home" aria-label="Pocket Republic 首页">
+          <img src="./assets/figma-homepage/brand-mark.svg" alt="" aria-hidden="true" />
+          <strong>Pocket Republic</strong>
+        </button>
+        <nav class="entry-nav-menu" aria-label="开屏导航">
+          <a class="active" href="#entryScreen">首页</a>
+          <a href="#entryManifesto">宪法宣言</a>
+          <button type="button" data-entry-action="review">财政议案</button>
+          <a href="#entryKiteNote">Kite 技术</a>
+        </nav>
+        <div class="entry-nav-actions">
+          <span>Sandbox</span>
+          <button type="button" data-entry-action="enter">进入国家</button>
+        </div>
+      </header>
+
+      <div class="entry-island-visual" aria-hidden="true">
+        <img src="./assets/figma-homepage/isometric-island.jpg" alt="" />
+        <i></i>
+      </div>
 
       <div class="entry-content">
-        <p class="entry-brand">Pocket Republic / 口袋共和国</p>
-        <p class="entry-track"><span aria-hidden="true">K</span>Kite AI Track · Agent Wallet &amp; Payment Governance</p>
-        <h1>当 AI 开始替你花钱，它需要的不只是一只钱包，而是一部宪法。</h1>
-        <p class="entry-title-cn">建立你的个人 AI 共和国——一个代表你行动、也替你花钱，但每一笔都受你宪法约束的治理层。</p>
-        <div class="entry-tech-note">
-          <strong>Kite 为 Agent 提供可验证的经济身份</strong>
-          <span>Passport 证明它是谁，Spending Session 限定它能花多少，x402 与 Receipt 记录它到底做了什么。</span>
-        </div>
+        <h1 class="entry-brand"><span>Pocket Republic</span><span>口袋共和国</span></h1>
         <div class="entry-actions">
-          <button class="button primary magnetic" type="button" data-entry-action="enter">
+          <button class="button entry-primary-cta magnetic" type="button" data-entry-action="enter">
             创建我的口袋共和国
           </button>
-          <button class="button ghost magnetic" type="button" data-entry-action="review">
-            <span class="button-symbol" aria-hidden="true">⚡</span>
-            提交一笔财政议案 <small>试玩 Demo</small>
+          <button class="entry-proposal-badge magnetic" type="button" data-entry-action="review">
+            <img src="./assets/figma-homepage/kite-badge-icon.png" alt="" aria-hidden="true" />
+            提交 1 笔财政议案
           </button>
         </div>
-        <p class="entry-demo-anchor">
-          <strong>核心演示</strong>
-          申请花 300 USDT 追高 Meme 币时，财政大臣与审计官依据宪法把上限压到 10 USDT，其余 290 USDT 进入 24 小时冷静期。
-        </p>
       </div>
-      <div class="entry-chapter" aria-label="建立个人共和国的四个步骤">
-        <span><b>01</b> 选择国家模板</span><span><b>02</b> 颁布个人宪法</span><span><b>03</b> 激活 Agent 国民</span><span><b>04</b> 审议财政与支付</span>
-      </div>
+
+      <a class="entry-scroll-cue" href="#entryManifesto" aria-label="查看宪法宣言">
+        <img src="./assets/figma-homepage/scroll-down.svg" alt="" aria-hidden="true" />
+      </a>
+      <p class="entry-manifesto" id="entryManifesto">当 AI 开始替你花钱，它需要的不只是一只钱包，而是一部宪法。</p>
+      <p class="entry-kite-note" id="entryKiteNote">Kite 为 Agent 提供可验证的经济身份：Passport 证明它是谁，Spending Session 限定它能花多少，x402 与 Receipt 记录它到底做了什么。</p>
       <div class="entry-iris" aria-hidden="true"></div>
     </section>
 
