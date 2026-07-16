@@ -97,12 +97,69 @@ flowchart TD
 
 ## 🤖 A parliament that actually thinks (real AI via Gonka)
 
-The seven citizens are no longer canned lines. On every review, **sponsor Gonka (Anthropic Messages-compatible)** generates, in real time, a line for each citizen that fits their role and stays consistent with the constitutional ruling:
+The seven citizens are no longer canned lines. On every review, **sponsor Gonka (Anthropic Messages-compatible, model `moonshotai/Kimi-K2.6`)** generates, in real time, a line for each citizen that fits their role and stays consistent with the constitutional ruling:
 
-- **Rin / Auditor**: the Telegram pump talk trips clauses A1–A4; I oppose any FOMO, but I accept the constitution releasing only 10 USDT.
-- **Luma / Caretaker**: the anxiety the group chat manufactured was just intercepted; a 24-hour cooldown lets the impulse burn off, and 10 USDT is enough to stay in the game.
+- **Bao Zheng / Auditor**: the Telegram pump talk trips clauses A1–A4; I oppose any FOMO, but I accept the constitution releasing only 10 USDT.
+- **Nietzsche / Caretaker**: the anxiety the group chat manufactured was just intercepted; a 24-hour cooldown lets the impulse burn off, and 10 USDT is enough to stay in the game.
 
 A `Gonka AI` tag lights up next to each speech; while the call is in flight the parliament shows **"AI thinking…"**. With no key or when offline, it gracefully falls back to built-in scripted lines — **the demo never stalls.**
+
+---
+
+## 👥 Citizen system: custom citizens + live reputation scores
+
+### Custom citizens
+
+All seven named ministers (Churchill / Buffett / Bao Zheng / da Vinci / Socrates / Nietzsche / Borges) are editable in-app; you can also **create your own citizens** to join the AI council debates.
+
+Technical implementation:
+- **`citizenStore`** persists in `localStorage` as `{ overrides: {id→patch}, custom: [...] }`.
+- **`getCitizens()`** merges the 7 built-ins, user overrides, and custom citizens into a single unified list — it's the only interface callers use.
+- **Portrait**: upload image → Canvas resize to 256 px JPEG 0.82 → data URL; or type an emoji directly.
+- **In the AI council**: `buildCouncilDebate()` passes each citizen's `persona` string to Gonka so the AI speaks in character. `scriptedSpeech()` switches on `citizen.id` for the built-in 7; custom citizens fall back to a stance-based generic line.
+
+### Live reputation scores (real computation)
+
+The score shown on each citizen card is **not hardcoded** — it's calculated in real time from gazette history as a stance alignment rate:
+
+```
+Every gazette entry now stores the full debate array.
+winningStance(action) maps the final ruling to the expected stance:
+  approve → "approve"  |  deny → "oppose"
+  reduce  → "reduce"   |  delay → "delay"
+  override_execute → skip (founder override doesn't count as a council verdict)
+
+score = base × (1-w) + (aligned / participated) × 100 × w
+w grows with gazette entries (saturates at ~0.6 after 4 entries)
+```
+
+When backed by real gazette data the score turns **cyan** and shows an "N entries" badge; hovering shows "Based on N gazette entries". Scores refresh immediately after each approved review.
+
+---
+
+## 📄 Nation passport export
+
+Click **"护照导出"** in the status ribbon to open a two-page visual passport dialog:
+
+| Cover (left) | Data page (right) |
+|---|---|
+| Deep navy background, gold SVG seal | Off-white, structured dark text |
+| Nation name / template / issue date | Bearer info (name / budget / citizen count / Agent passport ID / constitution hash) |
+| Decorative MRZ zone | First 5 constitution articles + last 4 gazette entries (color-coded by action) |
+
+**"↓ Download JSON"** exports a machine-readable passport file:
+```json
+{
+  "version": "pocket-republic-passport-v1",
+  "republic": { "name", "template", "mission", "monthlyBudget" },
+  "constitution": [ { "id", "chapter", "title", "text" } ],
+  "citizens": [ { "name", "role", "persona", "reputationScore", "custom" } ],
+  "gazette": [ { "title", "action", "approvedAmount", "decisionHash", "createdAt" } ],
+  "kite": { "agentPassportId", "sessionId", "providerMode" }
+}
+```
+
+**"Print / PDF"** calls `window.print()` with a `@media print` stylesheet that hides everything except the passport book — save directly as a shareable PDF.
 
 ---
 
@@ -113,7 +170,7 @@ The Kite treasury is the first building open, but a single personal constitution
 | Department | One line | Status |
 | --- | --- | --- |
 | 🏛️ **Treasury Gate / Kite Treasury** | The constitutional gate for agent payments | ✅ Shipped (core) |
-| 📜 **Archive / National Gazette** | A verifiable long-term governance record | ✅ Shipped |
+| 📜 **Archive / National Gazette** | Verifiable governance record + passport export + reputation scores | ✅ Shipped |
 | 🎨 **Studio** | Co-create with agents; purchases go through the treasury | 🧪 x402 procurement trial live |
 | 🌱 **Sanctuary** | Hits the brakes when emotion takes over | 🔜 Roadmap v0.2 |
 | 🎓 **Agent University** | Examiner agents verify your milestones before the next budget unlocks | 🔜 Roadmap v0.2 |
@@ -206,6 +263,9 @@ More detail in [`docs/KITE_INTEGRATION.md`](./docs/KITE_INTEGRATION.md).
 - **Frontend**: vanilla HTML / CSS / ES Modules, zero framework; original WebGL cloud sea, chaptered transitions, reduced-motion fallbacks.
 - **Bridge**: a Node `http` local server `server.mjs` that safely proxies the Kite CLI and Gonka.
 - **AI council**: `gonka.js` shared logic, used by both the local bridge and the Vercel Serverless function (`api/council.js`).
+- **Citizen data layer**: `citizenStore` (localStorage) + `getCitizens()` three-way merge + Canvas portrait compression.
+- **Reputation engine**: gazette stores full `debate` array → `winningStance()` → alignment-rate weighted blend.
+- **Passport export**: `openPassportExport()` (async, includes `constitutionHash()`) + `downloadPassportJson()` + `@media print`.
 
 ```bash
 npm test   # product structure / governance logic / FOMO risk / Kite envelope / bridge contracts
@@ -214,6 +274,9 @@ npm test   # product structure / governance logic / FOMO risk / Kite envelope / 
 ```text
 pocket-republic/
 ├── index.html · styles.css · app.js      # single-page product
+│   ├── citizenStore / getCitizens()       # citizen data layer (built-in + override + custom)
+│   ├── computeReputationScore()           # live reputation (gazette alignment rate)
+│   └── openPassportExport()              # passport export (visual + JSON + print)
 ├── governance.js                          # rule engine (sole authority on amount & votes)
 ├── nation-policies.js                     # four republic templates & constitutions
 ├── gonka.js                               # Gonka AI council (shared)
