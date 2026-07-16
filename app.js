@@ -102,6 +102,7 @@ const agentProfiles = [
     duty: "统合各部意见，把议会结论翻译成你能一键执行的决定。",
     permissions: ["summarize", "coordinate", "vote"],
     passport: "sandbox-agent:prime-minister:churchill",
+    portrait: "./assets/citizens/sol.png",
     reputation: 94,
     voteClass: "vote-approve",
   },
@@ -115,6 +116,7 @@ const agentProfiles = [
     duty: "掌管 Kite 国库，只放行通过宪法的金额，多一分都进不了钱包。",
     permissions: ["read_budget", "propose_payment", "freeze_spend"],
     passport: "sandbox-agent:treasurer:buffett",
+    portrait: "./assets/citizens/mira.png",
     reputation: 92,
     voteClass: "vote-reduce",
   },
@@ -128,6 +130,7 @@ const agentProfiles = [
     duty: "扫描风险信号与历史记录，绝不让 Agent 顺着你的冲动签字。",
     permissions: ["audit", "risk_scan", "vote"],
     passport: "sandbox-agent:auditor:baozheng",
+    portrait: "./assets/citizens/rin.png",
     reputation: 91,
     voteClass: "vote-oppose",
   },
@@ -141,6 +144,7 @@ const agentProfiles = [
     duty: "把每笔支出对齐项目目标，能省则省，给出更小的替代方案。",
     permissions: ["plan_project", "suggest_alternative", "vote"],
     passport: "sandbox-agent:builder:davinci",
+    portrait: "./assets/citizens/ivo.png",
     reputation: 89,
     voteClass: "vote-approve",
   },
@@ -154,6 +158,7 @@ const agentProfiles = [
     duty: "被强制唱反调，替你挡住情绪和单一 Agent 的裹挟。",
     permissions: ["debate", "veto_warning", "vote"],
     passport: "sandbox-agent:opposition:socrates",
+    portrait: "./assets/citizens/noa.png",
     reputation: 88,
     voteClass: "vote-delay",
   },
@@ -167,6 +172,7 @@ const agentProfiles = [
     duty: "识别焦虑、FOMO 与深夜情绪，先把不可逆的决定按进冷静期。",
     permissions: ["emotion_check", "cooling_period", "vote"],
     passport: "sandbox-agent:caretaker:nietzsche",
+    portrait: "./assets/citizens/luma.png",
     reputation: 90,
     voteClass: "vote-delay",
   },
@@ -180,6 +186,7 @@ const agentProfiles = [
     duty: "把每次审议、支付和你的推翻记录，写成可核验的国家公报。",
     permissions: ["write_gazette", "hash_record", "export_trace"],
     passport: "sandbox-agent:archivist:borges",
+    portrait: "./assets/citizens/vale.png",
     reputation: 93,
     voteClass: "vote-approve",
   },
@@ -221,7 +228,7 @@ const stanceVoteClass = {
 function getCitizens() {
   const base = agentProfiles.map((agent) => {
     const override = citizenStore.overrides[agent.id];
-    return override ? { ...agent, ...override, id: agent.id } : agent;
+    return override ? { ...agent, ...override, id: agent.id, customized: true } : agent;
   });
   const custom = citizenStore.custom.map((citizen) => ({
     department: "自定义部门",
@@ -244,9 +251,18 @@ function getCitizenByName(name) {
   return getCitizens().find((citizen) => citizen.name === name);
 }
 
+function isCitizenImageSource(value) {
+  return typeof value === "string"
+    && (value.startsWith("data:image")
+      || value.startsWith("http://")
+      || value.startsWith("https://")
+      || value.startsWith("./assets/")
+      || value.startsWith("/assets/"));
+}
+
 function citizenAvatarHtml(citizen) {
   const portrait = citizen?.portrait;
-  if (typeof portrait === "string" && (portrait.startsWith("data:image") || portrait.startsWith("http"))) {
+  if (isCitizenImageSource(portrait)) {
     return `<span class="citizen-avatar has-image"><img src="${escapeHtml(portrait)}" alt="" /></span>`;
   }
   if (typeof portrait === "string" && portrait.trim()) {
@@ -282,7 +298,7 @@ function openCitizenEditor(id) {
 function renderEditorAvatar() {
   if (!elements.citizenAvatarPreview) return;
   const portrait = editorPortrait;
-  if (portrait && (portrait.startsWith("data:image") || portrait.startsWith("http"))) {
+  if (isCitizenImageSource(portrait)) {
     setHtml(elements.citizenAvatarPreview, `<img src="${escapeHtml(portrait)}" alt="" />`);
   } else if (portrait) {
     setText(elements.citizenAvatarPreview, portrait);
@@ -506,6 +522,19 @@ const elements = {
   departmentDescription: document.querySelector("#departmentDescription"),
   departmentAction: document.querySelector("#departmentAction"),
   providerModeButton: document.querySelector("#providerModeButton"),
+  exportPassportBtn: document.querySelector("#exportPassportBtn"),
+  passportDialog: document.querySelector("#passportExport"),
+  ppTitle: document.querySelector("#ppTitle"),
+  ppSubtitle: document.querySelector("#ppSubtitle"),
+  ppIssuedDate: document.querySelector("#ppIssuedDate"),
+  ppCoverMrz: document.querySelector("#ppCoverMrz"),
+  ppBearer: document.querySelector("#ppBearer"),
+  ppArticles: document.querySelector("#ppArticles"),
+  ppGazette: document.querySelector("#ppGazette"),
+  ppDataMrz: document.querySelector("#ppDataMrz"),
+  closePassportBtn: document.querySelector("#closePassportBtn"),
+  downloadPassportJsonBtn: document.querySelector("#downloadPassportJsonBtn"),
+  printPassportBtn: document.querySelector("#printPassportBtn"),
   kiteGate: document.querySelector("#kiteGate"),
   providerDetail: document.querySelector("#providerDetail"),
   providerModeBadge: document.querySelector("#providerModeBadge"),
@@ -672,6 +701,11 @@ function bindEvents() {
     if (!latestTrace) return;
     downloadJson(latestTrace, `pocket-republic-trace-${activeRequestId}.json`);
   });
+
+  elements.exportPassportBtn?.addEventListener("click", openPassportExport);
+  elements.closePassportBtn?.addEventListener("click", () => elements.passportDialog?.close());
+  elements.downloadPassportJsonBtn?.addEventListener("click", downloadPassportJson);
+  elements.printPassportBtn?.addEventListener("click", () => window.print());
 
 }
 
@@ -2208,6 +2242,117 @@ function downloadJson(payload, filename) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+async function openPassportExport() {
+  if (!elements.passportDialog) return;
+  const hash = await constitutionHash();
+  const gazette = readGazetteHistory();
+  const citizens = getCitizens();
+  const template = nationTemplates.find((t) => t.id === nationState.id) ?? nationTemplates[0];
+  const issuedDate = new Date().toISOString().slice(0, 10);
+  const nationName = nationState.nationName || template.nationName;
+
+  setText(elements.ppTitle, nationName);
+  setText(elements.ppSubtitle, template.cn);
+  setText(elements.ppIssuedDate, `签发 ${issuedDate}`);
+
+  // 封面机读区（装饰性）
+  const mrzSlug = Array.from(nationName).map((c) => (/[一-龥]/.test(c) ? "<" : c.toUpperCase().replace(/[^A-Z0-9]/, "<"))).join("").slice(0, 22).padEnd(22, "<");
+  setHtml(elements.ppCoverMrz, `P&lt;REPUBLIC&lt;&lt;${mrzSlug}&lt;&lt;&lt;<br>${hash.slice(2, 36).toUpperCase()}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;`);
+
+  // 持有者信息
+  const agentId = latestPassport?.agentPassportId && latestPassport.agentPassportId !== "not-registered"
+    ? latestPassport.agentPassportId.slice(0, 20) + "…"
+    : "沙盒模式";
+  const missionText = (nationState.mission || "").length > 40
+    ? nationState.mission.slice(0, 40) + "…"
+    : (nationState.mission || "—");
+  setHtml(elements.ppBearer, [
+    ["国家名称", nationName],
+    ["治理模板", template.cn],
+    ["国家使命", missionText],
+    ["月度预算", `${nationState.monthlyBudget} USDT`],
+    ["国民数量", `${citizens.length} 位`],
+    ["Agent 护照", agentId],
+    ["宪法哈希", `${hash.slice(0, 14)}…`],
+    ["签发日期", issuedDate],
+  ].map(([k, v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join(""));
+
+  // 宪法（前5条）
+  setHtml(elements.ppArticles, constitutionArticles.slice(0, 5).map((a) => {
+    const short = a.text.length > 52 ? a.text.slice(0, 52) + "…" : a.text;
+    return `<li><strong>${escapeHtml(a.id)}</strong><em>${escapeHtml(a.title)}</em><span>${escapeHtml(short)}</span></li>`;
+  }).join(""));
+
+  // 公报（最近4条）
+  const actionCn = { approve: "批准", deny: "拒绝", reduce_payment: "缩减", delay: "延期", override_execute: "立宪覆盖", policy_block: "宪法拦截" };
+  setHtml(elements.ppGazette, gazette.length > 0
+    ? gazette.slice(0, 4).map((g) => {
+        const cls = g.action === "approve" ? "pp-g-approve" : g.action === "deny" || g.action === "policy_block" ? "pp-g-deny" : "pp-g-reduce";
+        const label = actionCn[g.action] ?? g.action;
+        const date = g.createdAt ? new Date(g.createdAt).toLocaleDateString("zh-CN") : "";
+        return `<li class="${cls}"><strong>${escapeHtml(label)}</strong>${escapeHtml(g.title)} · <em>${g.approvedAmount} ${escapeHtml(g.currency)}</em><small>${date}</small></li>`;
+      }).join("")
+    : '<li class="pp-g-empty">暂无公报记录</li>');
+
+  // 数据页机读区
+  setHtml(elements.ppDataMrz, `${hash.slice(2, 42).toUpperCase()}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>CITIZENS${String(citizens.length).padStart(2, "0")}&lt;&lt;GAZETTE${String(gazette.length).padStart(2, "0")}&lt;&lt;${issuedDate.replace(/-/g, "")}`);
+
+  elements.passportDialog.showModal();
+}
+
+function downloadPassportJson() {
+  const gazette = readGazetteHistory();
+  const citizens = getCitizens();
+  const template = nationTemplates.find((t) => t.id === nationState.id) ?? nationTemplates[0];
+  const passport = {
+    version: "pocket-republic-passport-v1",
+    issuedAt: new Date().toISOString(),
+    republic: {
+      name: nationState.nationName || template.nationName,
+      template: nationState.id,
+      templateCn: template.cn,
+      templateEn: template.en,
+      mission: nationState.mission,
+      monthlyBudget: nationState.monthlyBudget,
+      singleSpendLimit: nationState.singleSpendLimit,
+      highRiskLimit: nationState.highRiskLimit,
+    },
+    constitution: constitutionArticles.map((a) => ({
+      id: a.id,
+      chapter: a.chapter,
+      title: a.title,
+      text: a.text,
+    })),
+    citizens: citizens.map((c) => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      department: c.department,
+      persona: c.persona,
+      reputationScore: computeReputationScore(c, gazette),
+      custom: c.custom ?? false,
+    })),
+    gazette: gazette.map((g) => ({
+      id: g.id,
+      title: g.title,
+      action: g.action,
+      requestedAmount: g.requestedAmount,
+      approvedAmount: g.approvedAmount,
+      currency: g.currency,
+      proofMode: g.proofMode,
+      decisionHash: g.decisionHash,
+      createdAt: g.createdAt,
+    })),
+    kite: {
+      agentPassportId: latestPassport?.agentPassportId ?? null,
+      sessionId: latestPassport?.sessionId ?? null,
+      providerMode: provider.providerMode,
+    },
+  };
+  const safeName = (nationState.nationName || "republic").replace(/[^\w一-龥]/g, "-");
+  downloadJson(passport, `pocket-republic-passport-${safeName}-${new Date().toISOString().slice(0, 10)}.json`);
 }
 
 function setText(element, value) {

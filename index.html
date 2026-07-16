@@ -101,6 +101,7 @@
           <span>我的国家</span>
           <strong id="nationName">大雄的云上王国</strong>
           <p id="nationMission">本阶段目标：把重要目标拆成可执行计划。</p>
+          <button class="export-passport-trigger" id="exportPassportBtn" type="button" title="导出国家护照 · Export Nation Passport">护照导出</button>
         </div>
         <dl class="nation-metrics">
           <div>
@@ -519,6 +520,51 @@
           <button type="button" class="button primary" id="citizenSave">保存</button>
         </div>
       </form>
+    </dialog>
+
+    <!-- 国家护照导出弹窗 -->
+    <dialog class="passport-export-dialog" id="passportExport" aria-label="国家护照">
+      <div class="passport-book" id="passportBook">
+        <!-- 封面页 -->
+        <div class="passport-page passport-cover-page">
+          <div class="pp-cover-border" aria-hidden="true"></div>
+          <p class="pp-issuer-text">口袋共和国 · POCKET REPUBLIC</p>
+          <div class="pp-seal" aria-hidden="true">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="30" r="27" stroke="#c9a84c" stroke-width="1.5"/>
+              <circle cx="30" cy="30" r="21" stroke="#c9a84c" stroke-width="0.5"/>
+              <text x="30" y="26" text-anchor="middle" fill="#c9a84c" font-size="9.5" font-family="serif">口袋</text>
+              <text x="30" y="38" text-anchor="middle" fill="#c9a84c" font-size="9.5" font-family="serif">共和国</text>
+            </svg>
+          </div>
+          <p class="pp-passport-label">PASSPORT · 护照</p>
+          <h2 class="pp-nation-name" id="ppTitle">大雄的云上王国</h2>
+          <p class="pp-template-name" id="ppSubtitle">创作者共和国</p>
+          <p class="pp-issued" id="ppIssuedDate">签发 2026-07-16</p>
+          <div class="pp-mrz" id="ppCoverMrz" aria-label="机读区"></div>
+        </div>
+        <!-- 数据页 -->
+        <div class="passport-page passport-data-page">
+          <section class="pp-section">
+            <h3 class="pp-section-title">持有者 / BEARER</h3>
+            <dl class="pp-dl" id="ppBearer"></dl>
+          </section>
+          <section class="pp-section">
+            <h3 class="pp-section-title">宪法 / CONSTITUTION</h3>
+            <ol class="pp-articles" id="ppArticles"></ol>
+          </section>
+          <section class="pp-section">
+            <h3 class="pp-section-title">公报 / GAZETTE</h3>
+            <ul class="pp-gazette-list" id="ppGazette"></ul>
+          </section>
+          <div class="pp-mrz pp-mrz-data" id="ppDataMrz" aria-label="机读区"></div>
+        </div>
+      </div>
+      <div class="passport-export-actions">
+        <button class="pp-btn pp-btn-ghost" id="closePassportBtn" type="button">关闭</button>
+        <button class="pp-btn" id="downloadPassportJsonBtn" type="button">↓ 下载 JSON</button>
+        <button class="pp-btn pp-btn-print" id="printPassportBtn" type="button">打印 / PDF</button>
+      </div>
     </dialog>
 
     <div class="interaction-ripple-layer" aria-hidden="true"></div>
