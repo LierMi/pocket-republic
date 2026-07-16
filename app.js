@@ -396,60 +396,6 @@ function deleteCitizenFromEditor() {
   elements.citizenEditor?.close?.();
 }
 
-const mapDepartments = {
-  treasury: {
-    status: "当前开放 · MVP",
-    title: "Kite 国库",
-    description:
-      "Agent Passport 是国民身份，Scoped Spending Session 是财政权限，x402 Receipt 是写进国家公报的执行记录。",
-    actionLabel: "前往财政议案",
-    view: "review",
-  },
-  garden: {
-    status: "概念版图 · Roadmap v0.2",
-    title: "心灵花园",
-    description:
-      "情绪上头时替你踩刹车：陪伴 Agent 识别焦虑、FOMO 与深夜冲动，把非必要支出按进冷静期——比如深夜想追高 meme 币，先冻结 24 小时再说。",
-    actionLabel: "看一笔冲动消费审查",
-    view: "review",
-    requestId: "meme",
-  },
-  studio: {
-    status: "已接入国库试验",
-    title: "创作工坊",
-    description:
-      "建设部长与用户共创项目，并把 API、数据和工具采购提交为财政议案。当前可体验一笔外部 x402 数据服务采购，由宪法先审议，再交给 Kite 支付层。",
-    actionLabel: "审议一笔 API 采购",
-    view: "review",
-    requestId: "api",
-  },
-  academy: {
-    status: "概念版图 · Roadmap v0.2",
-    title: "Agent 大学",
-    description:
-      "把学习目标变成任务：考官 Agent 验证你完成的里程碑后，才解锁下一门课程或工具的预算——学得越扎实，能动用的预算越多。当前版本只保留国库规则入口。",
-    actionLabel: "配置成长共和国",
-    view: "setup",
-  },
-  embassy: {
-    status: "概念版图 · Roadmap v0.2",
-    title: "佣兵公会",
-    description:
-      "雇国境外的 AI Agent 与按次付费 API 替你干活——比如让一个数据 Agent 抓一份行业报告。每次雇佣都是一笔 x402 议案，先过宪法、再从国库按次付款。",
-    actionLabel: "看一笔 x402 雇佣",
-    view: "review",
-    requestId: "api",
-  },
-  shop: {
-    status: "概念版图 · Roadmap v0.2",
-    title: "道具铺",
-    description:
-      "未来提供专业 Agent 国民、国库宪法模板和工作流市场，并由 Kite 国库完成受控购买。它将成为模板订阅、Agent 交易与平台抽成的商业入口。",
-    actionLabel: "选择国库模板",
-    view: "setup",
-  },
-};
-
 const elements = {
   entryButtons: [...document.querySelectorAll("[data-entry-action]")],
   viewButtons: [...document.querySelectorAll("[data-view-tab]")],
@@ -517,11 +463,6 @@ const elements = {
   balanceMetric: document.querySelector("#balanceMetric"),
   frozenMetric: document.querySelector("#frozenMetric"),
   triggeredLaws: document.querySelector("#triggeredLaws"),
-  departmentCurrent: document.querySelector("#departmentCurrent"),
-  departmentStatus: document.querySelector("#departmentStatus"),
-  departmentTitle: document.querySelector("#departmentTitle"),
-  departmentDescription: document.querySelector("#departmentDescription"),
-  departmentAction: document.querySelector("#departmentAction"),
   providerModeButton: document.querySelector("#providerModeButton"),
   exportPassportBtn: document.querySelector("#exportPassportBtn"),
   passportDialog: document.querySelector("#passportExport"),
@@ -567,7 +508,6 @@ async function init() {
   renderCitizens();
   renderConstitution();
   renderRequestList();
-  renderMapDepartment("treasury");
   bindEvents();
   await renderProviderStatus();
   setView("setup");
@@ -629,17 +569,6 @@ function bindEvents() {
       url.searchParams.set("provider", "kite");
     }
     window.location.assign(url.toString());
-  });
-
-  document.querySelectorAll("[data-map-view]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      if (button.dataset.mapRequest) await selectRequest(button.dataset.mapRequest);
-      if (button.dataset.mapView) setView(button.dataset.mapView);
-    });
-  });
-
-  document.querySelectorAll("[data-map-target]").forEach((button) => {
-    button.addEventListener("click", () => renderMapDepartment(button.dataset.mapTarget));
   });
 
   elements.templateOptions?.addEventListener("click", (event) => {
@@ -944,34 +873,6 @@ function citizenPassportLabel(agent) {
   if (agent.id !== "treasurer") return "后续阶段 · 待注册";
   if (!latestPassport || latestPassport.agentPassportId === "not-registered") return "Kite Agent · 待注册";
   return latestPassport.agentPassportId;
-}
-
-function renderMapDepartment(departmentId) {
-  const department = mapDepartments[departmentId] ?? mapDepartments.treasury;
-  document.querySelectorAll("[data-map-target]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.mapTarget === departmentId);
-  });
-  setText(elements.departmentStatus, department.status);
-  setText(elements.departmentTitle, department.title);
-  setText(elements.departmentDescription, department.description);
-  setText(elements.departmentAction, department.actionLabel);
-  if (elements.departmentAction) {
-    elements.departmentAction.disabled = !department.view;
-    if (department.view) {
-      elements.departmentAction.dataset.mapView = department.view;
-    } else {
-      delete elements.departmentAction.dataset.mapView;
-    }
-    if (department.requestId) {
-      elements.departmentAction.dataset.mapRequest = department.requestId;
-    } else {
-      delete elements.departmentAction.dataset.mapRequest;
-    }
-  }
-  if (elements.departmentCurrent) {
-    elements.departmentCurrent.dataset.department = departmentId;
-    pulseElement(elements.departmentCurrent);
-  }
 }
 
 function renderConstitution() {

@@ -22,12 +22,11 @@ const assertions = [
   [html.includes('data-art-slot="ART-02"'), "存在 ART-02 Agent 群像槽"],
   [html.includes('data-art-slot="ART-03"'), "存在 ART-03 宪法大厅槽"],
   [html.includes('data-art-slot="ART-04"'), "存在 ART-04 国库大厅槽"],
-  [html.includes('data-art-slot="ART-05"'), "存在 ART-05 国家地图槽"],
   [html.includes('data-art-slot="ART-06"'), "存在 ART-06 公报装饰槽"],
-  [html.includes('id="departmentStatus"'), "地图存在部门开放状态"],
-  [html.includes('id="departmentTitle"'), "地图存在动态部门标题"],
-  [html.includes('id="departmentDescription"'), "地图存在动态部门说明"],
-  [html.includes('id="departmentAction"'), "地图存在动态部门动作"],
+  [!html.includes('data-view-panel="map"'), "国家地图概念页已从 MVP 移除"],
+  [!html.includes('data-view-tab="map"'), "主导航不再展示国家地图"],
+  [html.indexOf('class="citizen-section"') < html.indexOf('class="view-intro setup-intro"'), "Agent 国民卡片位于建国页最前"],
+  [/\/\* Cloud kingdom narrative layer \*\/[\s\S]{0,180}body\s*\{[^}]*background:\s*#fff/s.test(styles), "浅色工作区使用白色背景"],
   [html.includes('id="nationNameInput"'), "建国流程允许命名个人共和国"],
   [html.includes('<strong id="nationName">大雄的云上王国</strong>'), "默认国名使用大雄的云上王国"],
   [html.includes('id="milestoneVerifiedInput"'), "财政议案可提交学习里程碑证明"],
@@ -47,9 +46,6 @@ const assertions = [
   [appSource.includes("mission: template.mission"), "切换国家模板会载入对应的默认使命"],
   [appSource.includes("walletMetrics") && appSource.includes("approvalRoute"), "国家模板卡展示钱包指标与审批路线"],
   [appSource.includes("providerMode") && appSource.includes("policyPreview"), "策略预览区分沙盒与真实 Passport"],
-  [appSource.includes('status: "概念版图 · Roadmap v0.2"'), "未来部门明确标注 Roadmap 状态"],
-  [appSource.includes('status: "已接入国库试验"'), "创作工坊连接现有国库试验"],
-  [appSource.includes('requestId: "api"'), "创作工坊入口打开 API 采购议案"],
   [appSource.includes("function renderGazetteTerminal"), "国家公报包含动态 Kite 执行终端"],
   [appSource.includes("[SANDBOX]") && appSource.includes("非链上记录"), "沙盒终端明确声明不是链上证明"],
   [appSource.includes("settlementReference") && appSource.includes("agentPassportId"), "真实终端只读取 Kite 返回的身份与结算字段"],
@@ -58,7 +54,7 @@ const assertions = [
   [vercelIgnore.includes("server.mjs"), "Vercel 沙盒不发布本地凭证桥接"],
 ];
 
-const viewNames = ["setup", "constitution", "review", "map", "trace"];
+const viewNames = ["setup", "constitution", "review", "trace"];
 for (const viewName of viewNames) {
   const panelMatches = html.match(new RegExp(`data-view-panel="${viewName}"`, "g")) ?? [];
   assertions.push([
@@ -67,11 +63,8 @@ for (const viewName of viewNames) {
   ]);
 }
 
-const navMatches = html.match(/data-view-tab="(?:setup|constitution|review|map|trace)"/g) ?? [];
-assertions.push([navMatches.length === 5, "主导航恰好包含五个产品入口"]);
-
-const hotspotMatches = html.match(/data-map-target="(?:treasury|garden|studio|academy|embassy|shop)"/g) ?? [];
-assertions.push([hotspotMatches.length === 6, "国家地图包含六个可点击部门入口"]);
+const navMatches = html.match(/data-view-tab="(?:setup|constitution|review|trace)"/g) ?? [];
+assertions.push([navMatches.length === 4, "主导航恰好包含四个核心产品入口"]);
 
 const failures = assertions.filter(([passed]) => !passed);
 

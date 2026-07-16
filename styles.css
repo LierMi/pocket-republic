@@ -668,7 +668,7 @@ body:not(.pre-entry) .entry-screen {
 .nation-nav {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(82px, 1fr));
+  grid-template-columns: repeat(4, minmax(92px, 1fr));
   gap: 4px;
   padding: 5px;
   border: 1px solid var(--line);
@@ -1347,6 +1347,14 @@ body:not(.pre-entry) .entry-screen {
 
 .citizen-section {
   padding: 30px 0 110px;
+}
+
+[data-view-panel="setup"] > .citizen-section {
+  padding: 34px 0 64px;
+}
+
+[data-view-panel="setup"] > .citizen-section + .setup-intro {
+  padding-top: 38px;
 }
 
 .citizen-heading {
@@ -3367,6 +3375,10 @@ body:not(.pre-entry) .entry-screen {
     aspect-ratio: 16 / 9;
   }
 
+  [data-view-panel="setup"] > .citizen-section {
+    padding: 24px 0 46px;
+  }
+
   .citizen-card {
     min-height: 280px;
   }
@@ -3590,16 +3602,16 @@ body:not(.pre-entry) .entry-screen {
 
 /* Cloud kingdom narrative layer */
 body {
-  background: #c8cace;
+  background: #fff;
 }
 
 body::before {
   opacity: 1;
-  background: linear-gradient(180deg, #b8bbc0 0%, #d6d8db 34%, #e3e4e5 66%, #bec1c5 100%);
+  background: #fff;
 }
 
 .entry-screen {
-  background: #c4c6ca;
+  background: #fff;
 }
 
 .entry-image {
