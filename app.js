@@ -542,6 +542,7 @@ const elements = {
   sessionState: document.querySelector("#sessionState"),
   paymentState: document.querySelector("#paymentState"),
   receiptState: document.querySelector("#receiptState"),
+  treasuryCoreStatus: document.querySelector("#treasuryCoreStatus"),
 };
 
 let activeRequestId = "meme";
@@ -834,46 +835,106 @@ function renderCitizens() {
       ).length;
       const scoreTip = participated > 0 ? `基于 ${participated} 笔公报` : "初始信用分·暂无公报记录";
       const scoreLabel = participated > 0
-        ? `<code class="citizen-score citizen-score--live" title="${escapeHtml(scoreTip)}">${score}<small>${participated}笔</small></code>`
-        : `<code class="citizen-score" title="${escapeHtml(scoreTip)}">${score}</code>`;
+        ? `<code class="citizen-score citizen-score--live" title="${escapeHtml(scoreTip)}" aria-label="信誉分 ${score}，参与 ${participated} 笔公报"><span>${score}</span><small>${participated} 笔</small></code>`
+        : `<code class="citizen-score" title="${escapeHtml(scoreTip)}" aria-label="信誉分 ${score}"><span>${score}</span></code>`;
+      const theme = citizenThemeName(agent);
       return `
-          <article class="citizen-card${agent.custom ? " citizen-custom" : ""}" data-citizen-id="${escapeHtml(agent.id)}">
-            <div class="citizen-head">
-              ${citizenAvatarHtml(agent)}
+          <article class="citizen-card citizen-theme-${theme}${agent.custom ? " citizen-custom" : ""}" data-citizen-id="${escapeHtml(agent.id)}">
+            <div class="citizen-card-top">
+              <div class="citizen-portrait-wrap">${citizenAvatarHtml(agent)}</div>
               <div class="citizen-id-text">
-                <strong>${escapeHtml(agent.name)}</strong>
-                <small>${escapeHtml(agent.role)}</small>
+                <h4><span>${escapeHtml(agent.role)}</span><strong>${escapeHtml(agent.name)}</strong></h4>
+                <small>${escapeHtml(agent.englishRole || (agent.custom ? "Custom Citizen" : "AI Citizen"))}</small>
               </div>
               ${scoreLabel}
-              <button class="citizen-edit" type="button" data-citizen-edit="${escapeHtml(agent.id)}" aria-label="编辑 ${escapeHtml(agent.name)}">编辑</button>
             </div>
-            <small class="citizen-persona">${escapeHtml(agent.persona || agent.duty || "（还没写性格设定）")}</small>
-            <dl>
-              <div>
-                <dt>所属部门</dt>
-                <dd>${escapeHtml(agent.department)}</dd>
-              </div>
+            <section class="citizen-role-panel" aria-label="${escapeHtml(agent.role)}职能">
+              <small>所属部门：<strong>${escapeHtml(agent.department)}</strong></small>
+              <p>${escapeHtml(citizenDescription(agent))}</p>
+            </section>
+            <dl class="citizen-credential-list">
               <div>
                 <dt>护照</dt>
                 <dd>${escapeHtml(citizenPassportLabel(agent))}</dd>
+              </div>
+              <div>
+                <dt>权限</dt>
+                <dd>${escapeHtml(permissionsLabel(agent.permissions))}</dd>
               </div>
               <div>
                 <dt>忠诚对象</dt>
                 <dd>个人宪法</dd>
               </div>
             </dl>
+            <footer class="citizen-card-footer">
+              <button class="citizen-edit" type="button" data-citizen-edit="${escapeHtml(agent.id)}" aria-label="编辑 ${escapeHtml(agent.name)}">编辑资料</button>
+              <span class="citizen-brand" aria-label="Pocket Republic 签发">
+                <img src="./assets/figma-homepage/brand-mark.svg" alt="" />
+                <strong>Pocket Republic</strong>
+              </span>
+            </footer>
           </article>
         `;
     })
     .join("");
   const createCard = `
-          <button class="citizen-card citizen-create" type="button" data-citizen-create aria-label="创造你的国民">
-            <span class="citizen-create-plus" aria-hidden="true">+</span>
-            <strong>创造你的国民</strong>
-            <small>自定义名字、性格与头像，让他加入 AI 议会辩论</small>
+          <button class="citizen-card citizen-create citizen-theme-custom" type="button" data-citizen-create aria-label="创造你的国民">
+            <span class="citizen-create-orbit" aria-hidden="true"><i>+</i></span>
+            <span class="citizen-create-copy">
+              <small>新国民护照</small>
+              <strong>创造你的国民</strong>
+              <span>自定义名字、人格与头像，为你的 AI 国度增加一种新的判断。</span>
+            </span>
+            <span class="citizen-brand" aria-hidden="true">
+              <img src="./assets/figma-homepage/brand-mark.svg" alt="" />
+              <strong>Pocket Republic</strong>
+            </span>
           </button>
         `;
   setHtml(elements.citizenList, cards + createCard);
+}
+
+function citizenDescription(agent) {
+  if (agent.custom || agent.customized) return agent.persona || agent.duty || "这位国民还没有写下自己的行事准则。";
+  return agent.duty || agent.persona || "这位国民还没有写下自己的行事准则。";
+}
+
+function citizenThemeName(agent) {
+  const builtInThemes = {
+    prime: "prime",
+    treasurer: "treasurer",
+    auditor: "auditor",
+    builder: "builder",
+    opposition: "opposition",
+    caretaker: "caretaker",
+    archivist: "archivist",
+  };
+  if (builtInThemes[agent.id]) return builtInThemes[agent.id];
+  return ["approve", "oppose", "reduce", "delay"].includes(agent.stance) ? agent.stance : "custom";
+}
+
+function permissionsLabel(permissions = []) {
+  const labels = {
+    summarize: "总结议案",
+    coordinate: "协调部门",
+    vote: "参与表决",
+    read_budget: "读取预算",
+    propose_payment: "提出付款",
+    freeze_spend: "限制支出",
+    audit: "审计记录",
+    risk_scan: "扫描风险",
+    plan_project: "规划项目",
+    suggest_alternative: "提出替代方案",
+    debate: "提出辩论",
+    veto_warning: "发出反对警告",
+    emotion_check: "检查情绪",
+    cooling_period: "启动冷静期",
+    write_gazette: "撰写公报",
+    hash_record: "保存哈希",
+    export_trace: "导出凭证",
+  };
+  const readable = permissions.map((permission) => labels[permission] ?? permission).filter(Boolean);
+  return readable.length > 0 ? readable.join("、") : "参与议会";
 }
 
 function citizenPassportLabel(agent) {
@@ -1033,6 +1094,15 @@ function renderProtocolStatus(passport, allowance) {
   setText(elements.sessionState, isSandbox ? "本地额度" : hasSession ? "Session 生效" : "待立宪者批准");
   setText(elements.paymentState, "等待议案");
   setText(elements.receiptState, isSandbox ? "仅生成沙盒凭证" : "尚未生成");
+  syncTreasuryCoreStatus(
+    isSandbox
+      ? "沙盒国库已就绪"
+      : !isAuthenticated
+        ? "等待 Passport 登录"
+        : hasSession
+          ? "支付通道已就绪"
+          : "等待国玺授权",
+  );
   setText(
     elements.providerDetail,
     isSandbox
@@ -1057,6 +1127,7 @@ function renderProtocolError(error) {
   setText(elements.sessionState, "不可用");
   setText(elements.paymentState, "未执行");
   setText(elements.receiptState, "未生成");
+  syncTreasuryCoreStatus("Kite 通道离线");
   setText(elements.providerDetail, providerErrorMessage(error));
   if (elements.providerModeButton) setText(elements.providerModeButton, "返回沙盒国库");
 }
@@ -1172,6 +1243,7 @@ function renderDraftReview(request, decision) {
   );
   setText(elements.statusMetric, "待执行");
   setText(elements.frozenMetric, `${decision.frozenAmount} ${request.currency}`);
+  syncTreasuryCoreStatus(decision.approvedAmount > 0 ? "议案已预审" : "宪法已拦截");
   setText(elements.traceId, "待执行");
   setText(
     elements.tracePayload,
@@ -1396,6 +1468,21 @@ function renderExecutionProtocol(execution) {
             ? "等待批准"
             : "服务回执已到，链上引用待确认",
   );
+  syncTreasuryCoreStatus(
+    policyBlocked || blocked
+      ? "支付已被拦截"
+      : pending
+        ? "等待 Passkey 国玺"
+        : settled
+          ? "链上支付完成"
+          : sandbox
+            ? "沙盒执行完成"
+            : "回执确认中",
+  );
+}
+
+function syncTreasuryCoreStatus(label) {
+  setText(elements.treasuryCoreStatus, label);
 }
 
 async function overrideActiveDecision() {
@@ -2011,6 +2098,7 @@ async function playReviewProgress(steps = defaultReviewSteps()) {
   );
   setText(elements.statusMetric, "审查中");
   setText(elements.voteMetric, "...");
+  syncTreasuryCoreStatus("国民议会审查中");
   setHtml(
     elements.reviewProgress,
     steps

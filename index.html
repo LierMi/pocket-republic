@@ -69,10 +69,11 @@
 
     <header class="topbar">
       <button class="brand-button" type="button" data-entry-action="home" aria-label="返回开屏页">
-        <span class="brand-mark" aria-hidden="true">PR</span>
+        <span class="brand-mark" aria-hidden="true">
+          <img src="./assets/figma-homepage/brand-mark.svg" alt="" />
+        </span>
         <span class="brand-wording">
           <strong>Pocket Republic</strong>
-          <small>口袋共和国</small>
         </span>
       </button>
       <nav class="nation-nav" aria-label="国家主导航">
@@ -139,14 +140,7 @@
           <div class="nation-tags" id="nationTags" aria-label="国家标签"></div>
         </div>
 
-        <section class="territory-stage">
-          <div class="art-slot territory-art" data-art-slot="ART-01">
-            <div class="art-slot-note">
-              <code>ART-01</code>
-              <strong>四座共和国的概念版图</strong>
-              <span>1200 x 900，4:3。云海上连接着创作者、链上主权、心灵花园与探索成长四座微型共和国；中央国库用发光航线连接每一片领地，右下方留给模板选择。</span>
-            </div>
-          </div>
+        <section class="territory-stage" data-art-slot="ART-01">
           <div class="governance-config">
             <div class="territory-picker">
               <h3>选择国库治理模板</h3>
@@ -207,12 +201,10 @@
               <p class="kicker">首批 Agent 国民</p>
               <h3>他们忠于宪法，不迎合你一时的冲动。</h3>
             </div>
-            <div class="art-slot citizen-group-art" data-art-slot="ART-02">
-              <div class="art-slot-note">
-                <code>ART-02</code>
-                <strong>云上七位 Agent 国民</strong>
-                <span>1600 x 900，16:9。七位原创奇幻公民站在云港口，柔软玩具质感与超现实比例，每人携带护照和不同职业器物，童趣但不幼儿化。</span>
-              </div>
+            <div class="citizen-council-signal" data-art-slot="ART-02" aria-label="七位 Agent 国民已激活">
+              <span>AI CITIZEN COUNCIL</span>
+              <strong>7 位国民已激活</strong>
+              <i aria-hidden="true"></i>
             </div>
           </div>
           <div class="citizen-list" id="citizenList" aria-live="polite"></div>
@@ -227,15 +219,8 @@
             <p>每一条都可以编辑。财政大臣和审计官会在下一次议案中读取最新版本。</p>
           </div>
         </div>
-        <section class="constitution-stage">
-          <div class="art-slot constitution-art" data-art-slot="ART-03">
-            <div class="art-slot-note">
-              <code>ART-03</code>
-              <strong>云上宪法庭</strong>
-              <span>1400 x 1000，7:5。白色云崖之间悬着一页巨大宪法，国玺像小太阳一样照亮条款；青绿草地、珊瑚红仪式旗与深蓝远空形成层次。</span>
-            </div>
-          </div>
-          <div class="constitution-sheet">
+        <section class="constitution-stage constitution-centered">
+          <div class="constitution-sheet" data-art-slot="ART-03">
             <div class="constitution-seal" aria-hidden="true">PR</div>
             <div>
               <span>口袋共和国基本法</span>
@@ -250,41 +235,19 @@
       <section class="view-panel" data-view-panel="review" hidden>
         <div class="view-intro review-intro">
           <div>
-            <p class="kicker">财政议案</p>
-            <h2>当 Agent 准备花钱，它必须先经过你的宪法。</h2>
-            <p>议会决定这笔支出是否符合你的国家，Kite Passport 决定它是否拥有被验证、被限额、被追溯的行动权。</p>
+            <p class="kicker">财政议案 · KITE PAYMENT GOVERNANCE</p>
+            <h2>权力穿过四道门，才能成为一笔支付。</h2>
+            <p>宪法决定能不能花，Kite Passport 与 Scoped Session 决定谁能花、最多花多少，x402 Receipt 留下可核验的执行记录。</p>
           </div>
         </div>
 
-        <section class="kite-gate" id="kiteGate" data-kite-state="loading" aria-label="Kite 国库通道">
-          <div class="kite-gate-story">
-            <p class="kicker">国库通道</p>
-            <h3>权力只有穿过四道门，才能变成一笔支付。</h3>
-            <p id="providerDetail">正在读取财政大臣的 Kite Passport 状态。</p>
-          </div>
-          <ol class="protocol-steps">
-            <li data-protocol-step="passport">
-              <span>01</span><strong>国民护照</strong><small>Agent Passport</small><em id="passportState">检查中</em>
-            </li>
-            <li data-protocol-step="session">
-              <span>02</span><strong>国库大门</strong><small>Scoped Session</small><em id="sessionState">检查中</em>
-            </li>
-            <li data-protocol-step="payment">
-              <span>03</span><strong>外交采购</strong><small>x402 Execute</small><em id="paymentState">等待议案</em>
-            </li>
-            <li data-protocol-step="receipt">
-              <span>04</span><strong>链上回执</strong><small>On-chain Receipt</small><em id="receiptState">尚未生成</em>
-            </li>
-          </ol>
-          <div class="kite-gate-foot">
-            <span class="provider-mode-badge" id="providerModeBadge">读取中…</span>
-            <p>真实模式的 Passkey 与凭证只保存在立宪者本机，不进入网页。</p>
-          </div>
-        </section>
-
-        <section class="proposal-stage">
+        <section class="treasury-console">
           <form class="proposal-form" id="proposalForm">
-            <h3>提交一项财政议案</h3>
+            <header class="console-panel-heading">
+              <span>01 / 提交</span>
+              <h3>提交一项财政议案</h3>
+              <p>创建支出请求，交由国民议会与 Kite 国库共同审查。</p>
+            </header>
             <label>
               议案标题
               <input id="proposalTitleInput" type="text" placeholder="例如：购买新的项目数据包" />
@@ -310,8 +273,59 @@
             </label>
             <button class="button secondary magnetic" type="submit">提交给国民议会</button>
           </form>
+
+          <section class="kite-gate" id="kiteGate" data-kite-state="loading" aria-label="Kite 国库四道门">
+            <div class="kite-gate-story">
+              <p class="kicker">Kite 国库通道</p>
+              <h3>每一道门，都在缩小 Agent 的权力边界。</h3>
+              <p id="providerDetail">正在读取财政大臣的 Kite Passport 状态。</p>
+            </div>
+            <ol class="protocol-steps">
+              <li data-protocol-step="passport">
+                <span>01</span>
+                <strong>国民护照</strong>
+                <small>Agent Passport</small>
+                <div class="protocol-arch" aria-hidden="true"><i>PASS</i></div>
+                <em id="passportState">检查中</em>
+              </li>
+              <li data-protocol-step="session">
+                <span>02</span>
+                <strong>授权额度</strong>
+                <small>Scoped Session</small>
+                <div class="protocol-arch" aria-hidden="true"><i>LIMIT</i></div>
+                <em id="sessionState">检查中</em>
+              </li>
+              <li data-protocol-step="payment">
+                <span>03</span>
+                <strong>外交采购</strong>
+                <small>x402 Execute</small>
+                <div class="protocol-arch" aria-hidden="true"><i>x402</i></div>
+                <em id="paymentState">等待议案</em>
+              </li>
+              <li data-protocol-step="receipt">
+                <span>04</span>
+                <strong>链上回执</strong>
+                <small>On-chain Receipt</small>
+                <div class="protocol-arch" aria-hidden="true"><i>HASH</i></div>
+                <em id="receiptState">尚未生成</em>
+              </li>
+            </ol>
+            <div class="treasury-core-shell" aria-live="polite">
+              <div class="treasury-core">
+                <small>KITE PAYMENT CORE</small>
+                <strong id="treasuryCoreStatus">等待财政议案</strong>
+                <span>宪法与授权额度双重约束</span>
+              </div>
+            </div>
+            <div class="kite-gate-foot">
+              <span class="provider-mode-badge" id="providerModeBadge">读取中…</span>
+              <p>Passkey 与真实凭证仅保存在立宪者本机。</p>
+            </div>
+          </section>
+
           <div class="proposal-examples">
-            <div class="section-copy small">
+            <div class="console-panel-heading">
+              <span>02 / 试玩</span>
               <h3>试运行议案</h3>
               <p>选择一个场景，先看宪法会如何改变钱包行为。</p>
             </div>
@@ -333,12 +347,17 @@
         </section>
 
         <section class="treasury-theatre">
-          <div class="art-slot treasury-art" data-art-slot="ART-04">
-            <div class="art-slot-note">
-              <code>ART-04</code>
-              <strong>云上国库与国民议会</strong>
-              <span>1400 x 1000，7:5。云层中的圆形议会、像风眼一样开启的国库门、连接佣兵公会的发光星轨。中央留给审批天气和付款状态。</span>
+          <div class="treasury-ledger-visual" data-art-slot="ART-04" aria-label="Kite 支付执行链路">
+            <div class="ledger-grid" aria-hidden="true"></div>
+            <div class="ledger-route" aria-hidden="true">
+              <span>宪法</span><i></i><span>议会</span><i></i><span>Kite</span><i></i><span>Receipt</span>
             </div>
+            <div class="ledger-core">
+              <small>PAYMENT ENVELOPE</small>
+              <strong>受治理的 Agent 支付</strong>
+              <code>Passport → Allowance → x402 → Receipt</code>
+            </div>
+            <p>议案通过后，执行字段将进入国家公报；沙盒记录与真实链上凭证始终明确区分。</p>
           </div>
           <div class="decision-card">
             <div class="decision-heading">
@@ -392,10 +411,17 @@
 
         <section class="nation-map-stage">
           <div class="art-slot nation-map-art" data-art-slot="ART-05">
-            <div class="art-slot-note map-note">
-              <code>ART-05</code>
-              <strong>完整云上个人共和国地图</strong>
-              <span>2000 x 1250，16:10。多层云岛以风桥连接：宪法庭、Kite 国库、心灵花园、创作工坊、Agent 大学、佣兵公会、道具铺和档案馆。保留六个交互热点。</span>
+            <img src="./assets/product-ui/nation-map.png" alt="口袋共和国国家地图，六个 Agent 部门通过支付航线连接 Kite 国库" />
+            <div class="map-core-card">
+              <div class="map-core-copy">
+                <span>PERSONAL AI NATION</span>
+                <strong>完整云上个人共和国</strong>
+                <small>六个 Agent 部门，共享同一部宪法与国库</small>
+              </div>
+              <div class="map-core-badge">
+                <strong>Kite 国库</strong>
+                <small>Agent 经济接口</small>
+              </div>
             </div>
           </div>
           <button class="map-hotspot hotspot-treasury active" type="button" data-map-target="treasury"><span>Kite 国库</span><small>Agent 支付闸口</small></button>
@@ -443,14 +469,7 @@
             <div class="gazette-card" id="gazetteCard"></div>
             <button class="button ink magnetic" id="downloadTraceButton" type="button">下载 Kite 凭证 JSON</button>
           </div>
-          <div class="gazette-side">
-            <div class="art-slot gazette-art" data-art-slot="ART-06">
-              <div class="art-slot-note">
-                <code>ART-06</code>
-                <strong>云纹国玺与星轨档案</strong>
-                <span>1000 x 1000，透明背景。原创云纹国玺、风的缎带、星轨和奇异植物纹样，用于公报角落、Pending 与 Settled 状态。</span>
-              </div>
-            </div>
+          <div class="gazette-side" data-art-slot="ART-06">
             <div class="trace-box">
               <div class="trace-header">
                 <span>Kite 支付凭证包</span>

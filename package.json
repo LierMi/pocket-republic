@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node scripts/verify-product-structure.mjs && node scripts/verify-effects-module.mjs && node scripts/verify-nation-policies.mjs && node scripts/verify-governance-logic.mjs && node scripts/verify-kite-envelope.mjs && node scripts/verify-kite-bridge.mjs"
+    "test": "node scripts/verify-product-structure.mjs && node scripts/verify-citizen-cards.mjs && node scripts/verify-treasury-console.mjs && node scripts/verify-art-slots.mjs && node scripts/verify-effects-module.mjs && node scripts/verify-nation-policies.mjs && node scripts/verify-governance-logic.mjs && node scripts/verify-kite-envelope.mjs && node scripts/verify-kite-bridge.mjs"
   }
 }
