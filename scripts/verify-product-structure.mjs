@@ -67,6 +67,14 @@ for (const viewName of viewNames) {
 
 const navMatches = html.match(/data-view-tab="(?:setup|constitution|review|trace)"/g) ?? [];
 assertions.push([navMatches.length === 4, "主导航恰好包含四个核心产品入口"]);
+assertions.push([
+  /\.nav-liquid\s*\{[^}]*width:\s*calc\(\(100% - 22px\) \/ 4\)/s.test(styles),
+  "导航选中浮块按四个核心入口等宽定位",
+]);
+assertions.push([
+  !/\.nation-nav\s*\{[^}]*grid-template-columns:\s*repeat\(5,/s.test(styles),
+  "桌面与移动端导航均不再使用旧的五栏布局",
+]);
 
 const failures = assertions.filter(([passed]) => !passed);
 

@@ -710,7 +710,7 @@ body:not(.pre-entry) .entry-screen {
   position: absolute;
   left: 5px;
   top: 5px;
-  width: calc((100% - 18px) / 5);
+  width: calc((100% - 22px) / 4);
   height: 42px;
   border-radius: 999px;
   background: var(--coral);
@@ -3014,7 +3014,7 @@ body:not(.pre-entry) .entry-screen {
     right: 12px;
     bottom: max(12px, env(safe-area-inset-bottom));
     z-index: var(--z-nav);
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     min-height: 66px;
     padding: 5px;
     border-radius: 18px;
