@@ -32,6 +32,7 @@ const storageKeys = {
   gazette: "pocket-republic:gazette-history",
   spendLedger: "pocket-republic:monthly-spend-ledger",
   cooldowns: "pocket-republic:cooldowns",
+  citizens: "pocket-republic:citizens",
 };
 
 const defaultNationState = migrateNationState(null);
@@ -184,6 +185,201 @@ const agentProfiles = [
   },
 ];
 
+// ---- 国民自定义：现有国民可改性格/头像，也可新建"你的国民" ----
+let citizenStore = readCitizenStore();
+
+function readCitizenStore() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(storageKeys.citizens) ?? "null");
+    if (parsed && typeof parsed === "object") {
+      return {
+        overrides: parsed.overrides && typeof parsed.overrides === "object" ? parsed.overrides : {},
+        custom: Array.isArray(parsed.custom) ? parsed.custom : [],
+      };
+    }
+  } catch {
+    // ignore malformed store
+  }
+  return { overrides: {}, custom: [] };
+}
+
+function saveCitizenStore() {
+  try {
+    window.localStorage.setItem(storageKeys.citizens, JSON.stringify(citizenStore));
+  } catch {
+    // localStorage quota / disabled — customization simply won't persist
+  }
+}
+
+const stanceVoteClass = {
+  approve: "vote-approve",
+  oppose: "vote-oppose",
+  reduce: "vote-reduce",
+  delay: "vote-delay",
+};
+
+function getCitizens() {
+  const base = agentProfiles.map((agent) => {
+    const override = citizenStore.overrides[agent.id];
+    return override ? { ...agent, ...override, id: agent.id } : agent;
+  });
+  const custom = citizenStore.custom.map((citizen) => ({
+    department: "自定义部门",
+    duty: "",
+    permissions: ["debate", "vote"],
+    passport: `custom-agent:${citizen.id}`,
+    reputation: 85,
+    ...citizen,
+    voteClass: stanceVoteClass[citizen.stance] ?? "vote-approve",
+    custom: true,
+  }));
+  return [...base, ...custom];
+}
+
+function getCitizenById(id) {
+  return getCitizens().find((citizen) => citizen.id === id);
+}
+
+function getCitizenByName(name) {
+  return getCitizens().find((citizen) => citizen.name === name);
+}
+
+function citizenAvatarHtml(citizen) {
+  const portrait = citizen?.portrait;
+  if (typeof portrait === "string" && (portrait.startsWith("data:image") || portrait.startsWith("http"))) {
+    return `<span class="citizen-avatar has-image"><img src="${escapeHtml(portrait)}" alt="" /></span>`;
+  }
+  if (typeof portrait === "string" && portrait.trim()) {
+    return `<span class="citizen-avatar">${escapeHtml(portrait.trim())}</span>`;
+  }
+  const initial = escapeHtml((citizen?.name ?? "?").trim().slice(0, 1) || "?");
+  return `<span class="citizen-avatar">${initial}</span>`;
+}
+
+let editingCitizenId = null;
+let editorPortrait = "";
+
+function openCitizenEditor(id) {
+  const existing = id ? getCitizenById(id) : null;
+  editingCitizenId = id || null;
+  const isBuiltIn = Boolean(id) && agentProfiles.some((agent) => agent.id === id);
+  const isCustom = existing?.custom === true;
+  setText(elements.citizenEditorTitle, existing ? `编辑 ${existing.name}` : "创造你的国民");
+  if (elements.citizenName) elements.citizenName.value = existing?.name ?? "";
+  if (elements.citizenRole) elements.citizenRole.value = existing?.role ?? "";
+  if (elements.citizenDept) elements.citizenDept.value = existing?.department ?? "";
+  if (elements.citizenPersona) elements.citizenPersona.value = existing?.persona ?? "";
+  if (elements.citizenStance) elements.citizenStance.value = existing?.stance ?? "approve";
+  if (elements.citizenPortraitEmoji) elements.citizenPortraitEmoji.value = "";
+  if (elements.citizenPortraitFile) elements.citizenPortraitFile.value = "";
+  editorPortrait = typeof existing?.portrait === "string" ? existing.portrait : "";
+  if (elements.citizenStanceRow) elements.citizenStanceRow.hidden = isBuiltIn;
+  if (elements.citizenDelete) elements.citizenDelete.hidden = !isCustom;
+  renderEditorAvatar();
+  elements.citizenEditor?.showModal?.();
+}
+
+function renderEditorAvatar() {
+  if (!elements.citizenAvatarPreview) return;
+  const portrait = editorPortrait;
+  if (portrait && (portrait.startsWith("data:image") || portrait.startsWith("http"))) {
+    setHtml(elements.citizenAvatarPreview, `<img src="${escapeHtml(portrait)}" alt="" />`);
+  } else if (portrait) {
+    setText(elements.citizenAvatarPreview, portrait);
+  } else {
+    setText(elements.citizenAvatarPreview, (elements.citizenName?.value ?? "").trim().slice(0, 1) || "🙂");
+  }
+}
+
+function handlePortraitEmoji(value) {
+  const trimmed = String(value ?? "").trim();
+  if (!trimmed) return;
+  editorPortrait = trimmed;
+  if (elements.citizenPortraitFile) elements.citizenPortraitFile.value = "";
+  renderEditorAvatar();
+}
+
+async function handlePortraitFile(file) {
+  if (!file) return;
+  try {
+    editorPortrait = await downscaleImageToDataUrl(file, 256);
+    if (elements.citizenPortraitEmoji) elements.citizenPortraitEmoji.value = "";
+    renderEditorAvatar();
+  } catch {
+    setText(elements.citizenAvatarPreview, "⚠️");
+  }
+}
+
+function downscaleImageToDataUrl(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height, 1));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("no canvas context"));
+        ctx.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      image.onerror = () => reject(new Error("image decode failed"));
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function saveCitizenFromEditor() {
+  const name = (elements.citizenName?.value ?? "").trim();
+  if (!name) {
+    elements.citizenName?.focus();
+    return;
+  }
+  const role = (elements.citizenRole?.value ?? "").trim() || "国民";
+  const department = (elements.citizenDept?.value ?? "").trim() || "自定义部门";
+  const persona = (elements.citizenPersona?.value ?? "").trim();
+  const stance = elements.citizenStance?.value ?? "approve";
+  const portrait = editorPortrait || "";
+  const id = editingCitizenId;
+
+  if (id && agentProfiles.some((agent) => agent.id === id)) {
+    citizenStore.overrides[id] = { name, role, department, persona, portrait };
+  } else if (id) {
+    const target = citizenStore.custom.find((citizen) => citizen.id === id);
+    if (target) Object.assign(target, { name, role, department, persona, portrait, stance });
+  } else {
+    citizenStore.custom.push({
+      id: `custom-${Date.now().toString(36)}`,
+      name,
+      role,
+      department,
+      persona,
+      portrait,
+      stance,
+    });
+  }
+  saveCitizenStore();
+  renderCitizens();
+  renderNationHeader();
+  elements.citizenEditor?.close?.();
+}
+
+function deleteCitizenFromEditor() {
+  if (editingCitizenId) {
+    citizenStore.custom = citizenStore.custom.filter((citizen) => citizen.id !== editingCitizenId);
+    saveCitizenStore();
+    renderCitizens();
+    renderNationHeader();
+  }
+  elements.citizenEditor?.close?.();
+}
+
 const mapDepartments = {
   treasury: {
     status: "当前开放 · MVP",
@@ -243,6 +439,20 @@ const elements = {
   viewButtons: [...document.querySelectorAll("[data-view-tab]")],
   viewPanels: [...document.querySelectorAll("[data-view-panel]")],
   citizenList: document.querySelector("#citizenList"),
+  citizenEditor: document.querySelector("#citizenEditor"),
+  citizenEditorTitle: document.querySelector("#citizenEditorTitle"),
+  citizenName: document.querySelector("#citizenName"),
+  citizenRole: document.querySelector("#citizenRole"),
+  citizenDept: document.querySelector("#citizenDept"),
+  citizenPersona: document.querySelector("#citizenPersona"),
+  citizenStance: document.querySelector("#citizenStance"),
+  citizenStanceRow: document.querySelector("#citizenStanceRow"),
+  citizenPortraitFile: document.querySelector("#citizenPortraitFile"),
+  citizenPortraitEmoji: document.querySelector("#citizenPortraitEmoji"),
+  citizenAvatarPreview: document.querySelector("#citizenAvatarPreview"),
+  citizenDelete: document.querySelector("#citizenDelete"),
+  citizenSave: document.querySelector("#citizenSave"),
+  citizenCancel: document.querySelector("#citizenCancel"),
   templateOptions: document.querySelector("#templateOptions"),
   policyPreview: document.querySelector("#policyPreview"),
   policyPreviewContent: document.querySelector("#policyPreviewContent"),
@@ -362,6 +572,23 @@ function bindEvents() {
   elements.viewButtons.forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.viewTab));
   });
+
+  elements.citizenList?.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-citizen-edit]");
+    if (editButton) {
+      openCitizenEditor(editButton.dataset.citizenEdit);
+      return;
+    }
+    if (event.target.closest("[data-citizen-create]")) {
+      openCitizenEditor(null);
+    }
+  });
+  elements.citizenSave?.addEventListener("click", saveCitizenFromEditor);
+  elements.citizenCancel?.addEventListener("click", () => elements.citizenEditor?.close?.());
+  elements.citizenDelete?.addEventListener("click", deleteCitizenFromEditor);
+  elements.citizenPortraitFile?.addEventListener("change", (event) => handlePortraitFile(event.target.files?.[0]));
+  elements.citizenPortraitEmoji?.addEventListener("input", (event) => handlePortraitEmoji(event.target.value));
+  elements.citizenName?.addEventListener("input", renderEditorAvatar);
 
   elements.providerModeButton?.addEventListener("click", () => {
     const url = new URL(window.location.href);
@@ -553,7 +780,7 @@ function renderNationHeader() {
     elements.nationTags,
     [
       nationState.cn,
-      `国民：${agentProfiles.length} 位`,
+      `国民：${getCitizens().length} 位`,
       `单笔限额：${policy.singleSpendLimit} USDT`,
       `高风险上限：${policy.highRiskLimit} USDT`,
       "忠诚对象：宪法",
@@ -564,27 +791,37 @@ function renderNationHeader() {
 }
 
 function renderCitizens() {
-  setHtml(
-    elements.citizenList,
-    agentProfiles
-      .map(
-        (agent) => `
-          <article class="citizen-card">
+  const gazetteHistory = readGazetteHistory();
+  const cards = getCitizens()
+    .map((agent) => {
+      const score = computeReputationScore(agent, gazetteHistory);
+      const participated = gazetteHistory.filter(
+        (e) => Array.isArray(e.debate) && e.debate.some((d) => d.agent === agent.name),
+      ).length;
+      const scoreTip = participated > 0 ? `基于 ${participated} 笔公报` : "初始信用分·暂无公报记录";
+      const scoreLabel = participated > 0
+        ? `<code class="citizen-score citizen-score--live" title="${escapeHtml(scoreTip)}">${score}<small>${participated}笔</small></code>`
+        : `<code class="citizen-score" title="${escapeHtml(scoreTip)}">${score}</code>`;
+      return `
+          <article class="citizen-card${agent.custom ? " citizen-custom" : ""}" data-citizen-id="${escapeHtml(agent.id)}">
             <div class="citizen-head">
-              <span>${escapeHtml(agent.name)}</span>
-              <code>${agent.reputation}</code>
+              ${citizenAvatarHtml(agent)}
+              <div class="citizen-id-text">
+                <strong>${escapeHtml(agent.name)}</strong>
+                <small>${escapeHtml(agent.role)}</small>
+              </div>
+              ${scoreLabel}
+              <button class="citizen-edit" type="button" data-citizen-edit="${escapeHtml(agent.id)}" aria-label="编辑 ${escapeHtml(agent.name)}">编辑</button>
             </div>
-            <strong>${escapeHtml(agent.role)}</strong>
-            <p>所属部门：${escapeHtml(agent.department)}</p>
-            <small>${escapeHtml(agent.duty)}</small>
+            <small class="citizen-persona">${escapeHtml(agent.persona || agent.duty || "（还没写性格设定）")}</small>
             <dl>
+              <div>
+                <dt>所属部门</dt>
+                <dd>${escapeHtml(agent.department)}</dd>
+              </div>
               <div>
                 <dt>护照</dt>
                 <dd>${escapeHtml(citizenPassportLabel(agent))}</dd>
-              </div>
-              <div>
-                <dt>权限</dt>
-                <dd>${escapeHtml(agent.permissions.map(permissionLabel).join("、"))}</dd>
               </div>
               <div>
                 <dt>忠诚对象</dt>
@@ -592,10 +829,17 @@ function renderCitizens() {
               </div>
             </dl>
           </article>
-        `,
-      )
-      .join(""),
-  );
+        `;
+    })
+    .join("");
+  const createCard = `
+          <button class="citizen-card citizen-create" type="button" data-citizen-create aria-label="创造你的国民">
+            <span class="citizen-create-plus" aria-hidden="true">+</span>
+            <strong>创造你的国民</strong>
+            <small>自定义名字、性格与头像，让他加入 AI 议会辩论</small>
+          </button>
+        `;
+  setHtml(elements.citizenList, cards + createCard);
 }
 
 function citizenPassportLabel(agent) {
@@ -1034,6 +1278,7 @@ async function executeDecision(request, decision, options = {}) {
       trace,
       kind: decision.action === "override_execute" ? "override" : "review",
     });
+    renderCitizens(); // refresh reputation scores from new gazette entry
   }
   renderGazetteHistory();
   return true;
@@ -1142,7 +1387,6 @@ async function decide(request) {
   const { action, approvedAmount, frozenAmount, policyLimits, riskSignals, triggeredArticles, policy } =
     coreDecision;
 
-  const vote = createVote(action);
   const debate = await buildCouncilDebate({
     request,
     action,
@@ -1153,6 +1397,7 @@ async function decide(request) {
     triggeredArticles,
     policy,
   });
+  const vote = tallyVote(debate);
   const decisionHash = await sha256Hex({
     requestId: request.id,
     title: request.title,
@@ -1225,7 +1470,7 @@ async function buildCouncilDebate(context) {
             policy: context.policy,
           },
           agents: base.map((item) => {
-            const profile = agentProfiles.find((agent) => agent.name === item.agent);
+            const profile = getCitizenByName(item.agent);
             return {
               name: item.agent,
               role: item.role,
@@ -1251,77 +1496,120 @@ async function buildCouncilDebate(context) {
   }
 }
 
-function createDebate({ request, action, approvedAmount, policyLimits, riskSignals, triggeredArticles }) {
+function createDebate(context) {
+  return getCitizens().map((citizen) => {
+    const speech = scriptedSpeech(citizen, context);
+    return {
+      agent: citizen.name,
+      role: citizen.role,
+      department: citizen.department,
+      stance: speech.stance,
+      text: speech.text,
+    };
+  });
+}
+
+function scriptedSpeech(citizen, { request, action, approvedAmount, policyLimits, riskSignals, triggeredArticles }) {
   const missionAligned = riskSignals.includes("mission_aligned");
   const highRisk = riskSignals.includes("high_risk_asset");
   const fomo = riskSignals.includes("fomo");
   const articleText = triggeredArticles.join(", ");
+  switch (citizen.id) {
+    case "archivist":
+      return {
+        stance: "approve",
+        text: `议案已登记：${request.title}，申请 ${request.amount} ${request.currency}。触发条款：${articleText}。`,
+      };
+    case "auditor":
+      return {
+        stance: highRisk ? "oppose" : "approve",
+        text: highRisk
+          ? "该请求包含高风险资产和时间压力，不能按普通付款处理。"
+          : "未发现高风险资产信号，可以进入国库额度检查。",
+      };
+    case "treasurer":
+      return {
+        stance: action === "approve" ? "approve" : "reduce",
+        text:
+          action === "approve"
+            ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDT 单笔限额，国库可以进入下一步。`
+            : `请求金额 ${request.amount} ${request.currency} 超出当前宪法边界，国库只放行 ${approvedAmount} ${request.currency}。`,
+      };
+    case "builder":
+      return {
+        stance: missionAligned ? "approve" : "reduce",
+        text: missionAligned
+          ? "这笔支出服务当前国家目标，可以作为项目推进预算处理。"
+          : "建议先缩小试验金额，把剩余预算留给更确定的工具、API 或项目资产。",
+      };
+    case "opposition":
+      return {
+        stance: fomo ? "delay" : "oppose",
+        text: fomo
+          ? "这不是策略，是 FOMO。反对全额通过，建议进入冷静期。"
+          : "我反对无条件通过，请先证明它符合国家目标和预算纪律。",
+      };
+    case "caretaker":
+      return {
+        stance: fomo ? "delay" : "approve",
+        text: fomo
+          ? "检测到“今晚、错过、100x”等强情绪词，建议先保护用户情绪，不做不可逆付款。"
+          : "没有明显强情绪信号，心灵部不阻止本次议案继续审议。",
+      };
+    case "prime":
+      return {
+        stance: action === "approve" ? "approve" : "reduce",
+        text:
+          action === "approve"
+            ? "内阁建议通过，并由书记官生成国家公报。"
+            : "内阁建议按宪法执行限额方案，保留用户推翻权利，但必须归档。",
+      };
+    default: {
+      const stance = ["approve", "oppose", "reduce", "delay"].includes(citizen.stance) ? citizen.stance : "approve";
+      const byStance = {
+        approve: "我支持这笔支出，它符合我的判断。",
+        oppose: "我反对，这笔支出还需要更充分的理由。",
+        reduce: "我建议缩减额度、分批放行更稳妥。",
+        delay: "我建议先放进冷静期，稍后再议。",
+      };
+      return { stance, text: byStance[stance] };
+    }
+  }
+}
 
-  return [
-    {
-      agent: "博尔赫斯",
-      role: "书记官",
-      department: "档案馆",
-      stance: "approve",
-      text: `议案已登记：${request.title}，申请 ${request.amount} ${request.currency}。触发条款：${articleText}。`,
-    },
-    {
-      agent: "包拯",
-      role: "审计官",
-      department: "审计院",
-      stance: highRisk ? "oppose" : "approve",
-      text: highRisk
-        ? `该请求包含高风险资产和时间压力，不能按普通付款处理。`
-        : `未发现高风险资产信号，可以进入国库额度检查。`,
-    },
-    {
-      agent: "巴菲特",
-      role: "财政大臣",
-      department: "Kite 国库",
-      stance: action === "approve" ? "approve" : "reduce",
-      text:
-        action === "approve"
-          ? `请求金额未超过 ${policyLimits.singleSpendLimit} USDT 单笔限额，国库可以进入下一步。`
-          : `请求金额 ${request.amount} ${request.currency} 超出当前宪法边界，国库只放行 ${approvedAmount} ${request.currency}。`,
-    },
-    {
-      agent: "达·芬奇",
-      role: "建设部长",
-      department: "创作工坊",
-      stance: missionAligned ? "approve" : "reduce",
-      text: missionAligned
-        ? `这笔支出服务当前国家目标，可以作为项目推进预算处理。`
-        : `建议先缩小试验金额，把剩余预算留给更确定的工具、API 或项目资产。`,
-    },
-    {
-      agent: "苏格拉底",
-      role: "反对党领袖",
-      department: "国民议会",
-      stance: fomo ? "delay" : "oppose",
-      text: fomo
-        ? `这不是策略，是 FOMO。反对全额通过，建议进入冷静期。`
-        : `我反对无条件通过，请先证明它符合国家目标和预算纪律。`,
-    },
-    {
-      agent: "尼采",
-      role: "心灵部长",
-      department: "心灵花园",
-      stance: fomo ? "delay" : "approve",
-      text: fomo
-        ? `检测到“今晚、错过、100x”等强情绪词，建议先保护用户情绪，不做不可逆付款。`
-        : `没有明显强情绪信号，心灵部不阻止本次议案继续审议。`,
-    },
-    {
-      agent: "丘吉尔",
-      role: "首相",
-      department: "内阁",
-      stance: action === "approve" ? "approve" : "reduce",
-      text:
-        action === "approve"
-          ? `内阁建议通过，并由书记官生成国家公报。`
-          : `内阁建议按宪法执行限额方案，保留用户推翻权利，但必须归档。`,
-    },
-  ];
+function tallyVote(debate) {
+  const tally = { approve: 0, oppose: 0, reduce: 0, delay: 0 };
+  for (const item of debate) {
+    if (tally[item.stance] != null) tally[item.stance] += 1;
+  }
+  return tally;
+}
+
+// Maps final ruling action → the stance that "predicted correctly"
+function winningStance(action) {
+  return { approve: "approve", deny: "oppose", reduce: "reduce", delay: "delay", policy_block: "oppose" }[action] ?? null;
+}
+
+// Real reputation: base rep blended with historical alignment rate from gazette records
+function computeReputationScore(citizen, gazetteHistory) {
+  const base = citizen.reputation ?? 85;
+  const withDebate = gazetteHistory.filter((e) => Array.isArray(e.debate) && e.debate.length > 0);
+  if (withDebate.length === 0) return base;
+
+  let aligned = 0, total = 0;
+  for (const entry of withDebate) {
+    const ws = winningStance(entry.action);
+    if (!ws) continue; // skip立宪者 override — not a council judgement
+    const item = entry.debate.find((d) => d.agent === citizen.name);
+    if (!item) continue;
+    total++;
+    if (item.stance === ws) aligned++;
+  }
+  if (total === 0) return base;
+
+  // History weight grows to 60% as entries accumulate (saturates around 4 entries)
+  const histWeight = Math.min(total * 0.15, 0.6);
+  return Math.round(base * (1 - histWeight) + (aligned / total) * 100 * histWeight);
 }
 
 async function createOverrideDecision(request, previousDecision, previousExecution) {
@@ -1413,7 +1701,7 @@ function renderDebate(debate) {
     elements.debateTimeline,
     debate
       .map((item) => {
-        const profile = agentProfiles.find((agent) => agent.name === item.agent);
+        const profile = getCitizenByName(item.agent);
         const voteClass = item.stance === "override" ? "vote-override" : (profile?.voteClass ?? "vote-approve");
         return `
           <article class="debate-item">
@@ -1643,6 +1931,7 @@ function recordGazette({ request, decision, execution, trace, kind }) {
     coolingUntil,
     createdAt: execution.executedAt,
     trace,
+    debate: decision.debate ?? [],
   };
   recordMonthlySpend(entry);
   const history = readGazetteHistory().filter((item) => item.id !== entry.id);

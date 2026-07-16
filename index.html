@@ -471,6 +471,56 @@
 
     </main>
 
+    <dialog class="citizen-editor" id="citizenEditor" aria-label="编辑国民">
+      <form class="citizen-editor-form" id="citizenEditorForm" method="dialog">
+        <h3 id="citizenEditorTitle">创造你的国民</h3>
+        <div class="citizen-editor-avatar">
+          <span class="avatar-preview" id="citizenAvatarPreview" aria-hidden="true">🙂</span>
+          <div class="citizen-editor-portrait-controls">
+            <label class="upload-btn button ghost">
+              上传图片
+              <input type="file" id="citizenPortraitFile" accept="image/*" hidden />
+            </label>
+            <label class="emoji-field">
+              或用 Emoji
+              <input type="text" id="citizenPortraitEmoji" maxlength="4" placeholder="🙂" />
+            </label>
+          </div>
+        </div>
+        <label>
+          名字
+          <input type="text" id="citizenName" maxlength="20" placeholder="例如：马斯克 / 你外婆 / 任意角色" />
+        </label>
+        <label>
+          职位 / 头衔
+          <input type="text" id="citizenRole" maxlength="20" placeholder="例如：首席吐槽官" />
+        </label>
+        <label>
+          所属部门
+          <input type="text" id="citizenDept" maxlength="20" placeholder="例如：吐槽部" />
+        </label>
+        <label>
+          性格 / 人设 <small>会传给 AI 议会，它就用这个口吻发言</small>
+          <textarea id="citizenPersona" rows="3" maxlength="200" placeholder="例如：毒舌但精准，句句带刺，专戳冲动消费。"></textarea>
+        </label>
+        <label class="citizen-stance-row" id="citizenStanceRow">
+          议会立场倾向
+          <select id="citizenStance">
+            <option value="approve">倾向同意</option>
+            <option value="oppose">倾向反对</option>
+            <option value="reduce">倾向限额</option>
+            <option value="delay">倾向延迟</option>
+          </select>
+        </label>
+        <div class="citizen-editor-actions">
+          <button type="button" class="button ghost citizen-delete" id="citizenDelete" hidden>删除国民</button>
+          <span class="citizen-editor-spacer"></span>
+          <button type="button" class="button ghost" id="citizenCancel">取消</button>
+          <button type="button" class="button primary" id="citizenSave">保存</button>
+        </div>
+      </form>
+    </dialog>
+
     <div class="interaction-ripple-layer" aria-hidden="true"></div>
     <script type="module" src="./app.js"></script>
   </body>

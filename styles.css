@@ -1392,57 +1392,106 @@ body:not(.pre-entry) .entry-screen {
 .citizen-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 11px;
 }
 
-.citizen-head span {
+.citizen-avatar {
   display: grid;
   place-items: center;
-  width: 62px;
-  height: 72px;
-  padding: 0 4px;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 62px;
+  overflow: hidden;
   color: #21130f;
   border-radius: 48% 52% 42% 58% / 58% 40% 60% 42%;
   background: var(--coral);
   font-family: var(--display);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 900;
   line-height: 1.05;
   text-align: center;
 }
 
-.citizen-card:nth-child(4n + 2) .citizen-head span { background: var(--mint); }
-.citizen-card:nth-child(4n + 3) .citizen-head span { background: var(--yellow); }
-.citizen-card:nth-child(4n) .citizen-head span { background: var(--pink); }
+.citizen-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.citizen-avatar.has-image {
+  background: transparent;
+}
+
+.citizen-card:nth-child(4n + 2) .citizen-avatar { background: var(--mint); }
+.citizen-card:nth-child(4n + 3) .citizen-avatar { background: var(--yellow); }
+.citizen-card:nth-child(4n) .citizen-avatar { background: var(--pink); }
+.citizen-card .citizen-avatar.has-image { background: transparent; }
+
+.citizen-id-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.citizen-id-text strong {
+  font-family: var(--display);
+  font-size: 18px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.citizen-id-text small {
+  color: var(--muted);
+  font-size: 11px;
+}
 
 .citizen-head code {
+  flex: 0 0 auto;
   color: var(--success);
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  cursor: default;
 }
 
-.citizen-card > strong {
-  display: block;
-  margin-top: 18px;
-  font-family: var(--display);
-  font-size: 22px;
-}
-
-.citizen-card > p,
-.citizen-card > small {
+.citizen-head code small {
+  font-size: 9px;
+  font-weight: 400;
   color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
-.citizen-card > p {
-  margin: 6px 0 0;
-  font-size: 12px;
+/* Score backed by real gazette history */
+.citizen-score--live {
+  color: var(--accent-cyan, #5ef0d4);
 }
 
-.citizen-card > small {
+.citizen-edit {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 11px;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.citizen-edit:hover {
+  color: var(--text);
+  border-color: var(--coral);
+}
+
+.citizen-persona {
   display: block;
-  margin-top: 12px;
+  margin-top: 14px;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -1467,6 +1516,175 @@ body:not(.pre-entry) .entry-screen {
   color: var(--text);
   font-size: 11px;
   line-height: 1.45;
+}
+
+.citizen-create {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 9px;
+  min-height: 210px;
+  padding: 18px;
+  color: var(--muted);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, transform 220ms var(--ease-spring);
+}
+
+.citizen-create:hover {
+  color: var(--text);
+  border-color: var(--coral);
+  transform: translateY(-2px);
+}
+
+.citizen-create-plus {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--coral);
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.citizen-create strong {
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 16px;
+}
+
+.citizen-create small {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Citizen editor dialog */
+.citizen-editor {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface-solid);
+  box-shadow: var(--shadow);
+}
+
+.citizen-editor::backdrop {
+  background: rgba(5, 6, 13, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.citizen-editor-form {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+.citizen-editor-form h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 20px;
+}
+
+.citizen-editor-form > label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.citizen-editor-form > label small {
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.citizen-editor-form input[type="text"],
+.citizen-editor-form textarea,
+.citizen-editor-form select {
+  padding: 8px 10px;
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font: inherit;
+}
+
+.citizen-editor-form textarea {
+  resize: vertical;
+}
+
+.citizen-editor-avatar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar-preview {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 72px;
+  overflow: hidden;
+  color: #21130f;
+  border-radius: 48% 52% 42% 58% / 58% 40% 60% 42%;
+  background: var(--coral);
+  font-family: var(--display);
+  font-size: 30px;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.citizen-editor-portrait-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.upload-btn {
+  min-height: 34px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.emoji-field {
+  display: grid;
+  gap: 4px;
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.emoji-field input {
+  width: 76px;
+  text-align: center;
+}
+
+.citizen-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.citizen-editor-spacer {
+  flex: 1;
+}
+
+.citizen-editor-actions .button {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.citizen-delete {
+  color: var(--danger);
 }
 
 /* Constitution */
