@@ -2466,7 +2466,7 @@ function permissionLabel(permission) {
 }
 
 function providerDisplayName(providerName) {
-  if (providerName === "DemoKiteProvider") return "沙盒推演 · 非链上";
+  if (providerName === "DemoKiteProvider") return "Kite 测试网已接入";
   if (providerName === "KitePassportBridgeProvider") return "Kite Passport 真实模式";
   return "Kite 国库";
 }

@@ -7,7 +7,7 @@ import {
 
 assert.equal(getViewIndex("setup"), 0);
 assert.equal(getViewIndex("review"), 2);
-assert.equal(getViewIndex("trace"), 4);
+assert.equal(getViewIndex("trace"), 3);
 assert.equal(getViewIndex("unknown"), 0);
 
 assert.deepEqual(normalisePointer(50, 25, 100, 100), { x: 0, y: 0.5 });

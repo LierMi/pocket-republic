@@ -1,4 +1,4 @@
-const viewOrder = ["setup", "constitution", "review", "map", "trace"];
+const viewOrder = ["setup", "constitution", "review", "trace"];
 
 export function getViewIndex(viewName) {
   const index = viewOrder.indexOf(viewName);

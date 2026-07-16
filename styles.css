@@ -5322,7 +5322,7 @@ body:has([data-view-panel="review"]:not([hidden])) .review-intro .kicker {
   .entry-topnav {
     left: 34px;
     right: 34px;
-    grid-template-columns: 205px minmax(400px, 1fr) auto;
+    grid-template-columns: minmax(205px, 1fr) auto;
     gap: 14px;
   }
 

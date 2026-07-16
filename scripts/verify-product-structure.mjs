@@ -6,6 +6,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const html = await readFile(resolve(here, "../index.html"), "utf8");
 const appSource = await readFile(resolve(here, "../app.js"), "utf8");
 const styles = await readFile(resolve(here, "../styles.css"), "utf8");
+const readme = await readFile(resolve(here, "../README.md"), "utf8");
 const vercelIgnore = await readFile(resolve(here, "../.vercelignore"), "utf8");
 
 const assertions = [
@@ -13,8 +14,10 @@ const assertions = [
   [html.includes('id="nationStatusRibbon"'), "存在紧凑国家状态带"],
   [html.includes('class="nation-workspace"'), "存在单舞台国家工作区"],
   [html.includes('id="entryFluidCanvas"'), "开屏包含流体画布"],
-  [!html.includes('class="entry-topnav"'), "开屏已移除未接功能的顶部导航"],
-  [!html.includes('class="entry-nav-menu"'), "开屏不展示未接功能的导航菜单"],
+  [html.includes('class="entry-topnav"'), "开屏保留左右两端的顶部品牌栏"],
+  [html.includes('class="entry-nav-brand"'), "顶部左侧保留 Pocket Republic 品牌"],
+  [html.includes('class="entry-nav-actions"'), "顶部右侧保留模式状态与进入国家按钮"],
+  [!html.includes('class="entry-nav-menu"'), "开屏中间不展示未接功能的导航菜单"],
   [html.includes('class="entry-island-visual"'), "Figma 开屏包含中央等距国度"],
   [html.includes('./assets/figma-homepage/isometric-island.jpg'), "中央国度使用本地化 Figma 素材"],
   [html.includes('./assets/figma-homepage/hero-background.png'), "开屏背景使用本地化 Figma 素材"],
@@ -51,6 +54,8 @@ const assertions = [
   [appSource.includes("function renderGazetteTerminal"), "国家公报包含动态 Kite 执行终端"],
   [appSource.includes("[SANDBOX]") && appSource.includes("非链上记录"), "沙盒终端明确声明不是链上证明"],
   [appSource.includes("settlementReference") && appSource.includes("agentPassportId"), "真实终端只读取 Kite 返回的身份与结算字段"],
+  [appSource.includes('if (providerName === "DemoKiteProvider") return "Kite 测试网已接入"'), "顶部状态突出 Kite 测试网接入"],
+  [readme.includes("Kite 测试网接入状态") && readme.includes("尚未完成最终 x402 支付结算"), "README 明确测试网已接入但尚未真实支付"],
   [vercelIgnore.includes(".kite-passport/"), "Vercel 产物排除本地 Passport 凭证"],
   [vercelIgnore.includes(".kite-tools/"), "Vercel 产物排除本地 Kite CLI"],
   [vercelIgnore.includes("server.mjs"), "Vercel 沙盒不发布本地凭证桥接"],
