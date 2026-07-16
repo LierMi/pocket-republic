@@ -5028,7 +5028,7 @@ body:has([data-view-panel="review"]:not([hidden])) .review-intro .kicker {
   right: 84px;
   z-index: 8;
   display: grid;
-  grid-template-columns: minmax(210px, 1fr) minmax(460px, 625px) minmax(210px, 1fr);
+  grid-template-columns: minmax(210px, 1fr) auto;
   align-items: center;
   gap: 24px;
   min-height: 44px;
@@ -5063,7 +5063,7 @@ body:has([data-view-panel="review"]:not([hidden])) .review-intro .kicker {
 
 .entry-nav-menu {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   min-width: 0;
   height: 44px;
