@@ -247,9 +247,9 @@
           </div>
         </div>
 
-        <section class="kite-gate" id="kiteGate" data-kite-state="loading" aria-label="Kite 国库大门">
+        <section class="kite-gate" id="kiteGate" data-kite-state="loading" aria-label="Kite 国库通道">
           <div class="kite-gate-story">
-            <p class="kicker">国库大门</p>
+            <p class="kicker">国库通道</p>
             <h3>权力只有穿过四道门，才能变成一笔支付。</h3>
             <p id="providerDetail">正在读取财政大臣的 Kite Passport 状态。</p>
           </div>
@@ -268,7 +268,7 @@
             </li>
           </ol>
           <div class="kite-gate-foot">
-            <span class="provider-mode-badge" id="providerModeBadge">读取模式</span>
+            <span class="provider-mode-badge" id="providerModeBadge">读取中…</span>
             <p>真实模式的 Passkey 与凭证只保存在立宪者本机，不进入网页。</p>
           </div>
         </section>
@@ -289,14 +289,14 @@
               <textarea id="proposalContextInput" rows="5" placeholder="说明这笔支出要解决什么问题，以及为什么现在需要。"></textarea>
             </label>
             <label>
-              x402 服务地址 <small>真实支付时必填</small>
+              x402 服务地址 <small>对方的收款接口，真实支付必填、沙盒可留空</small>
               <input id="proposalServiceUrlInput" type="url" placeholder="https://服务地址/api/..." />
             </label>
             <label class="milestone-field">
               <input id="milestoneVerifiedInput" type="checkbox" />
               <span>
-                <strong>提交里程碑完成声明</strong>
-                <small>MVP 由立宪者自证并写入议案；Roadmap v0.2 将接入学院考官与外部证明。</small>
+                <strong>声明我已完成学习里程碑</strong>
+                <small>MVP 由立宪者自证并写入议案；Roadmap v0.2 将接入 Agent 大学考官与外部证明。</small>
               </span>
             </label>
             <button class="button secondary magnetic" type="submit">提交给国民议会</button>
@@ -328,7 +328,7 @@
             <div class="art-slot-note">
               <code>ART-04</code>
               <strong>云上国库与国民议会</strong>
-              <span>1400 x 1000，7:5。云层中的圆形议会、像风眼一样开启的国库门、连接外交邮局的发光星轨。中央留给审批天气和付款状态。</span>
+              <span>1400 x 1000，7:5。云层中的圆形议会、像风眼一样开启的国库门、连接佣兵公会的发光星轨。中央留给审批天气和付款状态。</span>
             </div>
           </div>
           <div class="decision-card">
@@ -357,7 +357,7 @@
             </div>
             <div class="decision-actions">
               <button class="button primary magnetic" id="runReviewButton" type="button">运行国库审查</button>
-              <button class="button ghost magnetic" id="overrideButton" type="button">行使 A6 立宪者权利</button>
+              <button class="button ghost magnetic" id="overrideButton" type="button">推翻议会（立宪者否决权）</button>
             </div>
             <div class="review-progress" id="reviewProgress" aria-live="polite"></div>
           </div>
@@ -377,7 +377,7 @@
           <div>
             <p class="kicker">国家地图</p>
             <h2>一部个人宪法，连接一整个 AI Agent 共和国。</h2>
-            <p>Kite 国库与创作工坊已经接入当前支付试验；心灵花园、学院、外交邮局和道具铺保留为 Roadmap 入口。未来无论哪个部门发起花费，都必须回到同一套宪法与授权额度。</p>
+            <p>Kite 国库与创作工坊已经接入当前支付试验；心灵花园、Agent 大学、佣兵公会和道具铺保留为 Roadmap 入口。未来无论哪个部门发起花费，都必须回到同一套宪法与授权额度。</p>
           </div>
         </div>
 
@@ -386,15 +386,15 @@
             <div class="art-slot-note map-note">
               <code>ART-05</code>
               <strong>完整云上个人共和国地图</strong>
-              <span>2000 x 1250，16:10。多层云岛以风桥连接：宪法庭、Kite 国库、心灵花园、创作工坊、学院、外交邮局、道具铺和档案馆。保留六个交互热点。</span>
+              <span>2000 x 1250，16:10。多层云岛以风桥连接：宪法庭、Kite 国库、心灵花园、创作工坊、Agent 大学、佣兵公会、道具铺和档案馆。保留六个交互热点。</span>
             </div>
           </div>
-          <button class="map-hotspot hotspot-treasury active" type="button" data-map-target="treasury"><span>Kite 国库</span><small>当前可用</small></button>
-          <button class="map-hotspot hotspot-garden" type="button" data-map-target="garden"><span>心灵花园</span><small>Roadmap v0.2</small></button>
-          <button class="map-hotspot hotspot-studio" type="button" data-map-target="studio"><span>创作工坊</span><small>已接入国库试验</small></button>
-          <button class="map-hotspot hotspot-academy" type="button" data-map-target="academy"><span>学院</span><small>Roadmap v0.2</small></button>
-          <button class="map-hotspot hotspot-embassy" type="button" data-map-target="embassy"><span>外交邮局</span><small>Roadmap v0.2</small></button>
-          <button class="map-hotspot hotspot-shop" type="button" data-map-target="shop"><span>道具铺</span><small>Roadmap v0.2</small></button>
+          <button class="map-hotspot hotspot-treasury active" type="button" data-map-target="treasury"><span>Kite 国库</span><small>Agent 支付闸口</small></button>
+          <button class="map-hotspot hotspot-garden" type="button" data-map-target="garden"><span>心灵花园</span><small>情绪冷静期</small></button>
+          <button class="map-hotspot hotspot-studio" type="button" data-map-target="studio"><span>创作工坊</span><small>共创与采购</small></button>
+          <button class="map-hotspot hotspot-academy" type="button" data-map-target="academy"><span>Agent 大学</span><small>里程碑解锁</small></button>
+          <button class="map-hotspot hotspot-embassy" type="button" data-map-target="embassy"><span>佣兵公会</span><small>雇外部 Agent</small></button>
+          <button class="map-hotspot hotspot-shop" type="button" data-map-target="shop"><span>道具铺</span><small>能力市场</small></button>
         </section>
 
         <section class="department-story">
@@ -405,11 +405,11 @@
             <button class="button primary magnetic" id="departmentAction" type="button" data-map-view="review">前往财政议案</button>
           </div>
           <div class="future-departments">
-            <article><span>Roadmap v0.2</span><strong>心灵花园</strong><p>情绪标记触发非必要支出的延迟审议，后续发展长期陪伴订阅。</p></article>
+            <article><span>Roadmap v0.2</span><strong>心灵花园</strong><p>情绪上头时替你踩刹车：识别焦虑与深夜冲动，把非必要支出按进冷静期。</p></article>
             <article><span>当前试验</span><strong>创作工坊</strong><p>已经可以将外部 API 与数据采购提交给 Kite 国库审议。</p></article>
-            <article><span>Roadmap v0.2</span><strong>学院</strong><p>考官 Agent 验证学习里程碑，再解锁下一阶段预算议案。</p></article>
-            <article><span>Roadmap v0.2</span><strong>外交邮局</strong><p>通过 Kite MCP 与外部 Agent 和按次付费服务协作。</p></article>
-            <article><span>Roadmap v0.2</span><strong>道具铺</strong><p>专业 Agent、工作流与国家模板市场，形成订阅和交易抽成。</p></article>
+            <article><span>Roadmap v0.2</span><strong>Agent 大学</strong><p>考官 Agent 验证你的学习里程碑，达标才解锁下一笔课程或工具预算。</p></article>
+            <article><span>Roadmap v0.2</span><strong>佣兵公会</strong><p>雇外部 Agent 和按次付费 API 替你干活，每次雇佣先过宪法、再按次从国库付款。</p></article>
+            <article><span>Roadmap v0.2</span><strong>道具铺</strong><p>给共和国加装新能力：专业 Agent、宪法模板与工作流市场，走国库审批、平台抽成。</p></article>
             <article><span>当前开放</span><strong>国家档案馆</strong><p>沉淀宪法判断、支付结果与用户推翻记录，形成个人治理档案。</p></article>
           </div>
         </section>

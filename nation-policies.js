@@ -99,7 +99,7 @@ export const nationTemplates = [
       { label: "阶段奖励", value: "15 USDT", detail: "验证后提交放行议案" },
     ],
     treasuryRule:
-      "MVP 记录立宪者的里程碑完成声明；Roadmap v0.2 由学院考官验证后解锁工具预算或奖励议案。",
+      "MVP 记录立宪者的里程碑完成声明；Roadmap v0.2 由 Agent 大学考官验证后解锁工具预算或奖励议案。",
     policyTags: ["里程碑支付", "知识奖励", "预算解锁"],
     demoHint: "概念场景：完成测试后提交 15 USDT 学习奖励议案",
     approvalRoute: "立宪者背书 + 财政大臣",
@@ -234,7 +234,7 @@ function protectionArticle(state) {
     return "强情绪状态未解除前，购物、打赏、游戏充值和娱乐订阅等非必要支付必须由心灵部与财政部联合复核。";
   }
   if (state.id === "learning") {
-    return "MVP 由立宪者提交并留存学习里程碑完成声明后，才能解锁下一阶段工具预算；学院考官验证属于 Roadmap v0.2，实际支付仍需经过 Kite 授权。";
+    return "MVP 由立宪者提交并留存学习里程碑完成声明后，才能解锁下一阶段工具预算；Agent 大学考官验证属于 Roadmap v0.2，实际支付仍需经过 Kite 授权。";
   }
   if (state.id === "builder") {
     return "超过免审额度的 API、SaaS 与开发工具采购，必须由财政大臣与审计官共同审查 ROI。";

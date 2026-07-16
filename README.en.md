@@ -116,8 +116,8 @@ The Kite treasury is the first building open, but a single personal constitution
 | 📜 **Archive / National Gazette** | A verifiable long-term governance record | ✅ Shipped |
 | 🎨 **Studio** | Co-create with agents; purchases go through the treasury | 🧪 x402 procurement trial live |
 | 🌱 **Sanctuary** | Hits the brakes when emotion takes over | 🔜 Roadmap v0.2 |
-| 🎓 **Academy** | Unlock budget with learning milestones | 🔜 Roadmap v0.2 |
-| ✉️ **Embassy** | Hire external agents & pay-per-call via Kite MCP | 🔜 Roadmap v0.2 |
+| 🎓 **Agent University** | Examiner agents verify your milestones before the next budget unlocks | 🔜 Roadmap v0.2 |
+| ⚔️ **Mercenary Guild** | Hire external agents & pay-per-call APIs to work for you — every hire cleared by your constitution | 🔜 Roadmap v0.2 |
 | 🛍️ **Gadget Shop** | A market for pro agents / constitution templates / workflows | 🔜 Roadmap v0.2 |
 | 🛂 **Passport Office** | Issue identity, permissions, and credit to each agent | 🔜 Roadmap v0.2 |
 
@@ -125,7 +125,7 @@ The Kite treasury is the first building open, but a single personal constitution
 
 ## 💰 Business roadmap
 
-**The flywheel**: more agent citizens → more API/data/compute purchases → more payable services enter the Shop and Embassy → the nation gets more useful → every action distills into sharper policy and reputation.
+**The flywheel**: more agent citizens → more API/data/compute purchases → more payable services enter the Shop and Mercenary Guild → the nation gets more useful → every action distills into sharper policy and reputation.
 
 1. **Free** — one nation, a basic constitution, sandbox governance.
 2. **Pro** — advanced policy guardrails, long-term gazette archive, more agent citizens, cross-device sync, real wallet provider.

@@ -62,7 +62,7 @@ const requests = {
     // 真实 x402 服务 StableCrypto 以 USDC 结算，此议案保持 USDC 以匹配链上实际资产。
     currency: "USDC",
     merchant: "StableCrypto / Kite 服务目录",
-    category: "外交邮局 · x402 数据采购",
+    category: "佣兵公会 · x402 数据采购",
     summary:
       "建设部长想雇佣一个国境外的数据服务，取得一份全球加密市场晨报，为今日的建设计划校准方向。",
     context:
@@ -197,8 +197,8 @@ const mapDepartments = {
     status: "概念版图 · Roadmap v0.2",
     title: "心灵花园",
     description:
-      "未来由陪伴 Agent 协助用户标记焦虑、FOMO 与关系冲突，再把非必要支出送入国库冷静期。可进一步接入可验证推理服务；当前版本优先开放 Kite 国库治理。",
-    actionLabel: "查看国库治理",
+      "情绪上头时替你踩刹车：陪伴 Agent 识别焦虑、FOMO 与深夜冲动，把非必要支出按进冷静期——比如深夜想追高 meme 币，先冻结 24 小时再说。",
+    actionLabel: "看一笔冲动消费审查",
     view: "review",
     requestId: "meme",
   },
@@ -213,18 +213,18 @@ const mapDepartments = {
   },
   academy: {
     status: "概念版图 · Roadmap v0.2",
-    title: "学院",
+    title: "Agent 大学",
     description:
-      "未来由考官 Agent 验证学习里程碑，再解锁下一阶段工具预算或奖励议案。当前版本只保留国库规则入口，不宣称已经实现自动托管与验证。",
+      "把学习目标变成任务：考官 Agent 验证你完成的里程碑后，才解锁下一门课程或工具的预算——学得越扎实，能动用的预算越多。当前版本只保留国库规则入口。",
     actionLabel: "配置成长共和国",
     view: "setup",
   },
   embassy: {
     status: "概念版图 · Roadmap v0.2",
-    title: "外交邮局",
+    title: "佣兵公会",
     description:
-      "未来通过 Kite MCP 与外部 Agent、商家和按次付费服务协作；所有报价仍需先通过个人宪法，再进入受限 Spending Session。当前尚未开放自动谈判。",
-    actionLabel: "查看财政议案",
+      "雇国境外的 AI Agent 与按次付费 API 替你干活——比如让一个数据 Agent 抓一份行业报告。每次雇佣都是一笔 x402 议案，先过宪法、再从国库按次付款。",
+    actionLabel: "看一笔 x402 雇佣",
     view: "review",
     requestId: "api",
   },
