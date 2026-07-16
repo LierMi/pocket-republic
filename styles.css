@@ -2267,6 +2267,10 @@ body:not(.pre-entry) .entry-screen {
   border-left: 1px solid var(--line);
 }
 
+#reviewResult {
+  scroll-margin-top: 96px;
+}
+
 .decision-heading p {
   margin: 10px 0 0;
   color: var(--muted);

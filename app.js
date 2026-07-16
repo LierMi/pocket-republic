@@ -498,6 +498,7 @@ const elements = {
   runReviewButton: document.querySelector("#runReviewButton"),
   overrideButton: document.querySelector("#overrideButton"),
   reviewProgress: document.querySelector("#reviewProgress"),
+  reviewResult: document.querySelector("#reviewResult"),
   decisionTitle: document.querySelector("#decisionTitle"),
   decisionPolicy: document.querySelector("#decisionPolicy"),
   approvedAmount: document.querySelector("#approvedAmount"),
@@ -690,7 +691,8 @@ function bindEvents() {
 
   elements.runReviewButton?.addEventListener("click", async () => {
     await reviewActiveRequest();
-    setView("review");
+    elements.reviewResult?.scrollIntoView({ behavior: "smooth", block: "start" });
+    elements.reviewResult?.focus({ preventScroll: true });
   });
 
   elements.overrideButton?.addEventListener("click", async () => {
