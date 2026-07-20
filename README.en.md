@@ -19,6 +19,8 @@
 > **Pocket Republic is a tiny AI nation in your pocket.**
 > You are the constitution-writer; AI Agents are its citizens. They can create, advise, and act — but every payment must first pass through your **personal constitution** and your **Kite treasury**.
 
+> **As AI Agents like Claude start making real decisions — and spending real money — on your behalf, a "trust crisis between people and Agents" is coming into focus**: on what grounds do you hand your wallet, your accounts, and your judgment to an AI? Pocket Republic's answer is not a promise but a system — a constitution you write yourself, turning trust into rules that are verifiable, bounded, and traceable.
+
 ---
 
 ## ✨ A nation that can spend on its own
